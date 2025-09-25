@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UniReportes - Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="css/dashboard.css"/>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <!-- Sidebar de navegación -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <!-- Logo y título -->
+                <div class="header-sidebar">
+                    <span class="material-symbols-outlined logo-icon">school</span>
+                    <h1 class="logo-titulo">UniReportes</h1>
+                </div>
+                
+                <!-- Navegación principal -->
+                <nav class="navegacion-principal">
+                    <a href="#" class="nav-item active">
+                        <span class="material-symbols-outlined">home</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="material-symbols-outlined">description</span>
+                        <span class="nav-text">Mis reportes</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span class="nav-text">Nuevo reporte</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- Footer del sidebar -->
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item">
+                    <span class="material-symbols-outlined">help_outline</span>
+                    <span class="nav-text">Ayuda</span>
+                </a>
+                <div class="usuario-info">
+                    <p class="usuario-nombre">Juan Pérez</p>
+                    <p class="usuario-rol">Estudiante</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Contenido wrapper -->
+        <div class="contenido-wrapper">
+            <!-- Header superior -->
+            <header class="header-principal">
+                <div class="header-contenido">
+                    <div class="controles-usuario">
+                        <button class="boton-notificaciones">
+                            <span class="material-symbols-outlined">notifications</span>
+                        </button>
+                        <button class="perfil-usuario">
+                            <div class="avatar-usuario"></div>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Contenido principal -->
+            <main class="contenido-principal">
+                <div class="contenedor-contenido">
+                    <!-- Encabezado de la página -->
+                    <header class="encabezado-pagina">
+                    <h2 class="titulo-pagina">Inicio</h2>
+                    <p class="descripcion-pagina">
+                        Bienvenido a UniReportes, tu plataforma para reportar problemas de infraestructura en la universidad.
+                    </p>
+                </header>
+
+                <!-- Sección principal -->
+                <section class="seccion-principal">
+                    <h3 class="titulo-seccion">¿Qué puedes hacer?</h3>
+                    
+                    <div class="grid-opciones">
+                        <!-- Opción 1: Explorar reportes -->
+                        <div class="tarjeta-opcion">
+                            <span class="material-symbols-outlined icono-opcion">visibility</span>
+                            <div class="contenido-opcion">
+                                <h4 class="titulo-opcion">Explorar reportes</h4>
+                                <p class="descripcion-opcion">Visualiza los reportes existentes para estar al tanto de los problemas actuales.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Opción 2: Crear nuevo reporte -->
+                        <div class="tarjeta-opcion">
+                            <span class="material-symbols-outlined icono-opcion">edit_document</span>
+                            <div class="contenido-opcion">
+                                <h4 class="titulo-opcion">Crear un nuevo reporte</h4>
+                                <p class="descripcion-opcion">¿Encontraste un problema? Repórtalo para que podamos solucionarlo.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón de acción principal -->
+                    <div class="contenedor-boton">
+                        <button class="boton-principal">
+                            Crear nuevo reporte
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </main>
+        </div>
+    </div>
+</body>
+</html>

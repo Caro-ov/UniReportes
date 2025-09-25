@@ -1,0 +1,302 @@
+/*
+  Archivo: login.css
+  Descripción: Estilos para la página de login/registro de UniReportes
+  Autor: Equipo UniReportes
+*/
+
+/* Variables de colores */
+:root {
+    --primario: #1173d4;
+    --secundario: #e7edf3;
+    --texto-principal: #0d141b;
+    --texto-secundario: #4c739a;
+    --fondo-claro: #f8fafc;
+    --borde: #cbd5e1;
+    --texto-gris: #64748b;
+    --texto-gris-claro: #94a3b8;
+}
+
+.material-symbols-outlined {
+    font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+}
+
+/* Contenedor principal */
+.contenedor-login {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sección izquierda con imagen */
+.seccion-imagen {
+    display: none;
+    position: relative;
+    background: var(--fondo-claro);
+}
+
+@media (min-width: 1024px) {
+    .seccion-imagen {
+        display: block;
+        width: 50%;
+    }
+}
+
+.imagen-fondo {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.texto-imagen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 48px;
+    color: white;
+}
+
+.titulo-imagen {
+    font-size: 2.25rem;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.subtitulo-imagen {
+    margin-top: 16px;
+    font-size: 1.125rem;
+}
+
+/* Sección derecha con formulario */
+.seccion-formulario {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 16px;
+}
+
+@media (min-width: 640px) {
+    .seccion-formulario {
+        padding: 48px 24px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .seccion-formulario {
+        width: 50%;
+        flex: none;
+        padding: 48px 80px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .seccion-formulario {
+        padding: 48px 96px;
+    }
+}
+
+.contenedor-formulario {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 384px;
+}
+
+@media (min-width: 1024px) {
+    .contenedor-formulario {
+        width: 384px;
+    }
+}
+
+/* Encabezado del login */
+.logo-login {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.icono-logo {
+    height: 40px;
+    width: 40px;
+    color: var(--primario);
+    font-size: 3rem;
+}
+
+.titulo-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+.titulo-login {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.subtitulo-login {
+    margin-top: 8px;
+    font-size: 0.875rem;
+    color: var(--texto-gris);
+}
+
+.enlace-registro {
+    font-weight: 500;
+    color: var(--primario);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.enlace-registro:hover {
+    color: #1d4ed8;
+}
+
+/* Formulario */
+.contenedor-form {
+    margin-top: 32px;
+}
+
+.formulario-login {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.campo-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.etiqueta-campo {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+.campo-con-icono {
+    position: relative;
+}
+
+.icono-campo {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--texto-gris-claro);
+    pointer-events: none;
+}
+
+.input-campo {
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid var(--borde);
+    background: white;
+    padding: 12px 12px 12px 40px;
+    font-size: 1rem;
+    color: var(--texto-principal);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-campo::placeholder {
+    color: var(--texto-gris-claro);
+}
+
+.input-campo:focus {
+    outline: none;
+    border-color: var(--primario);
+    box-shadow: 0 0 0 1px var(--primario);
+}
+
+/* Opciones del formulario */
+.opciones-formulario {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.recordar-usuario {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-recordar {
+    height: 16px;
+    width: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--borde);
+    color: var(--primario);
+}
+
+.checkbox-recordar:focus {
+    outline: none;
+    box-shadow: 0 0 0 1px var(--primario);
+}
+
+.etiqueta-recordar {
+    margin-left: 8px;
+    font-size: 0.875rem;
+    color: #0f172a;
+}
+
+.enlace-contraseña {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--primario);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.enlace-contraseña:hover {
+    color: #1d4ed8;
+}
+
+/* Botón de login */
+.contenedor-boton {
+    margin-top: 24px;
+}
+
+.boton-login {
+    position: relative;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: var(--primario);
+    padding: 12px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.boton-login:hover {
+    background: #1d4ed8;
+}
+
+.boton-login:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px rgba(59, 130, 246, 0.5);
+}

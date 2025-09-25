@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UniReportes - Crear Reporte</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="css/crear-reporte.css"/>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <!-- Sidebar de navegación -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <!-- Logo y título -->
+                <div class="header-sidebar">
+                    <span class="material-symbols-outlined logo-icono">school</span>
+                    <h1 class="logo-titulo">UniReportes</h1>
+                </div>
+                
+                <!-- Navegación principal -->
+                <nav class="navegacion-principal">
+                    <a href="#" class="nav-item">
+                        <span class="material-symbols-outlined">home</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="material-symbols-outlined">description</span>
+                        <span class="nav-text">Mis reportes</span>
+                    </a>
+                    <a href="#" class="nav-item active">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span class="nav-text">Nuevo reporte</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- Footer del sidebar -->
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item">
+                    <span class="material-symbols-outlined">help_outline</span>
+                    <span class="nav-text">Ayuda</span>
+                </a>
+                <div class="usuario-info">
+                    <p class="usuario-nombre">Juan Pérez</p>
+                    <p class="usuario-rol">Estudiante</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <div class="contenido-wrapper">
+            <!-- Header superior -->
+            <header class="header-principal">
+                <div class="header-contenido">
+                    <div class="controles-usuario">
+                        <button class="boton-notificaciones">
+                            <span class="material-symbols-outlined">notifications</span>
+                        </button>
+                        <button class="perfil-usuario">
+                            <div class="avatar-usuario"></div>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Contenido principal -->
+            <main class="contenido-principal">
+                <div class="contenedor-formulario">
+                    <div class="encabezado-pagina">
+                        <h2 class="titulo-pagina">Crear un nuevo reporte</h2>
+                        <p class="descripcion-pagina">
+                            Ayúdanos a mejorar la universidad. Selecciona el problema que encontraste para que podamos solucionarlo lo antes posible.
+                        </p>
+                    </div>
+
+                    <div class="tarjeta-formulario">
+                        <form class="formulario-reporte">
+                            <!-- Tipo de problema -->
+                            <div class="campo-formulario">
+                                <label for="problem-type" class="etiqueta-campo">Tipo de problema</label>
+                                <select id="problem-type" name="problem-type" class="select-personalizado">
+                                    <option disabled selected>Selecciona un problema común...</option>
+                                    <option value="aire-danado">Aire acondicionado dañado</option>
+                                    <option value="bano-mal-estado">Baño en mal estado</option>
+                                    <option value="sin-luz">Aula sin luz</option>
+                                    <option value="proyector-falla">Proyector no funciona</option>
+                                    <option value="mobiliario-roto">Mobiliario roto (silla, mesa)</option>
+                                    <option value="falta-limpieza">Falta de limpieza</option>
+                                    <option value="otro">Otro (describe a continuación)</option>
+                                </select>
+                            </div>
+
+                            <!-- Ubicación -->
+                            <div class="campo-formulario">
+                                <label for="location" class="etiqueta-campo">Ubicación</label>
+                                <div class="campo-con-icono">
+                                    <span class="material-symbols-outlined icono-campo">location_on</span>
+                                    <input type="text" id="location" name="location" 
+                                           placeholder="Ej: Edificio A, Salón 203" 
+                                           class="input-con-icono"/>
+                                </div>
+                            </div>
+
+                            <!-- Fecha y Hora -->
+                            <div class="campos-fila">
+                                <div class="campo-formulario">
+                                    <label for="date" class="etiqueta-campo">Fecha</label>
+                                    <div class="campo-con-icono">
+                                        <span class="material-symbols-outlined icono-campo">calendar_today</span>
+                                        <input type="date" id="date" name="date" class="input-con-icono"/>
+                                    </div>
+                                </div>
+                                <div class="campo-formulario">
+                                    <label for="time" class="etiqueta-campo">Hora</label>
+                                    <div class="campo-con-icono">
+                                        <span class="material-symbols-outlined icono-campo">schedule</span>
+                                        <input type="time" id="time" name="time" class="input-con-icono"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="campo-formulario">
+                                <label for="description" class="etiqueta-campo">Descripción (opcional)</label>
+                                <textarea id="description" name="description" rows="4" 
+                                          placeholder="Añade más detalles si es necesario. ¿Qué pasó? ¿Cuándo lo notaste?"
+                                          class="textarea-personalizado"></textarea>
+                            </div>
+
+                            <!-- Subir foto -->
+                            <div class="campo-formulario">
+                                <label for="photo" class="etiqueta-campo">Añadir foto (opcional)</label>
+                                <div class="zona-subida-archivo">
+                                    <div class="contenido-subida">
+                                        <svg class="icono-subida" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                                        </svg>
+                                        <div class="texto-subida">
+                                            <label for="file-upload" class="enlace-subida">
+                                                <span>Sube un archivo</span>
+                                                <input id="file-upload" name="file-upload" type="file" class="input-oculto"/>
+                                            </label>
+                                            <span class="texto-adicional">o arrastra y suelta</span>
+                                        </div>
+                                        <p class="texto-ayuda">PNG, JPG, GIF hasta 10MB</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botón de envío -->
+                            <div class="contenedor-boton-envio">
+                                <button type="submit" class="boton-envio">
+                                    Enviar Reporte
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer-principal">
+                <div class="footer-contenido">
+                    <p class="texto-footer">© 2024 UniReportes. Todos los derechos reservados.</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

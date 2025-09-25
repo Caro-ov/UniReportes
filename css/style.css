@@ -190,6 +190,13 @@ body {
 .hero-boton {
   margin-top: 40px;
 }
+.hero-boton .boton {
+  padding: 16px 32px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  min-width: 150px;
+  box-shadow: 0 4px 14px 0 rgba(17, 115, 212, 0.3);
+}
 
 /* Sección de beneficios */
 .seccion-beneficios {
