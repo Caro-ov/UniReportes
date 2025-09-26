@@ -1,6 +1,14 @@
 /*
   Archivo: login.css
-  Descripción: Estilos para la página de login/registro de UniReportes
+  Descripción: Estilos p    .seccion-imagen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 50%;
+        padding: 20px;
+        text-align: center;
+    }gina de login/registro de UniReportes
   Autor: Equipo UniReportes
 */
 
@@ -10,7 +18,7 @@
     --secundario: #e7edf3;
     --texto-principal: #0d141b;
     --texto-secundario: #4c739a;
-    --fondo-claro: #f8fafc;
+    --fondo-claro: #ffffff;
     --borde: #cbd5e1;
     --texto-gris: #64748b;
     --texto-gris-claro: #94a3b8;
@@ -29,70 +37,81 @@ body {
     margin: 0;
     padding: 0;
     background: #fff;
+    height: 100vh;
+    overflow: hidden;
 }
 
 /* Contenedor principal */
 .contenedor-login {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
 }
 
 /* Sección izquierda con imagen */
 .seccion-imagen {
     display: none;
-    position: relative;
     background: var(--fondo-claro);
+    flex: 0 0 40%;
+    min-height: 100vh;
 }
 
 @media (min-width: 1024px) {
     .seccion-imagen {
-        display: block;
-        width: 50%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 50vw;
+        padding: 20px;
+        text-align: center;
     }
 }
 
 .imagen-fondo {
-    position: absolute;
-    inset: 0;
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
+    width: 500px;
+    height: 500px;
+    max-width: 100%;
+    object-fit: contain;
+    margin-bottom: 10px;
 }
 
-.overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.2);
-}
+/* Overlay no necesario para el nuevo diseño */
 
 .texto-imagen {
-    position: absolute;
-    inset: 0;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding: 48px;
-    color: white;
+    align-items: flex-start;
+    text-align: left;
+    max-width: 100%;
+    margin-top: -10px;
+    padding-left: 20px;
 }
 
 .titulo-imagen {
-    font-size: 2.25rem;
+    font-size: 2rem;
     font-weight: bold;
-    line-height: 1.2;
+    line-height: 1.3;
+    margin-bottom: 16px;
+    color: var(--texto-principal);
 }
 
 .subtitulo-imagen {
-    margin-top: 16px;
     font-size: 1.125rem;
+    color: var(--texto-secundario);
+    line-height: 1.5;
 }
 
 /* Sección derecha con formulario */
 .seccion-formulario {
     display: flex;
-    flex: 1;
+    flex: 0 0 50%;
     flex-direction: column;
     justify-content: center;
     padding: 48px 16px;
+    min-height: 100vh;
+    background: white;
 }
 
 @media (min-width: 640px) {
@@ -103,22 +122,25 @@ body {
 
 @media (min-width: 1024px) {
     .seccion-formulario {
-        width: 50%;
+        width: 50vw;
         flex: none;
-        padding: 48px 80px;
+        padding: 48px 20px 48px 0px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
     }
 }
 
 @media (min-width: 1280px) {
     .seccion-formulario {
-        padding: 48px 96px;
+        padding: 48px 30px;
     }
 }
 
 .contenedor-formulario {
-    margin: 0 auto;
+    margin: 0;
     width: 100%;
-    max-width: 384px;
+    max-width: 400px;
 }
 
 @media (min-width: 1024px) {
