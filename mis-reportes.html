@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UniReportes - Mis Reportes</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="css/mis-reportes.css"/>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <!-- Overlay para móvil -->
+        <div class="overlay" onclick="toggleSidebar()"></div>
+        
+        <!-- Sidebar de navegación -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <!-- Logo y título -->
+                <div class="header-sidebar">
+                    <span class="material-symbols-outlined logo-icon">school</span>
+                    <h1 class="logo-titulo">UniReportes</h1>
+                </div>
+                
+                <!-- Navegación principal -->
+                <nav class="navegacion-principal">
+                    <a href="dashboard.html" class="nav-item">
+                        <span class="material-symbols-outlined">home</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                    <a href="mis-reportes.html" class="nav-item active">
+                        <span class="material-symbols-outlined">description</span>
+                        <span class="nav-text">Mis reportes</span>
+                    </a>
+                    <a href="crear-reporte.html" class="nav-item">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span class="nav-text">Nuevo reporte</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- Footer del sidebar -->
+            <div class="sidebar-footer">
+                <a href="ayuda.html" class="nav-item">
+                    <span class="material-symbols-outlined">help_outline</span>
+                    <span class="nav-text">Ayuda</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Contenido wrapper -->
+        <div class="contenido-wrapper">
+            <!-- Header superior -->
+            <header class="header-principal">
+                <div class="header-contenido">
+                    <button class="boton-menu-movil" onclick="toggleSidebar()">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div class="controles-usuario">
+                        <button class="boton-notificaciones">
+                            <span class="material-symbols-outlined">notifications</span>
+                        </button>
+                        <div class="perfil-completo">
+                            <div class="usuario-info-header">
+                                <p class="usuario-nombre-header">Juan Pérez</p>
+                                <p class="usuario-rol-header">Monitor</p>
+                            </div>
+                            <button class="perfil-usuario">
+                                <div class="avatar-usuario"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Contenido principal -->
+            <main class="contenido-principal">
+            <div class="contenedor-contenido">
+                <!-- Encabezado de la página -->
+                <div class="encabezado-pagina">
+                    <div class="titulo-contenedor">
+                        <span class="material-symbols-outlined icono-titulo">school</span>
+                        <h1 class="titulo-pagina">Panel de Control</h1>
+                    </div>
+                    <button class="boton-nuevo-reporte">
+                        <span class="material-symbols-outlined">add</span>
+                        <span>Nuevo Reporte</span>
+                    </button>
+                </div>
+
+                <!-- Tarjetas de estadísticas -->
+                <div class="grid-estadisticas">
+                    <div class="tarjeta-estadistica">
+                        <p class="etiqueta-estadistica">Reportes Enviados</p>
+                        <p class="numero-estadistica">2</p>
+                    </div>
+                    <div class="tarjeta-estadistica">
+                        <p class="etiqueta-estadistica">Reportes Resueltos</p>
+                        <p class="numero-estadistica">12</p>
+                    </div>
+                    <div class="tarjeta-estadistica">
+                        <p class="etiqueta-estadistica">Reportes Totales</p>
+                        <p class="numero-estadistica">16</p>
+                    </div>
+                </div>
+
+                <!-- Tabla de reportes -->
+                <div class="contenedor-tabla">
+                    <div class="encabezado-tabla">
+                        <h2 class="titulo-tabla">Reportes Recientes</h2>
+                    </div>
+                    <div class="tabla-scroll">
+                        <table class="tabla-reportes">
+                            <thead class="tabla-encabezado">
+                                <tr>
+                                    <th class="columna-id">ID</th>
+                                    <th class="columna-asunto">Asunto</th>
+                                    <th class="columna-estado">Estado</th>
+                                    <th class="columna-fecha">Fecha de Creación</th>
+                                    <th class="columna-acciones">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="tabla-cuerpo">
+                                <tr class="fila-reporte">
+                                    <td class="celda-id">#12350</td>
+                                    <td class="celda-asunto">Conexión de internet en la sala de profesores</td>
+                                    <td class="celda-estado">
+                                        <span class="estado-badge estado-revisado">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                            <span>Revisado</span>
+                                        </span>
+                                    </td>
+                                    <td class="celda-fecha">2024-07-27</td>
+                                    <td class="celda-acciones">
+                                        <a href="#" class="enlace-accion">Ver</a>
+                                    </td>
+                                </tr>
+                                <tr class="fila-reporte">
+                                    <td class="celda-id">#12345</td>
+                                    <td class="celda-asunto">Falla en el sistema de iluminación del aula 201</td>
+                                    <td class="celda-estado">
+                                        <span class="estado-badge estado-enviado">
+                                            <span class="material-symbols-outlined">send</span>
+                                            <span>Enviado</span>
+                                        </span>
+                                    </td>
+                                    <td class="celda-fecha">2024-07-26</td>
+                                    <td class="celda-acciones">
+                                        <a href="#" class="enlace-accion">Ver</a>
+                                    </td>
+                                </tr>
+                                <tr class="fila-reporte">
+                                    <td class="celda-id">#12346</td>
+                                    <td class="celda-asunto">Problema con el proyector en el auditorio principal</td>
+                                    <td class="celda-estado">
+                                        <span class="estado-badge estado-resuelto">
+                                            <span class="material-symbols-outlined">check_circle</span>
+                                            <span>Resuelto</span>
+                                        </span>
+                                    </td>
+                                    <td class="celda-fecha">2024-07-25</td>
+                                    <td class="celda-acciones">
+                                        <a href="#" class="enlace-accion">Ver</a>
+                                    </td>
+                                </tr>
+                                <tr class="fila-reporte">
+                                    <td class="celda-id">#12347</td>
+                                    <td class="celda-asunto">Daño en el mobiliario del laboratorio de química</td>
+                                    <td class="celda-estado">
+                                        <span class="estado-badge estado-proceso">
+                                            <span class="material-symbols-outlined">sync</span>
+                                            <span>En proceso</span>
+                                        </span>
+                                    </td>
+                                    <td class="celda-fecha">2024-07-24</td>
+                                    <td class="celda-acciones">
+                                        <a href="#" class="enlace-accion">Ver</a>
+                                    </td>
+                                </tr>
+                                <tr class="fila-reporte">
+                                    <td class="celda-id">#12348</td>
+                                    <td class="celda-asunto">Fuga de agua en los baños del primer piso</td>
+                                    <td class="celda-estado">
+                                        <span class="estado-badge estado-enviado">
+                                            <span class="material-symbols-outlined">send</span>
+                                            <span>Enviado</span>
+                                        </span>
+                                    </td>
+                                    <td class="celda-fecha">2024-07-23</td>
+                                    <td class="celda-acciones">
+                                        <a href="#" class="enlace-accion">Ver</a>
+                                    </td>
+                                </tr>
+                                <tr class="fila-reporte">
+                                    <td class="celda-id">#12349</td>
+                                    <td class="celda-asunto">Problema con el aire acondicionado en la biblioteca</td>
+                                    <td class="celda-estado">
+                                        <span class="estado-badge estado-resuelto">
+                                            <span class="material-symbols-outlined">check_circle</span>
+                                            <span>Resuelto</span>
+                                        </span>
+                                    </td>
+                                    <td class="celda-fecha">2024-07-22</td>
+                                    <td class="celda-acciones">
+                                        <a href="#" class="enlace-accion">Ver</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Cerrar sidebar al hacer clic fuera de ella en móvil
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.sidebar');
+            const menuButton = document.querySelector('.boton-menu-movil');
+            
+            if (window.innerWidth <= 1024 && 
+                !sidebar.contains(event.target) && 
+                !menuButton.contains(event.target) && 
+                sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>

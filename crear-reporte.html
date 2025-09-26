@@ -15,26 +15,29 @@
 </head>
 <body>
     <div class="contenedor-principal">
+        <!-- Overlay para móvil -->
+        <div class="overlay" onclick="toggleSidebar()"></div>
+        
         <!-- Sidebar de navegación -->
         <aside class="sidebar">
             <div class="sidebar-content">
                 <!-- Logo y título -->
                 <div class="header-sidebar">
-                    <span class="material-symbols-outlined logo-icono">school</span>
+                    <span class="material-symbols-outlined logo-icon">school</span>
                     <h1 class="logo-titulo">UniReportes</h1>
                 </div>
                 
                 <!-- Navegación principal -->
                 <nav class="navegacion-principal">
-                    <a href="#" class="nav-item">
+                    <a href="dashboard.html" class="nav-item">
                         <span class="material-symbols-outlined">home</span>
                         <span class="nav-text">Inicio</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="mis-reportes.html" class="nav-item">
                         <span class="material-symbols-outlined">description</span>
                         <span class="nav-text">Mis reportes</span>
                     </a>
-                    <a href="#" class="nav-item active">
+                    <a href="crear-reporte.html" class="nav-item active">
                         <span class="material-symbols-outlined">add_circle</span>
                         <span class="nav-text">Nuevo reporte</span>
                     </a>
@@ -43,7 +46,7 @@
             
             <!-- Footer del sidebar -->
             <div class="sidebar-footer">
-                <a href="#" class="nav-item">
+                <a href="ayuda.html" class="nav-item">
                     <span class="material-symbols-outlined">help_outline</span>
                     <span class="nav-text">Ayuda</span>
                 </a>
@@ -55,6 +58,9 @@
             <!-- Header superior -->
             <header class="header-principal">
                 <div class="header-contenido">
+                    <button class="boton-menu-movil" onclick="toggleSidebar()">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
                     <div class="controles-usuario">
                         <button class="boton-notificaciones">
                             <span class="material-symbols-outlined">notifications</span>
@@ -175,5 +181,25 @@
             </footer>
         </div>
     </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Cerrar sidebar al hacer clic fuera de ella en móvil
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.sidebar');
+            const menuButton = document.querySelector('.boton-menu-movil');
+            
+            if (window.innerWidth <= 1024 && 
+                !sidebar.contains(event.target) && 
+                !menuButton.contains(event.target) && 
+                sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>
 </body>
 </html>

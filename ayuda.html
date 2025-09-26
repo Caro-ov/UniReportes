@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UniReportes - Centro de Ayuda</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="css/ayuda.css"/>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <!-- Overlay para móvil -->
+        <div class="overlay" onclick="toggleSidebar()"></div>
+        
+        <!-- Sidebar de navegación -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <!-- Logo y título -->
+                <div class="header-sidebar">
+                    <span class="material-symbols-outlined logo-icon">school</span>
+                    <h1 class="logo-titulo">UniReportes</h1>
+                </div>
+                
+                <!-- Navegación principal -->
+                <nav class="navegacion-principal">
+                    <a href="dashboard.html" class="nav-item">
+                        <span class="material-symbols-outlined">home</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                    <a href="mis-reportes.html" class="nav-item">
+                        <span class="material-symbols-outlined">description</span>
+                        <span class="nav-text">Mis reportes</span>
+                    </a>
+                    <a href="crear-reporte.html" class="nav-item">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span class="nav-text">Nuevo reporte</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- Footer del sidebar -->
+            <div class="sidebar-footer">
+                <a href="ayuda.html" class="nav-item active">
+                    <span class="material-symbols-outlined">help_outline</span>
+                    <span class="nav-text">Ayuda</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Contenido wrapper -->
+        <div class="contenido-wrapper">
+            <!-- Header superior -->
+            <header class="header-principal">
+                <div class="header-contenido">
+                    <button class="boton-menu-movil" onclick="toggleSidebar()">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div class="controles-usuario">
+                        <button class="boton-notificaciones">
+                            <span class="material-symbols-outlined">notifications</span>
+                        </button>
+                        <div class="perfil-completo">
+                            <div class="usuario-info-header">
+                                <p class="usuario-nombre-header">Juan Pérez</p>
+                                <p class="usuario-rol-header">Monitor</p>
+                            </div>
+                            <button class="perfil-usuario">
+                                <div class="avatar-usuario"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Contenido principal -->
+            <main class="contenido-principal">
+                <div class="contenedor-contenido">
+                    <!-- Encabezado del centro de ayuda -->
+                    <div class="encabezado-ayuda">
+                        <div class="titulo-contenedor">
+                            <span class="material-symbols-outlined icono-titulo">school</span>
+                            <h1 class="titulo-pagina">Centro de Ayuda</h1>
+                        </div>
+                        <p class="descripcion-ayuda">
+                            Encuentra respuestas a las preguntas más frecuentes o aprende cómo usar UniReportes de manera efectiva.
+                        </p>
+                    </div>
+
+                    <!-- Contenido de ayuda -->
+                    <div class="contenido-ayuda">
+                        <!-- Sección de preguntas frecuentes -->
+                        <div class="seccion-faq">
+                            <h2 class="titulo-seccion">Preguntas Frecuentes</h2>
+                            <div class="lista-faq">
+                                <a href="#" class="item-faq">
+                                    <div class="contenido-faq">
+                                        <p class="pregunta-faq">¿Cómo reporto un problema?</p>
+                                        <p class="descripcion-faq">Aprende a reportar problemas de infraestructura en el campus.</p>
+                                    </div>
+                                    <span class="material-symbols-outlined icono-flecha">chevron_right</span>
+                                </a>
+                                
+                                <a href="#" class="item-faq">
+                                    <div class="contenido-faq">
+                                        <p class="pregunta-faq">¿Cómo sigo el estado de mi reporte?</p>
+                                        <p class="descripcion-faq">Descubre cómo seguir el estado de tus reportes.</p>
+                                    </div>
+                                    <span class="material-symbols-outlined icono-flecha">chevron_right</span>
+                                </a>
+                                
+                                <a href="#" class="item-faq">
+                                    <div class="contenido-faq">
+                                        <p class="pregunta-faq">¿Qué tipo de problemas puedo reportar?</p>
+                                        <p class="descripcion-faq">Entiende las categorías de problemas que puedes reportar.</p>
+                                    </div>
+                                    <span class="material-symbols-outlined icono-flecha">chevron_right</span>
+                                </a>
+                                
+                                <a href="#" class="item-faq">
+                                    <div class="contenido-faq">
+                                        <p class="pregunta-faq">¿Cuánto tiempo tarda en resolverse un problema?</p>
+                                        <p class="descripcion-faq">Conoce los tiempos estimados de resolución de problemas.</p>
+                                    </div>
+                                    <span class="material-symbols-outlined icono-flecha">chevron_right</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Sección de cómo crear reporte -->
+                        <div class="seccion-guia">
+                            <h2 class="titulo-seccion">Cómo Crear un Reporte</h2>
+                            <p class="descripcion-guia">
+                                Sigue estos sencillos pasos para reportar un problema de infraestructura en el campus:
+                            </p>
+                            
+                            <div class="pasos-guia">
+                                <div class="linea-timeline"></div>
+                                
+                                <div class="paso-item">
+                                    <div class="numero-paso">1</div>
+                                    <div class="contenido-paso">
+                                        <p class="titulo-paso">Selecciona la ubicación</p>
+                                        <p class="descripcion-paso">Usa el mapa interactivo para indicar dónde se encuentra el problema.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="paso-item">
+                                    <div class="numero-paso">2</div>
+                                    <div class="contenido-paso">
+                                        <p class="titulo-paso">Describe el problema</p>
+                                        <p class="descripcion-paso">Añade detalles y fotos para que podamos entender mejor la situación.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="paso-item">
+                                    <div class="numero-paso">3</div>
+                                    <div class="contenido-paso">
+                                        <p class="titulo-paso">Envía el reporte</p>
+                                        <p class="descripcion-paso">Revisa la información y envía tu reporte. Recibirás una notificación.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Cerrar sidebar al hacer clic fuera de ella en móvil
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.sidebar');
+            const menuButton = document.querySelector('.boton-menu-movil');
+            
+            if (window.innerWidth <= 1024 && 
+                !sidebar.contains(event.target) && 
+                !menuButton.contains(event.target) && 
+                sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>

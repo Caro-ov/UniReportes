@@ -1,0 +1,626 @@
+/* Variables CSS */
+:root {
+    --primary-color: #1173d4;
+    --primary-color-text: #ffffff;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --bg-primary: #F9FAFB;
+    --bg-secondary: #FFFFFF;
+    --border-color: #E5E7EB;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --transition: all 0.15s ease-in-out;
+    
+    /* Estados de reportes */
+    --estado-enviado-bg: #fee2e2;
+    --estado-enviado-text: #ef4444;
+    --estado-resuelto-bg: #dcfce7;
+    --estado-resuelto-text: #22c55e;
+    --estado-proceso-bg: #fef9c3;
+    --estado-proceso-text: #eab308;
+    --estado-revisado-bg: #dbeafe;
+    --estado-revisado-text: #3b82f6;
+}
+
+/* Reset y configuración base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', 'Noto Sans', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* Contenedor principal */
+.contenedor-principal {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background-color: var(--bg-primary);
+    border-right: 1px solid var(--border-color);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow-y: auto;
+    transition: transform var(--transition-duration) ease;
+    z-index: 100;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sidebar-content {
+    padding: 24px;
+}
+
+.sidebar-footer {
+    padding: 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Header del sidebar */
+.header-sidebar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.logo-icon {
+    color: var(--primary-color);
+    font-size: 32px;
+}
+
+.logo-titulo {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Navegación del sidebar */
+.navegacion-principal {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 14px;
+    transition: all var(--transition-duration) ease;
+}
+
+.nav-item:hover {
+    background-color: #f8fafc;
+    color: var(--text-primary);
+    transform: translateX(2px);
+}
+
+.nav-item.active {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.nav-item .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.nav-text {
+    font-size: 14px;
+}
+
+/* Contenido wrapper */
+.contenido-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-left: 280px;
+    min-height: 100vh;
+}
+
+/* Header principal */
+.header-principal {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--bg-secondary);
+    box-shadow: var(--shadow-sm);
+}
+
+.header-contenido {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 12px 16px;
+}
+
+/* Botón de menú móvil */
+.boton-menu-movil {
+    display: none;
+    background: none;
+    border: none;
+    padding: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.boton-menu-movil:hover {
+    background-color: #f3f4f6;
+    color: var(--text-primary);
+}
+
+/* Overlay para móvil */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity var(--transition-duration) ease;
+}
+
+/* Controles de usuario */
+.controles-usuario {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.boton-notificaciones {
+    position: relative;
+    border-radius: 50%;
+    padding: 8px;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.boton-notificaciones:hover {
+    background-color: #f3f4f6;
+    color: var(--text-primary);
+}
+
+.boton-notificaciones:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.perfil-completo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.usuario-info-header {
+    text-align: right;
+}
+
+.usuario-nombre-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+.usuario-rol-header {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.2;
+}
+
+.perfil-usuario {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.avatar-usuario {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDBdYVUbzMX4sq_bne-0DfGM1Xm1ul2KroVtTIsMgFO6a-BtTyn4IqMzkWiPpfDX9P8n3FhEbJQVabbe_irCxtrJA2Jx8jBMLH2RVWEsJ19-_L9WlslcBrhtnKiBn3R1WBs8pmIs0LS1fBL1vIzHe0yK-fFVHdqLycojQ5ny-ULH1QxOmi10ZqcS8WkiprIVsfKs_H2wrJ-6mJepgZJ6Cam6_0Vl4rCuPwyvbPptEoQ_xZXrEw7k0YW-0dkYmU2Ne4bpzBOrqdu3D0");
+    background-size: cover;
+    background-position: center;
+}
+
+/* Contenido principal */
+.contenido-principal {
+    flex: 1;
+    padding: 16px;
+}
+
+.contenedor-contenido {
+    max-width: 1408px;
+    margin: 0 auto;
+}
+
+/* Encabezado de la página */
+.encabezado-pagina {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    gap: 16px;
+}
+
+.titulo-contenedor {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.icono-titulo {
+    font-size: 32px;
+    color: var(--text-primary);
+}
+
+.titulo-pagina {
+    color: var(--text-primary);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+.boton-nuevo-reporte {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 6px;
+    height: 40px;
+    padding: 0 24px;
+    background-color: var(--primary-color);
+    color: var(--primary-color-text);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.boton-nuevo-reporte:hover {
+    background-color: #0e5eac;
+}
+
+/* Grid de estadísticas */
+.grid-estadisticas {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.tarjeta-estadistica {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-radius: 8px;
+    padding: 24px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.etiqueta-estadistica {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.numero-estadistica {
+    color: var(--text-primary);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* Contenedor de tabla */
+.contenedor-tabla {
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.encabezado-tabla {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.titulo-tabla {
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.tabla-scroll {
+    overflow-x: auto;
+}
+
+/* Tabla de reportes */
+.tabla-reportes {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-encabezado {
+    background-color: var(--bg-primary);
+}
+
+.tabla-encabezado th {
+    padding: 12px 24px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tabla-cuerpo {
+    background-color: var(--bg-secondary);
+}
+
+.fila-reporte {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.fila-reporte:hover {
+    background-color: var(--bg-primary);
+}
+
+.fila-reporte td {
+    padding: 16px 24px;
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.celda-id {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.celda-asunto {
+    color: var(--text-secondary);
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.celda-estado {
+    font-size: 14px;
+}
+
+.celda-fecha {
+    color: var(--text-secondary);
+}
+
+.celda-acciones {
+    font-weight: 500;
+}
+
+/* Estados de reportes */
+.estado-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+    gap: 6px;
+}
+
+.estado-badge .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.estado-enviado {
+    background-color: var(--estado-enviado-bg);
+    color: var(--estado-enviado-text);
+}
+
+.estado-resuelto {
+    background-color: var(--estado-resuelto-bg);
+    color: var(--estado-resuelto-text);
+}
+
+.estado-proceso {
+    background-color: var(--estado-proceso-bg);
+    color: var(--estado-proceso-text);
+}
+
+.estado-revisado {
+    background-color: var(--estado-revisado-bg);
+    color: var(--estado-revisado-text);
+}
+
+/* Enlaces de acción */
+.enlace-accion {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.enlace-accion:hover {
+    opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (min-width: 640px) {
+    .contenido-principal {
+        padding: 24px;
+    }
+    
+    .grid-estadisticas {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 768px) {
+    .navegacion-principal {
+        display: flex;
+    }
+    
+    .encabezado-pagina {
+        flex-direction: row;
+        align-items: center;
+        gap: 0;
+    }
+}
+
+@media (min-width: 1024px) {
+    .contenido-principal {
+        padding: 32px 40px;
+    }
+    
+    .grid-estadisticas {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .header-principal {
+        padding: 16px;
+    }
+    
+    .navegacion-principal {
+        display: none;
+    }
+    
+    .titulo-pagina {
+        font-size: 24px;
+    }
+    
+    .tarjeta-estadistica {
+        padding: 16px;
+    }
+    
+    .encabezado-tabla {
+        padding: 12px 16px;
+    }
+    
+    .tabla-reportes th,
+    .tabla-reportes td {
+        padding: 12px 16px;
+    }
+    
+    .celda-asunto {
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .titulo-contenedor {
+        gap: 8px;
+    }
+    
+    .icono-titulo {
+        font-size: 24px;
+    }
+    
+    .titulo-pagina {
+        font-size: 20px;
+    }
+    
+    .boton-nuevo-reporte {
+        width: 100%;
+        margin-top: 8px;
+    }
+    
+    .tarjeta-estadistica {
+        padding: 12px;
+    }
+    
+    .numero-estadistica {
+        font-size: 24px;
+    }
+    
+    .tabla-reportes th,
+    .tabla-reportes td {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .celda-asunto {
+        max-width: 150px;
+    }
+}
+
+/* Estilos específicos para sidebar en responsive */
+@media (min-width: 1025px) {
+    .sidebar {
+        position: fixed;
+        transform: translateX(0);
+    }
+    
+    .contenido-wrapper {
+        margin-left: 280px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 1000;
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .contenido-wrapper {
+        margin-left: 0;
+    }
+    
+    .boton-menu-movil {
+        display: block;
+        position: absolute;
+        left: 16px;
+    }
+    
+    .header-contenido {
+        justify-content: flex-end;
+        position: relative;
+    }
+}
