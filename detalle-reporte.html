@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UniReportes - Detalles del Reporte</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="css/detalle-reporte.css"/>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <!-- Overlay para móvil -->
+        <div class="overlay" onclick="toggleSidebar()"></div>
+        
+        <!-- Sidebar de navegación -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <!-- Logo y título -->
+                <div class="header-sidebar">
+                    <span class="material-symbols-outlined logo-icon">school</span>
+                    <h1 class="logo-titulo">UniReportes</h1>
+                </div>
+                
+                <!-- Navegación principal -->
+                <nav class="navegacion-principal">
+                    <a href="dashboard.html" class="nav-item">
+                        <span class="material-symbols-outlined">home</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                    <a href="mis-reportes.html" class="nav-item active">
+                        <span class="material-symbols-outlined">description</span>
+                        <span class="nav-text">Mis reportes</span>
+                    </a>
+                    <a href="crear-reporte.html" class="nav-item">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span class="nav-text">Nuevo reporte</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- Footer del sidebar -->
+            <div class="sidebar-footer">
+                <a href="ayuda.html" class="nav-item">
+                    <span class="material-symbols-outlined">help_outline</span>
+                    <span class="nav-text">Ayuda</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Contenido wrapper -->
+        <div class="contenido-wrapper">
+            <!-- Header superior -->
+            <header class="header-principal">
+                <div class="header-contenido">
+                    <div class="controles-usuario">
+                        <button class="boton-notificaciones">
+                            <span class="material-symbols-outlined">notifications</span>
+                        </button>
+                        <div class="perfil-completo">
+                            <div class="usuario-info-header">
+                                <p class="usuario-nombre-header">Juan Pérez</p>
+                                <p class="usuario-rol-header">Monitor</p>
+                            </div>
+                            <button class="perfil-usuario">
+                                <div class="avatar-usuario"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+        <!-- Contenido principal -->
+        <main class="contenido-principal">
+            <div class="contenedor-contenido">
+                <!-- Breadcrumb -->
+                <div class="breadcrumb-container">
+                    <nav class="breadcrumb">
+                        <a href="mis-reportes.html" class="breadcrumb-link">Reportes</a>
+                        <span class="breadcrumb-separator">/</span>
+                        <span class="breadcrumb-current">Reporte #1234</span>
+                    </nav>
+                </div>
+
+                <!-- Tarjeta principal del reporte -->
+                <div class="tarjeta-reporte">
+                    <!-- Header del reporte -->
+                    <div class="reporte-header">
+                        <div class="header-info">
+                            <h2 class="titulo-reporte">Fuga en el laboratorio de química</h2>
+                            <div class="estado-container">
+                                <span class="estado estado-en-proceso">En proceso</span>
+                            </div>
+                        </div>
+                        <p class="numero-reporte">Reporte #1234</p>
+                    </div>
+
+                    <!-- Contenido del reporte -->
+                    <div class="reporte-contenido">
+                        <!-- Detalles del reporte -->
+                        <div class="detalles-section">
+                            <h3 class="section-titulo">Detalles del reporte</h3>
+                            <div class="detalles-grid">
+                                <div class="detalle-item">
+                                    <p class="detalle-label">Ubicación</p>
+                                    <p class="detalle-valor">Laboratorio de Química, Edificio de Ciencias</p>
+                                </div>
+                                <div class="detalle-item">
+                                    <p class="detalle-label">Fecha de envío</p>
+                                    <p class="detalle-valor">15 de mayo de 2024, 10:00 AM</p>
+                                </div>
+                                <div class="detalle-item">
+                                    <p class="detalle-label">Descripción</p>
+                                    <p class="detalle-valor descripcion-texto">
+                                        Se ha detectado una fuga de agua en el laboratorio de química. El agua está goteando del techo cerca de la estación de trabajo número 3. Por favor, envíen a alguien para que lo revise lo antes posible.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fotos del reporte -->
+                        <div class="fotos-section">
+                            <h3 class="section-titulo">Fotos</h3>
+                            <div class="fotos-grid">
+                                <div class="foto-placeholder"></div>
+                                <div class="foto-placeholder"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Historial de cambios -->
+                    <div class="historial-section">
+                        <h3 class="section-titulo">Historial de cambios</h3>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-icon">
+                                    <span class="material-symbols-outlined">send</span>
+                                </div>
+                                <div class="timeline-content">
+                                    <p class="timeline-titulo">Reporte enviado</p>
+                                    <p class="timeline-fecha">15 de mayo de 2024, 10:00 AM</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-icon">
+                                    <span class="material-symbols-outlined">hourglass_top</span>
+                                </div>
+                                <div class="timeline-content">
+                                    <p class="timeline-titulo">Reporte en proceso</p>
+                                    <p class="timeline-fecha">15 de mayo de 2024, 11:30 AM</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-icon">
+                                    <span class="material-symbols-outlined">person</span>
+                                </div>
+                                <div class="timeline-content">
+                                    <p class="timeline-titulo">Técnico asignado</p>
+                                    <p class="timeline-fecha">15 de mayo de 2024, 12:00 PM</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comentarios -->
+                    <div class="comentarios-section">
+                        <h3 class="section-titulo">Comentarios</h3>
+                        <div class="comentarios-lista">
+                            <div class="comentario-item">
+                                <div class="comentario-avatar"></div>
+                                <div class="comentario-contenido">
+                                    <div class="comentario-header">
+                                        <p class="comentario-autor">Carlos Mendoza</p>
+                                        <p class="comentario-fecha">15 de mayo de 2024, 12:00 PM</p>
+                                    </div>
+                                    <div class="comentario-mensaje">
+                                        <p>Hemos asignado a un técnico para que revise la fuga. Estará en el laboratorio en aproximadamente una hora.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Añadir comentario -->
+                    <div class="agregar-comentario-section">
+                        <h3 class="section-titulo">Añadir comentario</h3>
+                        <div class="comentario-form">
+                            <div class="form-avatar"></div>
+                            <div class="form-contenido">
+                                <textarea class="comentario-textarea" placeholder="Escribe tu comentario aquí..." rows="4"></textarea>
+                                <div class="form-acciones">
+                                    <button class="boton-adjuntar">
+                                        <span class="material-symbols-outlined">attach_file</span>
+                                        Adjuntar foto
+                                    </button>
+                                    <button class="boton-enviar">Enviar comentario</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            const body = document.body;
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            body.classList.toggle('sidebar-open');
+        }
+
+        // Cerrar sidebar al hacer clic en el overlay
+        document.querySelector('.overlay').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            const body = document.body;
+            
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            body.classList.remove('sidebar-open');
+        });
+
+        // Manejar clic en el botón del menú
+        document.querySelector('.menu-toggle').addEventListener('click', toggleSidebar);
+    </script>
+</body>
+</html>
