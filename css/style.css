@@ -264,4 +264,133 @@ body {
     font-family: 'Inter', sans-serif;
 }
 
-/* Puedes agregar aquí más estilos personalizados si lo deseas */
+/* ===========================
+   ESTILOS PARA JAVASCRIPT
+   =========================== */
+
+/* Animaciones para scroll */
+.tarjeta-beneficio.animado,
+.tarjeta-reporte.animado {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Efecto ripple para botones */
+.boton {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.4);
+    transform: scale(0);
+    animation: rippleEffect 0.6s ease-out;
+    pointer-events: none;
+}
+
+@keyframes rippleEffect {
+    to {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Header scroll effect */
+.encabezado.scroll-activo {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Enlace activo en navegación */
+.menu-enlace.activo {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+/* Transiciones suaves para tarjetas */
+.tarjeta-reporte,
+.tarjeta-beneficio {
+    transition: all 0.3s ease;
+}
+
+.tarjeta-reporte .imagen-reporte {
+    transition: transform 0.3s ease;
+}
+
+.tarjeta-beneficio .icono-beneficio {
+    transition: all 0.3s ease;
+}
+
+/* Toast notifications */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #3b82f6;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10000;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toast.mostrar {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast.toast-success {
+    background-color: #10b981;
+}
+
+.toast.toast-error {
+    background-color: #ef4444;
+}
+
+.toast.toast-warning {
+    background-color: #f59e0b;
+}
+
+/* Easter egg styles */
+.easter-egg .tarjeta-reporte,
+.easter-egg .tarjeta-beneficio {
+    animation: bounce 0.5s ease infinite alternate;
+}
+
+.easter-egg .icono-beneficio {
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes bounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-10px); }
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments para JavaScript */
+@media (max-width: 768px) {
+    .toast {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        transform: translateY(-100%);
+    }
+    
+    .toast.mostrar {
+        transform: translateY(0);
+    }
+}

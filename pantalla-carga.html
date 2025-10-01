@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>UniReportes - Conectando</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="css/pantalla-carga.css"/>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <div class="tarjeta-carga">
+            <div class="seccion-icono">
+                <span class="material-symbols-outlined icono-principal">school</span>
+                <h1 class="titulo-principal">Conectando con UniReportes</h1>
+                <p class="subtitulo">Por favor, espera un momento.</p>
+            </div>
+            
+            <div class="contenedor-progreso">
+                <div class="barra-progreso">
+                    <div class="progreso-activo"></div>
+                </div>
+            </div>
+            
+            <p class="mensaje-estado">Estableciendo conexión segura...</p>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- JavaScript personalizado -->
+    <script src="js/pantalla-carga.js"></script>
+</body>
+</html>
