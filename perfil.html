@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UniReportes - Perfil de Usuario</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="css/perfil.css"/>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <!-- Sidebar de navegación -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <!-- Logo y título -->
+                <div class="header-sidebar">
+                    <span class="material-symbols-outlined logo-icon">school</span>
+                    <h1 class="logo-titulo">UniReportes</h1>
+                </div>
+                
+                <!-- Navegación principal -->
+                <nav class="navegacion-principal">
+                    <a href="dashboard.html" class="nav-item">
+                        <span class="material-symbols-outlined">home</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                    <a href="mis-reportes.html" class="nav-item">
+                        <span class="material-symbols-outlined">description</span>
+                        <span class="nav-text">Mis reportes</span>
+                    </a>
+                    <a href="crear-reporte.html" class="nav-item">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span class="nav-text">Nuevo reporte</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- Footer del sidebar -->
+            <div class="sidebar-footer">
+                
+                
+                <!-- Botón cerrar sesión -->
+                <button class="boton-cerrar-sesion">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Contenido principal -->
+        <main class="contenido-principal">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-izquierda">
+                    <button class="boton-menu" onclick="toggleSidebar()">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div class="encabezado-pagina">
+                        <h1>Perfil de Usuario</h1>
+                    </div>
+                </div>
+                
+                <div class="header-derecha">
+                    <button class="boton-notificaciones" title="Notificaciones">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="badge-notificacion">3</span>
+                    </button>
+                    
+                    <div class="perfil-usuario">
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIvpTfsJZtJf3u0QUasQKHp7vuS5HkynRH-z1Q84AgJJNspNOHyFPd9yf2yd666o4PiPwy4GBvukzevK-unWo4eqtiG3l8AosaXjo7OMk_V0zmHf1Yzs0XSMmSntrRuCRWevXxbHavfeJlzzSiwpx0TNJ4Umh1H67kgfHI0rQamGVhkbmFt0TI6yzAtpxFOELlz4IbFYpBEg72BRFW98Xe02s8jpT2gq4omfz8f7Ol2xCZdpIBWbL81ygY3akRum-TMPWd623P4g8" alt="Usuario">
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Contenedor del perfil -->
+            <div class="contenedor-perfil">
+                <!-- Sección principal del perfil -->
+                <section class="seccion-perfil-principal">
+                    <div class="tarjeta-perfil">
+                        <div class="avatar-principal">
+                            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZxrEbj_Z_7NSeysBmfpQkrGHt_RGaGBkK03-Zdgq9ONwtoFLcp5NZdCShto53h6uVEMtuNeUBJmkBpojTndCzfOl7e0dUDeb9R74xzB0RpLN7a4AZELsC6FJBStK4fGUa9AU4MzO3Sn-WShowV7jPNKWaCocW846AGKQwfantY3pSYuj5FPrKE8p-mrZBFFMbjuAID10l3V2m1nZu-RMcvhcS1Zrr4qmyEAuWAa_epnOtR8SzxU39tqE9Xx5WTirF3dUPjasTuRs" alt="Lucia Rodriguez">
+                            <button class="boton-cambiar-foto" title="Cambiar foto de perfil">
+                                <span class="material-symbols-outlined">photo_camera</span>
+                            </button>
+                        </div>
+                        <div class="info-perfil">
+                            <h2 class="nombre-completo">Lucia Rodriguez</h2>
+                            <p class="rol">Administradora</p>
+                            <p class="institucion">Universidad Nacional de Colombia</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Grid de contenido -->
+                <div class="grid-contenido">
+                    <!-- Columna de actividad -->
+                    <aside class="columna-actividad">
+                        <h3 class="titulo-seccion">Actividad</h3>
+                        <div class="tarjetas-estadisticas">
+                            <div class="tarjeta-estadistica">
+                                <div class="contenido-estadistica">
+                                    <h4>Reportes Creados</h4>
+                                    <span class="numero-estadistica">12</span>
+                                </div>
+                                <div class="icono-estadistica icono-verde">
+                                    <span class="material-symbols-outlined">add_chart</span>
+                                </div>
+                            </div>
+                            
+                            <div class="tarjeta-estadistica">
+                                <div class="contenido-estadistica">
+                                    <h4>En Proceso</h4>
+                                    <span class="numero-estadistica">5</span>
+                                </div>
+                                <div class="icono-estadistica icono-amarillo">
+                                    <span class="material-symbols-outlined">hourglass_top</span>
+                                </div>
+                            </div>
+                            
+                            <div class="tarjeta-estadistica">
+                                <div class="contenido-estadistica">
+                                    <h4>Resueltos</h4>
+                                    <span class="numero-estadistica">7</span>
+                                </div>
+                                <div class="icono-estadistica icono-azul">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                    
+                    <!-- Columna principal -->
+                    <main class="columna-principal">
+                        <!-- Información personal -->
+                        <section class="seccion-informacion">
+                            <h3 class="titulo-seccion">Información Personal</h3>
+                            <div class="tabla-informacion">
+                                <div class="fila-informacion">
+                                    <span class="etiqueta">Nombre</span>
+                                    <span class="valor">Lucia Rodriguez</span>
+                                </div>
+                                <div class="fila-informacion">
+                                    <span class="etiqueta">Rol</span>
+                                    <span class="valor">Administradora</span>
+                                </div>
+                                <div class="fila-informacion">
+                                    <span class="etiqueta">Correo</span>
+                                    <span class="valor">lucia.rodriguez@unal.edu.co</span>
+                                </div>
+                                <div class="fila-informacion">
+                                    <span class="etiqueta">Idioma</span>
+                                    <span class="valor">Español</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Configuración -->
+                            <h3 class="titulo-seccion titulo-configuracion">Configuración</h3>
+                            <div class="menu-configuracion">
+                                <a href="#" class="opcion-configuracion">
+                                    <div class="icono-opcion">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </div>
+                                    <span>Editar Perfil</span>
+                                    <span class="material-symbols-outlined flecha">chevron_right</span>
+                                </a>
+                                
+                                <a href="#" class="opcion-configuracion">
+                                    <div class="icono-opcion">
+                                        <span class="material-symbols-outlined">lock</span>
+                                    </div>
+                                    <span>Cambiar Contraseña</span>
+                                    <span class="material-symbols-outlined flecha">chevron_right</span>
+                                </a>
+                                
+                                <a href="#" class="opcion-configuracion">
+                                    <div class="icono-opcion">
+                                        <span class="material-symbols-outlined">notifications</span>
+                                    </div>
+                                    <span>Configurar Notificaciones</span>
+                                    <span class="material-symbols-outlined flecha">chevron_right</span>
+                                </a>
+                                
+                                <a href="#" class="opcion-configuracion">
+                                    <div class="icono-opcion">
+                                        <span class="material-symbols-outlined">palette</span>
+                                    </div>
+                                    <span>Tema de la Aplicación</span>
+                                    <span class="material-symbols-outlined flecha">chevron_right</span>
+                                </a>
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Script básico para sidebar móvil -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('activo');
+        }
+        
+        // Cerrar sidebar al hacer clic en overlay
+        document.querySelector('.overlay').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+        });
+        
+        // Cerrar sidebar al cambiar tamaño de ventana
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.querySelector('.overlay');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('activo');
+            }
+        });
+    </script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- JavaScript personalizado -->
+    <script src="js/perfil.js"></script>
+</body>
+</html>

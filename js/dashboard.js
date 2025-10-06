@@ -1,6 +1,26 @@
 $(document).ready(function() {
     
     // ===========================
+    // DROPDOWN DEL PERFIL
+    // ===========================
+    
+    // Toggle del menú desplegable
+    $('.avatar-usuario').click(function(e) {
+        e.stopPropagation();
+        $('.menu-desplegable').toggleClass('mostrar');
+    });
+
+    // Cerrar menú al hacer clic fuera
+    $(document).click(function() {
+        $('.menu-desplegable').removeClass('mostrar');
+    });
+
+    // Prevenir que el menú se cierre al hacer clic dentro
+    $('.menu-desplegable').click(function(e) {
+        e.stopPropagation();
+    });
+    
+    // ===========================
     // CONFIGURACIÓN INICIAL
     // ===========================
     
@@ -396,6 +416,62 @@ $(document).ready(function() {
     
     // Ejecutar inicialización
     inicializar();
+    
+    // ===========================
+    // MENÚ DESPLEGABLE DEL PERFIL
+    // ===========================
+    
+    // Manejar click en foto de perfil
+    $('#dropdownPerfil').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const $menu = $('#menuPerfil');
+        $menu.toggleClass('mostrar');
+    });
+    
+    // Cerrar menú al hacer click fuera
+    $(document).on('click', function(e) {
+        const $menu = $('#menuPerfil');
+        if (!$(e.target).closest('.dropdown-perfil').length) {
+            $menu.removeClass('mostrar');
+        }
+    });
+    
+    // Manejar opciones del menú
+    $('.opcion-menu').on('click', function(e) {
+        const href = $(this).attr('href');
+        const texto = $(this).text().trim();
+        
+        if (href === '#') {
+            e.preventDefault();
+        }
+        
+        // Cerrar menú
+        $('#menuPerfil').removeClass('mostrar');
+        
+        // Manejar acciones específicas
+        if (texto === 'Cerrar Sesión') {
+            e.preventDefault();
+            const confirmar = confirm('¿Estás seguro de que quieres cerrar sesión?');
+            if (confirmar) {
+                mostrarToast('Cerrando sesión...', 'info');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            }
+        } else if (texto === 'Configuración') {
+            e.preventDefault();
+            mostrarToast('Configuración próximamente disponible', 'info');
+        }
+    });
+    
+    // Cerrar menú con tecla Escape
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape') {
+            $('#menuPerfil').removeClass('mostrar');
+        }
+    });
     
     // Logging para desarrollo
     console.log('Dashboard JavaScript inicializado');

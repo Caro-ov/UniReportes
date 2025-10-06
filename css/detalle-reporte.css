@@ -1,25 +1,25 @@
 /* Variables CSS */
 :root {
-    --primary-color: #3b82f6;
-    --primary-hover: #2563eb;
+    --primary-color: #1173d4;
+    --primary-hover: #0e5eac;
     --primary-light: #dbeafe;
     --secondary-color: #64748b;
     --success-color: #10b981;
     --warning-color: #f59e0b;
     --error-color: #ef4444;
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
     --text-muted: #94a3b8;
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F9FAFB;
     --bg-tertiary: #f1f5f9;
-    --border-color: #e2e8f0;
+    --border-color: #E5E7EB;
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --border-radius: 8px;
     --transition: all 0.2s ease-in-out;
-    --transition-duration: 0.2s;
+    --transition-duration: 200ms;
 }
 
 /* Estados de reportes */
@@ -55,7 +55,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-    width: 280px;
+    width: 256px;
     background-color: var(--bg-primary);
     border-right: 1px solid var(--border-color);
     height: 100vh;
@@ -65,7 +65,7 @@ body {
     overflow-y: auto;
     transition: transform var(--transition-duration) ease;
     z-index: 100;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -111,7 +111,7 @@ body {
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-radius: 8px;
+    border-radius: 6px;
     text-decoration: none;
     color: var(--text-secondary);
     font-weight: 500;
@@ -120,16 +120,14 @@ body {
 }
 
 .nav-item:hover {
-    background-color: #f8fafc;
+    background-color: #f3f4f6;
     color: var(--text-primary);
-    transform: translateX(2px);
 }
 
 .nav-item.active {
     background-color: var(--primary-color);
     color: white;
     font-weight: 600;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .nav-item .material-symbols-outlined {
@@ -145,7 +143,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    margin-left: 280px;
+    margin-left: 256px;
     min-height: 100vh;
 }
 
@@ -272,6 +270,68 @@ body {
     background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDBdYVUbzMX4sq_bne-0DfGM1Xm1ul2KroVtTIsMgFO6a-BtTyn4IqMzkWiPpfDX9P8n3FhEbJQVabbe_irCxtrJA2Jx8jBMLH2RVWEsJ19-_L9WlslcBrhtnKiBn3R1WBs8pmIs0LS1fBL1vIzHe0yK-fFVHdqLycojQ5ny-ULH1QxOmi10ZqcS8WkiprIVsfKs_H2wrJ-6mJepgZJ6Cam6_0Vl4rCuPwyvbPptEoQ_xZXrEw7k0YW-0dkYmU2Ne4bpzBOrqdu3D0");
     background-size: cover;
     background-position: center;
+}
+
+/* Dropdown del perfil */
+.dropdown-perfil {
+    position: relative;
+}
+
+.menu-desplegable {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    min-width: 200px;
+    z-index: 50;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.menu-desplegable.mostrar {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.opcion-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.opcion-menu:hover {
+    background-color: var(--bg-secondary);
+}
+
+.opcion-menu.cerrar-sesion {
+    color: #dc2626;
+}
+
+.opcion-menu.cerrar-sesion:hover {
+    background-color: #fef2f2;
+}
+
+.separador-menu {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 4px 0;
+}
+
+.opcion-menu .material-symbols-outlined {
+    font-size: 18px;
 }
 
 /* Contenido principal */
