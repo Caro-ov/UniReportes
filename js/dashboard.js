@@ -227,7 +227,7 @@ $(document).ready(function() {
                     <li><a href="#"><span class="material-symbols-outlined">person</span>Mi perfil</a></li>
                     <li><a href="#"><span class="material-symbols-outlined">settings</span>Configuración</a></li>
                     <li><a href="ayuda.html"><span class="material-symbols-outlined">help</span>Ayuda</a></li>
-                    <li><a href="index.html" class="cerrar-sesion"><span class="material-symbols-outlined">logout</span>Cerrar sesión</a></li>
+                    <li><a href="#" class="cerrar-sesion"><span class="material-symbols-outlined">logout</span>Cerrar sesión</a></li>
                 </ul>
             </div>
         `);
@@ -259,6 +259,21 @@ $(document).ready(function() {
                     $menu.remove();
                     $(document).off('click.perfil');
                 }, 300);
+            }
+        });
+
+        // Manejar logout
+        $menu.find('a.cerrar-sesion').on('click', async function(e) {
+            e.preventDefault();
+            try {
+                const res = await fetch('/auth/logout', { method: 'POST' });
+                if (res.ok) {
+                    window.location.href = 'login.html';
+                } else {
+                    window.location.href = 'login.html';
+                }
+            } catch (_) {
+                window.location.href = 'login.html';
             }
         });
     }
