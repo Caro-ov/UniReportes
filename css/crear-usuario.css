@@ -1,0 +1,413 @@
+/* Variables CSS heredadas del sistema */
+:root {
+    --primary-color: #1173d4;
+    --primary-hover-color: #0e5eac;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F9FAFB;
+    --border-color: #E5E7EB;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --transition-duration: 200ms;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+    --admin-accent: #7c3aed;
+    --admin-accent-hover: #6d28d9;
+}
+
+/* Reset y configuración base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', 'Noto Sans', sans-serif;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* Contenedor principal */
+.contenedor-principal {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Overlay para móvil */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity var(--transition-duration) ease;
+}
+
+/* Contenido wrapper */
+.contenido-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-left: 256px;
+    min-height: 100vh;
+}
+
+/* Contenido principal */
+.contenido-principal {
+    flex: 1;
+    padding: 32px;
+}
+
+.contenedor-formulario {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Encabezado de la página */
+.encabezado-pagina {
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.titulo-pagina {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--primary-color), var(--admin-accent));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.descripcion-pagina {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Sección del formulario */
+.seccion-formulario {
+    background-color: var(--bg-primary);
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 4px 6px -1px var(--shadow-color);
+    border: 1px solid var(--border-color);
+}
+
+.formulario-usuario {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* Grupos del formulario */
+.seccion-formulario-grupo {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 24px;
+}
+
+.seccion-formulario-grupo:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.titulo-grupo {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.titulo-grupo::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(135deg, var(--primary-color), var(--admin-accent));
+    border-radius: 2px;
+}
+
+/* Campos del formulario */
+.grupo-campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.campo-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.etiqueta-campo {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.campo-entrada {
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    transition: all var(--transition-duration) ease;
+}
+
+.campo-entrada:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(17, 115, 212, 0.1);
+}
+
+.campo-entrada:invalid {
+    border-color: var(--error-color);
+}
+
+.campo-entrada::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Permisos */
+.grupo-permisos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.permiso-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all var(--transition-duration) ease;
+    cursor: pointer;
+}
+
+.permiso-item:hover {
+    background-color: var(--bg-secondary);
+    border-color: var(--primary-color);
+}
+
+.permiso-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.permiso-item label {
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+    flex: 1;
+}
+
+/* Botones del formulario */
+.botones-formulario {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.boton-cancelar,
+.boton-crear {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-duration) ease;
+    border: none;
+    text-decoration: none;
+}
+
+.boton-cancelar {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.boton-cancelar:hover {
+    background-color: var(--border-color);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.boton-crear {
+    background-color: var(--admin-accent);
+    color: white;
+}
+
+.boton-crear:hover {
+    background-color: var(--admin-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(124, 58, 237, 0.3);
+}
+
+.boton-crear:focus,
+.boton-cancelar:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Estados de validación */
+.campo-entrada.valido {
+    border-color: var(--success-color);
+    background-color: rgba(16, 185, 129, 0.05);
+}
+
+.campo-entrada.invalido {
+    border-color: var(--error-color);
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+/* Mensaje de error */
+.mensaje-error {
+    font-size: 12px;
+    color: var(--error-color);
+    margin-top: 4px;
+    display: none;
+}
+
+.campo-formulario.error .mensaje-error {
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .contenido-wrapper {
+        margin-left: 0;
+    }
+    
+    .contenido-principal {
+        padding: 16px;
+    }
+    
+    .seccion-formulario {
+        padding: 20px;
+    }
+    
+    .titulo-pagina {
+        font-size: 24px;
+    }
+    
+    .grupo-campos {
+        grid-template-columns: 1fr;
+    }
+    
+    .grupo-permisos {
+        grid-template-columns: 1fr;
+    }
+    
+    .botones-formulario {
+        flex-direction: column;
+    }
+    
+    .boton-cancelar,
+    .boton-crear {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .contenido-principal {
+        padding: 12px;
+    }
+    
+    .seccion-formulario {
+        padding: 16px;
+    }
+    
+    .titulo-pagina {
+        font-size: 20px;
+    }
+    
+    .titulo-grupo {
+        font-size: 16px;
+    }
+}
+
+/* ===========================
+   ANIMACIONES
+   =========================== */
+
+.seccion-formulario {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.seccion-formulario-grupo {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.seccion-formulario-grupo:nth-child(1) { animation-delay: 0.1s; }
+.seccion-formulario-grupo:nth-child(2) { animation-delay: 0.2s; }
+.seccion-formulario-grupo:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Toasts para notificaciones */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    transform: translateX(100%);
+    transition: transform var(--transition-duration) ease;
+}
+
+.toast.mostrar {
+    transform: translateX(0);
+}
+
+.toast-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.toast-error {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.toast-info {
+    background-color: var(--primary-color);
+    color: white;
+}

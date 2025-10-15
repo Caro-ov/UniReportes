@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head id="head-container">
+    <!-- Head common será cargado aquí -->
+</head>
+<body data-page="create-user" data-title="UniReportes - Crear Usuario" data-css="crear-usuario">
+    <div class="contenedor-principal">
+        <!-- Overlay para móvil -->
+        <div class="overlay"></div>
+        
+        <!-- Sidebar de navegación -->
+        <aside id="sidebar-container" class="sidebar">
+            <!-- Sidebar será cargado aquí -->
+        </aside>
+
+        <!-- Contenido wrapper -->
+        <div class="contenido-wrapper">
+            <!-- Header superior -->
+            <header id="header-container" class="header-principal">
+                <!-- Header será cargado aquí -->
+            </header>
+
+            <!-- Contenido principal -->
+            <main class="contenido-principal">
+                <div class="contenedor-formulario">
+                    <!-- Encabezado de la página -->
+                    <header class="encabezado-pagina">
+                        <h2 class="titulo-pagina">Crear Nuevo Usuario</h2>
+                        <p class="descripcion-pagina">
+                            Registra un nuevo usuario en el sistema y asigna los permisos correspondientes.
+                        </p>
+                    </header>
+
+                    <!-- Formulario de creación de usuario -->
+                    <section class="seccion-formulario">
+                        <form id="formulario-usuario" class="formulario-usuario">
+                            <!-- Información personal -->
+                            <div class="seccion-formulario-grupo">
+                                <h3 class="titulo-grupo">Información Personal</h3>
+                                
+                                <div class="grupo-campos">
+                                    <div class="campo-formulario">
+                                        <label for="nombre" class="etiqueta-campo">Nombre completo *</label>
+                                        <input type="text" id="nombre" name="nombre" class="campo-entrada" required>
+                                    </div>
+                                    
+                                    <div class="campo-formulario">
+                                        <label for="email" class="etiqueta-campo">Correo electrónico *</label>
+                                        <input type="email" id="email" name="email" class="campo-entrada" required>
+                                    </div>
+                                    
+                                    <div class="campo-formulario">
+                                        <label for="telefono" class="etiqueta-campo">Teléfono</label>
+                                        <input type="tel" id="telefono" name="telefono" class="campo-entrada">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Información del sistema -->
+                            <div class="seccion-formulario-grupo">
+                                <h3 class="titulo-grupo">Información del Sistema</h3>
+                                
+                                <div class="grupo-campos">
+                                    <div class="campo-formulario">
+                                        <label for="rol" class="etiqueta-campo">Rol del usuario *</label>
+                                        <select id="rol" name="rol" class="campo-entrada" required>
+                                            <option value="">Seleccionar rol</option>
+                                            <option value="estudiante">Estudiante</option>
+                                            <option value="docente">Docente</option>
+                                            <option value="administrativo">Administrativo</option>
+                                            <option value="monitor">Monitor</option>
+                                            <option value="administrador">Administrador</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="campo-formulario">
+                                        <label for="facultad" class="etiqueta-campo">Facultad</label>
+                                        <select id="facultad" name="facultad" class="campo-entrada">
+                                            <option value="">Seleccionar facultad</option>
+                                            <option value="ingenieria">Ingeniería</option>
+                                            <option value="ciencias">Ciencias</option>
+                                            <option value="medicina">Medicina</option>
+                                            <option value="derecho">Derecho</option>
+                                            <option value="economia">Economía</option>
+                                            <option value="artes">Artes</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="campo-formulario">
+                                        <label for="codigo_estudiante" class="etiqueta-campo">Código de estudiante</label>
+                                        <input type="text" id="codigo_estudiante" name="codigo_estudiante" class="campo-entrada" placeholder="Ej: 2024001234">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Permisos -->
+                            <div class="seccion-formulario-grupo">
+                                <h3 class="titulo-grupo">Permisos del Usuario</h3>
+                                
+                                <div class="grupo-permisos">
+                                    <div class="permiso-item">
+                                        <input type="checkbox" id="puede_crear_reportes" name="permisos[]" value="crear_reportes" checked>
+                                        <label for="puede_crear_reportes">Puede crear reportes</label>
+                                    </div>
+                                    
+                                    <div class="permiso-item">
+                                        <input type="checkbox" id="puede_ver_reportes" name="permisos[]" value="ver_reportes" checked>
+                                        <label for="puede_ver_reportes">Puede ver todos los reportes</label>
+                                    </div>
+                                    
+                                    <div class="permiso-item">
+                                        <input type="checkbox" id="puede_editar_reportes" name="permisos[]" value="editar_reportes">
+                                        <label for="puede_editar_reportes">Puede editar reportes</label>
+                                    </div>
+                                    
+                                    <div class="permiso-item">
+                                        <input type="checkbox" id="puede_eliminar_reportes" name="permisos[]" value="eliminar_reportes">
+                                        <label for="puede_eliminar_reportes">Puede eliminar reportes</label>
+                                    </div>
+                                    
+                                    <div class="permiso-item">
+                                        <input type="checkbox" id="es_administrador" name="permisos[]" value="administrador">
+                                        <label for="es_administrador">Permisos de administrador</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones de acción -->
+                            <div class="botones-formulario">
+                                <button type="button" class="boton-cancelar" onclick="window.location.href='admin-dashboard.html'">
+                                    <span class="material-symbols-outlined">close</span>
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="boton-crear">
+                                    <span class="material-symbols-outlined">person_add</span>
+                                    Crear Usuario
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Sistema de componentes -->
+    <script src="js/components.js"></script>
+    <!-- JavaScript personalizado -->
+    <script src="js/crear-usuario.js"></script>
+</body>
+</html>

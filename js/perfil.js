@@ -6,54 +6,9 @@ $(document).ready(function() {
     
     console.log('Perfil de Usuario JavaScript inicializado');
     
-    // ===========================
-    // NAVEGACIÓN SIDEBAR
-    // ===========================
-    
-    // Manejar navegación en sidebar
-    $('.nav-item').on('click', function(e) {
-        e.preventDefault();
-        
-        const $item = $(this);
-        const texto = $item.find('.nav-text').text().trim();
-        
-        // Remover clase activa de todos los elementos
-        $('.nav-item').removeClass('active');
-        
-        // Agregar clase activa al elemento clickeado
-        $item.addClass('active');
-        
-        // Determinar destino
-        let destino = '';
-        
-        switch(texto) {
-            case 'Inicio':
-                destino = 'dashboard.html';
-                break;
-            case 'Mis reportes':
-                destino = 'mis-reportes.html';
-                break;
-            case 'Nuevo reporte':
-                destino = 'crear-reporte.html';
-                break;
-            case 'Perfil':
-                destino = 'perfil.html';
-                break;
-            case 'Ayuda':
-                destino = 'ayuda.html';
-                break;
-            default:
-                destino = 'dashboard.html';
-        }
-        
-        // Si es la misma página, no redirigir
-        if (destino === 'perfil.html') {
-            return;
-        }
-        
-        // Redirigir directamente (sin pantalla de carga para navegación interna)
-        window.location.href = destino;
-    });
+    // El sistema de componentes ya maneja la navegación del sidebar
+    // El sistema de componentes ya maneja la navegación del sidebar
+    // Solo necesitamos la funcionalidad específica del perfil
     
     // ===========================
     // FUNCIONALIDADES DEL PERFIL

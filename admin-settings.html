@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head id="head-container">
+    <!-- Head common será cargado aquí -->
+</head>
+<body data-page="admin-settings" data-title="UniReportes - Configuración Administrativa" data-css="admin-settings">
+    <div class="contenedor-principal">
+        <!-- Overlay para móvil -->
+        <div class="overlay"></div>
+        
+        <!-- Sidebar de navegación -->
+        <aside id="sidebar-container" class="sidebar">
+            <!-- Sidebar será cargado aquí -->
+        </aside>
+
+        <!-- Contenido wrapper -->
+        <div class="contenido-wrapper">
+            <!-- Header superior -->
+            <header id="header-container" class="header-principal">
+                <!-- Header será cargado aquí -->
+            </header>
+
+            <!-- Contenido principal -->
+            <main class="contenido-principal">
+                <div class="contenedor-contenido">
+                    <!-- Encabezado de la página -->
+                    <header class="encabezado-pagina">
+                        <h2 class="titulo-pagina">Configuración Administrativa</h2>
+                        <p class="descripcion-pagina">
+                            Gestiona las configuraciones del sistema y parámetros administrativos de UniReportes.
+                        </p>
+                    </header>
+
+                    <!-- Sección de configuraciones -->
+                    <section class="seccion-configuraciones">
+                        <div class="grid-configuraciones">
+                            <!-- Configuración de usuarios -->
+                            <div class="tarjeta-config">
+                                <div class="header-config">
+                                    <span class="material-symbols-outlined icono-config">people</span>
+                                    <h3>Gestión de Usuarios</h3>
+                                </div>
+                                <p class="descripcion-config">Administrar usuarios, roles y permisos del sistema.</p>
+                                <div class="acciones-config">
+                                    <button class="boton-config-secundario">Ver usuarios</button>
+                                    <button class="boton-config-principal" onclick="window.location.href='crear-usuario.html'">Crear usuario</button>
+                                </div>
+                            </div>
+
+                            <!-- Configuración de reportes -->
+                            <div class="tarjeta-config">
+                                <div class="header-config">
+                                    <span class="material-symbols-outlined icono-config">settings</span>
+                                    <h3>Configuración de Reportes</h3>
+                                </div>
+                                <p class="descripcion-config">Configurar categorías, estados y flujos de trabajo.</p>
+                                <div class="acciones-config">
+                                    <button class="boton-config-secundario">Categorías</button>
+                                    <button class="boton-config-secundario">Estados</button>
+                                </div>
+                            </div>
+
+                            <!-- Configuración del sistema -->
+                            <div class="tarjeta-config">
+                                <div class="header-config">
+                                    <span class="material-symbols-outlined icono-config">tune</span>
+                                    <h3>Configuración del Sistema</h3>
+                                </div>
+                                <p class="descripcion-config">Parámetros generales, notificaciones y mantenimiento.</p>
+                                <div class="acciones-config">
+                                    <button class="boton-config-secundario">Notificaciones</button>
+                                    <button class="boton-config-secundario">Mantenimiento</button>
+                                </div>
+                            </div>
+
+                            <!-- Respaldos y seguridad -->
+                            <div class="tarjeta-config">
+                                <div class="header-config">
+                                    <span class="material-symbols-outlined icono-config">security</span>
+                                    <h3>Seguridad y Respaldos</h3>
+                                </div>
+                                <p class="descripcion-config">Gestionar copias de seguridad y configuraciones de seguridad.</p>
+                                <div class="acciones-config">
+                                    <button class="boton-config-secundario">Respaldos</button>
+                                    <button class="boton-config-secundario">Seguridad</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Mensaje temporal -->
+                    <section class="seccion-mensaje">
+                        <div class="mensaje-info">
+                            <span class="material-symbols-outlined">info</span>
+                            <div>
+                                <h4>Configuración en desarrollo</h4>
+                                <p>Esta sección está siendo desarrollada. Próximamente estará disponible con todas las funcionalidades administrativas.</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Sistema de componentes -->
+    <script src="js/components.js"></script>
+    <!-- JavaScript personalizado -->
+    <script src="js/admin-settings.js"></script>
+</body>
+</html>

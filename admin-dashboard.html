@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head id="head-container">
+    <!-- Head common será cargado aquí -->
+</head>
+<body data-page="admin-home" data-title="UniReportes - Panel de Administración" data-css="admin-dashboard">
+    <div class="contenedor-principal">
+        <!-- Overlay para móvil -->
+        <div class="overlay"></div>
+        
+        <!-- Sidebar de navegación -->
+        <aside id="sidebar-container" class="sidebar">
+            <!-- Sidebar será cargado aquí -->
+        </aside>
+
+        <!-- Contenido wrapper -->
+        <div class="contenido-wrapper">
+            <!-- Header superior -->
+            <header id="header-container" class="header-principal">
+                <!-- Header será cargado aquí -->
+            </header>
+
+            <!-- Contenido principal -->
+            <main class="contenido-principal">
+                <div class="contenedor-contenido">
+                    <!-- Encabezado de la página -->
+                    <header class="encabezado-pagina">
+                        <h2 class="titulo-pagina">Panel de Administración</h2>
+                        <p class="descripcion-pagina">
+                            Bienvenido al panel de administración de UniReportes. Gestiona usuarios, reportes y configuraciones del sistema.
+                        </p>
+                    </header>
+
+                    <!-- Sección principal -->
+                    <section class="seccion-principal">
+                        <h3 class="titulo-seccion">¿Qué puedes hacer?</h3>
+                        
+                        <div class="grid-opciones">
+                            <!-- Opción 1: Explorar reportes -->
+                            <div class="tarjeta-opcion">
+                                <span class="material-symbols-outlined icono-opcion">visibility</span>
+                                <div class="contenido-opcion">
+                                    <h4 class="titulo-opcion">Explorar reportes</h4>
+                                    <p class="descripcion-opcion">Visualiza y gestiona todos los reportes del sistema para monitorear el estado de la infraestructura.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Opción 2: Crear nuevo reporte -->
+                            <div class="tarjeta-opcion">
+                                <span class="material-symbols-outlined icono-opcion">edit_document</span>
+                                <div class="contenido-opcion">
+                                    <h4 class="titulo-opcion">Crear un nuevo reporte</h4>
+                                    <p class="descripcion-opcion">Registra nuevos problemas de infraestructura en el sistema para su seguimiento.</p>
+                                </div>
+                            </div>
+
+                            <!-- Opción 3: Crear usuario -->
+                            <div class="tarjeta-opcion">
+                                <span class="material-symbols-outlined icono-opcion">person_add</span>
+                                <div class="contenido-opcion">
+                                    <h4 class="titulo-opcion">Crear nuevo usuario</h4>
+                                    <p class="descripcion-opcion">Registra nuevos usuarios en el sistema y asigna permisos y roles apropiados.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Botones de acción principales -->
+                        <div class="contenedor-botones">
+                            <button class="boton-principal" onclick="window.location.href='crear-reporte.html'">
+                                Crear nuevo reporte
+                            </button>
+                            <button class="boton-secundario" onclick="window.location.href='crear-usuario.html'">
+                                <span class="material-symbols-outlined">person_add</span>
+                                Crear usuario
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- Sección de estadísticas del administrador -->
+                    <section class="seccion-estadisticas">
+                        <h3 class="titulo-seccion">Estadísticas del Sistema</h3>
+                        
+                        <div class="grid-estadisticas">
+                            <!-- Total de reportes -->
+                            <div class="tarjeta-estadistica">
+                                <div class="contenido-estadistica">
+                                    <h4>Total de Reportes</h4>
+                                    <span class="numero-estadistica">245</span>
+                                </div>
+                                <div class="icono-estadistica icono-azul">
+                                    <span class="material-symbols-outlined">description</span>
+                                </div>
+                            </div>
+
+                            <!-- Usuarios activos -->
+                            <div class="tarjeta-estadistica">
+                                <div class="contenido-estadistica">
+                                    <h4>Usuarios Activos</h4>
+                                    <span class="numero-estadistica">89</span>
+                                </div>
+                                <div class="icono-estadistica icono-verde">
+                                    <span class="material-symbols-outlined">people</span>
+                                </div>
+                            </div>
+
+                            <!-- Reportes pendientes -->
+                            <div class="tarjeta-estadistica">
+                                <div class="contenido-estadistica">
+                                    <h4>Reportes Pendientes</h4>
+                                    <span class="numero-estadistica">12</span>
+                                </div>
+                                <div class="icono-estadistica icono-amarillo">
+                                    <span class="material-symbols-outlined">schedule</span>
+                                </div>
+                            </div>
+
+                            <!-- Reportes resueltos este mes -->
+                            <div class="tarjeta-estadistica">
+                                <div class="contenido-estadistica">
+                                    <h4>Resueltos este mes</h4>
+                                    <span class="numero-estadistica">34</span>
+                                </div>
+                                <div class="icono-estadistica icono-verde">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Sistema de componentes -->
+    <script src="js/components.js"></script>
+    <!-- JavaScript personalizado -->
+    <script src="js/admin-dashboard.js"></script>
+</body>
+</html>

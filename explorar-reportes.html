@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UniReportes - Explorar Reportes</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/components.css"/>
+    <link rel="stylesheet" href="css/explorar-reportes.css"/>
+    
+    <!-- Estilos de emergencia para asegurar que se vean -->
+    <style>
+        /* Estilos de emergencia */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Noto Sans', sans-serif;
+            background-color: #F9FAFB;
+            color: #1F2937;
+            line-height: 1.6;
+        }
+        
+        .contenedor-principal {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 256px;
+            background-color: #F9FAFB;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 100;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .contenido-wrapper {
+            flex: 1;
+            margin-left: 256px;
+            background-color: #F9FAFB;
+            min-height: 100vh;
+            padding-top: 64px;
+        }
+        
+        .header-principal {
+            position: fixed;
+            top: 0;
+            left: 256px;
+            right: 0;
+            height: 64px;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E5E7EB;
+            z-index: 50;
+        }
+        
+        .contenido-principal {
+            padding: 24px;
+        }
+        
+        /* Estilos adicionales para la tabla */
+        .seccion-reportes-recientes {
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        
+        .header-seccion {
+            padding: 24px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        
+        .titulo-seccion {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 20px;
+        }
+        
+        .filtros-reportes {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filtro-buscar, .filtro-select {
+            padding: 10px 12px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #FFFFFF;
+        }
+        
+        .tabla-reportes {
+            width: 100%;
+            border-collapse: collapse;
+            background: #FFFFFF;
+        }
+        
+        .tabla-reportes th {
+            background: #F9FAFB;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #6B7280;
+            border-bottom: 2px solid #E5E7EB;
+        }
+        
+        .tabla-reportes td {
+            padding: 16px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        
+        .estado-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .estado-abierto {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        .estado-proceso {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+        
+        .estado-resuelto {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+    </style>
+</head>
+<body data-page="explore-reports" data-title="UniReportes - Explorar Reportes" data-css="explorar-reportes">
+    <div class="contenedor-principal">
+        <!-- Overlay para móvil -->
+        <div class="overlay"></div>
+        
+        <!-- Sidebar de navegación -->
+        <aside class="sidebar" id="sidebar-principal">
+            <!-- Contenido del sidebar de administrador -->
+            <div class="sidebar-content">
+                <!-- Logo y título -->
+                <div class="header-sidebar">
+                    <span class="material-symbols-outlined logo-icon">admin_panel_settings</span>
+                    <h1 class="logo-titulo">UniReportes Admin</h1>
+                </div>
+                
+                <!-- Navegación principal -->
+                <nav class="navegacion-principal sidebar-nav">
+                    <a href="admin-dashboard.html" class="nav-item" data-page="admin-home">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                    <a href="explorar-reportes.html" class="nav-item active" data-page="explore-reports">
+                        <span class="material-symbols-outlined">search</span>
+                        <span class="nav-text">Explorar reportes</span>
+                    </a>
+                    <a href="crear-reporte.html" class="nav-item" data-page="new-report">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span class="nav-text">Nuevo reporte</span>
+                    </a>
+                    <a href="crear-usuario.html" class="nav-item" data-page="create-user">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Crear usuario</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Footer del sidebar -->
+            <div class="sidebar-footer">
+                <a href="admin-settings.html" class="nav-item" data-page="admin-settings">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="nav-text">Configuración</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Contenido wrapper -->
+        <div class="contenido-wrapper">
+            <!-- Header superior -->
+            <header class="header-principal">
+                <!-- Contenido del header -->
+                <div class="header-contenido">
+                    <button class="boton-menu-movil">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div class="controles-usuario">
+                        <button class="boton-notificaciones notification-btn">
+                            <span class="material-symbols-outlined">notifications</span>
+                        </button>
+                        <div class="perfil-completo">
+                            <div class="usuario-info-header">
+                                <p class="usuario-nombre-header">Juan Pérez</p>
+                                <p class="usuario-rol-header">Administrador</p>
+                            </div>
+                            <div class="dropdown-perfil user-dropdown">
+                                <button class="perfil-usuario" id="dropdownPerfil">
+                                    <div class="avatar-usuario"></div>
+                                </button>
+                                <div class="menu-desplegable" id="menuPerfil">
+                                    <a href="perfil.html" class="opcion-menu">
+                                        <span class="material-symbols-outlined">person</span>
+                                        Mi perfil
+                                    </a>
+                                    <a href="#" class="opcion-menu">
+                                        <span class="material-symbols-outlined">settings</span>
+                                        Configuración
+                                    </a>
+                                    <a href="ayuda.html" class="opcion-menu">
+                                        <span class="material-symbols-outlined">help</span>
+                                        Ayuda
+                                    </a>
+                                    <a href="#" class="opcion-menu salir">
+                                        <span class="material-symbols-outlined">logout</span>
+                                        Cerrar sesión
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Contenido principal -->
+            <main class="contenido-principal">
+                <div class="contenedor-contenido">
+                    <!-- Sección principal de reportes -->
+                    <section class="seccion-reportes-recientes">
+                        <div class="header-seccion">
+                            <h2 class="titulo-seccion">Reportes Recientes</h2>
+                            
+                            <!-- Filtros de reportes -->
+                            <div class="filtros-reportes">
+                                <div class="filtro-grupo">
+                                    <span class="material-symbols-outlined">search</span>
+                                    <input type="text" class="filtro-buscar" placeholder="Buscar reportes...">
+                                </div>
+                                
+                                <div class="filtro-grupo">
+                                    <span class="filtro-label">Categoría</span>
+                                    <select class="filtro-select" id="filtro-categoria">
+                                        <option value="">Todas</option>
+                                        <option value="electrico">Eléctrico</option>
+                                        <option value="fontaneria">Fontanería</option>
+                                        <option value="estructural">Estructural</option>
+                                        <option value="climatizacion">Climatización</option>
+                                        <option value="seguridad">Seguridad</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                                
+                                <div class="filtro-grupo">
+                                    <span class="filtro-label">Estado</span>
+                                    <select class="filtro-select" id="filtro-estado">
+                                        <option value="">Todos</option>
+                                        <option value="abierto">Abierto</option>
+                                        <option value="en-proceso">En Proceso</option>
+                                        <option value="resuelto">Resuelto</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                                
+                                <div class="filtro-grupo">
+                                    <span class="filtro-label">Fecha</span>
+                                    <select class="filtro-select" id="filtro-fecha">
+                                        <option value="">Todas</option>
+                                        <option value="hoy">Hoy</option>
+                                        <option value="semana">Esta semana</option>
+                                        <option value="mes">Este mes</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabla de reportes -->
+                        <div class="tabla-container">
+                            <table class="tabla-reportes">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Categoría</th>
+                                        <th>Estado</th>
+                                        <th>Usuario</th>
+                                        <th>Fecha</th>
+                                        <th>Responsable</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-reportes-body">
+                                    <tr>
+                                        <td class="id-reporte">#12345</td>
+                                        <td class="categoria">Eléctrico</td>
+                                        <td><span class="estado-badge estado-abierto">Abierto</span></td>
+                                        <td>Carlos López</td>
+                                        <td>2024-07-26</td>
+                                        <td>Sin asignar</td>
+                                        <td class="acciones">
+                                            <button class="btn-accion btn-ver" title="Ver detalles">
+                                                <span class="material-symbols-outlined">visibility</span>
+                                            </button>
+                                            <button class="btn-accion btn-editar" title="Editar">
+                                                <span class="material-symbols-outlined">edit</span>
+                                            </button>
+                                            <button class="btn-accion btn-eliminar" title="Eliminar">
+                                                <span class="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="id-reporte">#12346</td>
+                                        <td class="categoria">Fontanería</td>
+                                        <td><span class="estado-badge estado-proceso">En Proceso</span></td>
+                                        <td>Ana García</td>
+                                        <td>2024-07-25</td>
+                                        <td>Juan Pérez</td>
+                                        <td class="acciones">
+                                            <button class="btn-accion btn-ver" title="Ver detalles">
+                                                <span class="material-symbols-outlined">visibility</span>
+                                            </button>
+                                            <button class="btn-accion btn-editar" title="Editar">
+                                                <span class="material-symbols-outlined">edit</span>
+                                            </button>
+                                            <button class="btn-accion btn-eliminar" title="Eliminar">
+                                                <span class="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="id-reporte">#12347</td>
+                                        <td class="categoria">Estructural</td>
+                                        <td><span class="estado-badge estado-resuelto">Resuelto</span></td>
+                                        <td>Sofía Martínez</td>
+                                        <td>2024-07-24</td>
+                                        <td>Pedro Ramírez</td>
+                                        <td class="acciones">
+                                            <button class="btn-accion btn-ver" title="Ver detalles">
+                                                <span class="material-symbols-outlined">visibility</span>
+                                            </button>
+                                            <button class="btn-accion btn-editar" title="Editar">
+                                                <span class="material-symbols-outlined">edit</span>
+                                            </button>
+                                            <button class="btn-accion btn-eliminar" title="Eliminar">
+                                                <span class="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="id-reporte">#12348</td>
+                                        <td class="categoria">Climatización</td>
+                                        <td><span class="estado-badge estado-abierto">Abierto</span></td>
+                                        <td>Diego Fernández</td>
+                                        <td>2024-07-23</td>
+                                        <td>Sin asignar</td>
+                                        <td class="acciones">
+                                            <button class="btn-accion btn-ver" title="Ver detalles">
+                                                <span class="material-symbols-outlined">visibility</span>
+                                            </button>
+                                            <button class="btn-accion btn-editar" title="Editar">
+                                                <span class="material-symbols-outlined">edit</span>
+                                            </button>
+                                            <button class="btn-accion btn-eliminar" title="Eliminar">
+                                                <span class="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="id-reporte">#12349</td>
+                                        <td class="categoria">Seguridad</td>
+                                        <td><span class="estado-badge estado-proceso">En Proceso</span></td>
+                                        <td>Laura Sánchez</td>
+                                        <td>2024-07-22</td>
+                                        <td>María Gómez</td>
+                                        <td class="acciones">
+                                            <button class="btn-accion btn-ver" title="Ver detalles">
+                                                <span class="material-symbols-outlined">visibility</span>
+                                            </button>
+                                            <button class="btn-accion btn-editar" title="Editar">
+                                                <span class="material-symbols-outlined">edit</span>
+                                            </button>
+                                            <button class="btn-accion btn-eliminar" title="Eliminar">
+                                                <span class="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Sección de análisis y notificaciones -->
+                    <div class="seccion-inferior">
+                        <!-- Análisis de reportes -->
+                        <section class="seccion-analisis">
+                            <h3 class="titulo-seccion">Análisis de Reportes</h3>
+                            
+                            <div class="analisis-container">
+                                <!-- Distribución por categoría -->
+                                <div class="chart-container">
+                                    <h4>Distribución por Categoría</h4>
+                                    <div class="chart-barras">
+                                        <div class="barra-item">
+                                            <span class="barra-label">Eléctrico</span>
+                                            <div class="barra">
+                                                <div class="barra-fill" data-categoria="electrico" style="width: 80%;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="barra-item">
+                                            <span class="barra-label">Fontanería</span>
+                                            <div class="barra">
+                                                <div class="barra-fill" data-categoria="fontaneria" style="width: 60%;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="barra-item">
+                                            <span class="barra-label">Estructural</span>
+                                            <div class="barra">
+                                                <div class="barra-fill" data-categoria="estructural" style="width: 40%;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="barra-item">
+                                            <span class="barra-label">Climatización</span>
+                                            <div class="barra">
+                                                <div class="barra-fill" data-categoria="climatizacion" style="width: 30%;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="barra-item">
+                                            <span class="barra-label">Seguridad</span>
+                                            <div class="barra">
+                                                <div class="barra-fill" data-categoria="seguridad" style="width: 20%;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Evolución de reportes -->
+                                <div class="chart-container">
+                                    <h4>Evolución de Reportes</h4>
+                                    <div class="chart-lineas">
+                                        <div class="linea-grafico">
+                                            <svg viewBox="0 0 300 100" class="svg-chart">
+                                                <polyline points="0,80 50,60 100,70 150,40 200,50 250,30 300,20" 
+                                                         class="chart-line" fill="none" stroke="#1173d4" stroke-width="2"/>
+                                                <circle cx="0" cy="80" r="3" fill="#1173d4"/>
+                                                <circle cx="50" cy="60" r="3" fill="#1173d4"/>
+                                                <circle cx="100" cy="70" r="3" fill="#1173d4"/>
+                                                <circle cx="150" cy="40" r="3" fill="#1173d4"/>
+                                                <circle cx="200" cy="50" r="3" fill="#1173d4"/>
+                                                <circle cx="250" cy="30" r="3" fill="#1173d4"/>
+                                                <circle cx="300" cy="20" r="3" fill="#1173d4"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Notificaciones urgentes -->
+                        <section class="seccion-notificaciones">
+                            <h3 class="titulo-seccion">Notificaciones Urgentes</h3>
+                            
+                            <div class="notificaciones-lista">
+                                <div class="notificacion-item urgente">
+                                    <div class="notificacion-icon">
+                                        <span class="material-symbols-outlined">error</span>
+                                    </div>
+                                    <div class="notificacion-content">
+                                        <h5>Reporte #12345 - Eléctrico</h5>
+                                        <p>Fallo eléctrico en el edificio principal. Requiere atención inmediata.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Inicializar funcionalidad del header
+        $(document).ready(function() {
+            // Dropdown del perfil
+            $('#dropdownPerfil').click(function(e) {
+                e.stopPropagation();
+                $('#menuPerfil').toggleClass('mostrar');
+            });
+
+            $(document).click(function() {
+                $('#menuPerfil').removeClass('mostrar');
+            });
+
+            // Marcar elemento activo en el sidebar
+            $('.nav-item[data-page="explore-reports"]').addClass('active');
+        });
+    </script>
+    <script src="js/explorar-reportes.js"></script>
+</body>
+</html>

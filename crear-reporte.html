@@ -1,102 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>UniReportes - Crear Reporte</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com" rel="preconnect"/>
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    <!-- CSS Personalizado -->
-    <link rel="stylesheet" href="css/crear-reporte.css"/>
+<head id="head-container">
+    <!-- Head common será cargado aquí -->
 </head>
-<body>
+<body data-page="new-report" data-title="UniReportes - Crear Reporte" data-css="crear-reporte">
     <div class="contenedor-principal">
         <!-- Overlay para móvil -->
         <div class="overlay" onclick="toggleSidebar()"></div>
         
         <!-- Sidebar de navegación -->
-        <aside class="sidebar">
-            <div class="sidebar-content">
-                <!-- Logo y título -->
-                <div class="header-sidebar">
-                    <span class="material-symbols-outlined logo-icon">school</span>
-                    <h1 class="logo-titulo">UniReportes</h1>
-                </div>
-                
-                <!-- Navegación principal -->
-                <nav class="navegacion-principal">
-                    <a href="dashboard.html" class="nav-item">
-                        <span class="material-symbols-outlined">home</span>
-                        <span class="nav-text">Inicio</span>
-                    </a>
-                    <a href="mis-reportes.html" class="nav-item">
-                        <span class="material-symbols-outlined">description</span>
-                        <span class="nav-text">Mis reportes</span>
-                    </a>
-                    <a href="crear-reporte.html" class="nav-item active">
-                        <span class="material-symbols-outlined">add_circle</span>
-                        <span class="nav-text">Nuevo reporte</span>
-                    </a>
-                </nav>
-            </div>
-            
-            <!-- Footer del sidebar -->
-            <div class="sidebar-footer">
-                <a href="ayuda.html" class="nav-item">
-                    <span class="material-symbols-outlined">help_outline</span>
-                    <span class="nav-text">Ayuda</span>
-                </a>
-            </div>
+        <aside id="sidebar-container" class="sidebar">
+            <!-- Sidebar será cargado aquí -->
         </aside>
 
         <!-- Contenido principal -->
         <div class="contenido-wrapper">
             <!-- Header superior -->
-            <header class="header-principal">
-                <div class="header-contenido">
-                    <button class="boton-menu-movil" onclick="toggleSidebar()">
-                        <span class="material-symbols-outlined">menu</span>
-                    </button>
-                    <div class="controles-usuario">
-                        <button class="boton-notificaciones">
-                            <span class="material-symbols-outlined">notifications</span>
-                        </button>
-                        <div class="perfil-completo">
-                            <div class="usuario-info-header">
-                                <p class="usuario-nombre-header">Juan Pérez</p>
-                                <p class="usuario-rol-header">Monitor</p>
-                            </div>
-                            <div class="dropdown-perfil">
-                                <button class="perfil-usuario" id="dropdownPerfil">
-                                    <div class="avatar-usuario"></div>
-                                </button>
-                                <div class="menu-desplegable" id="menuPerfil">
-                                    <a href="perfil.html" class="opcion-menu">
-                                        <span class="material-symbols-outlined">person</span>
-                                        Mi perfil
-                                    </a>
-                                    <a href="#" class="opcion-menu">
-                                        <span class="material-symbols-outlined">settings</span>
-                                        Configuración
-                                    </a>
-                                    <a href="ayuda.html" class="opcion-menu">
-                                        <span class="material-symbols-outlined">help</span>
-                                        Ayuda
-                                    </a>
-                                    <hr class="separador-menu">
-                                    <a href="#" class="opcion-menu cerrar-sesion">
-                                        <span class="material-symbols-outlined">logout</span>
-                                        Cerrar sesión
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <header id="header-container" class="header-principal">
+                <!-- Header será cargado aquí -->
             </header>
 
             <!-- Contenido principal -->
@@ -225,6 +146,8 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Sistema de componentes -->
+    <script src="js/components.js"></script>
     <!-- JavaScript personalizado -->
     <script src="js/crear-reporte.js"></script>
 </body>
