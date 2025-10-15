@@ -16,11 +16,11 @@
 <body>
     <div class="contenedor-login">
         <!-- Sección izquierda con imagen -->
-        <div class="seccion-imagen" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-            <img alt="Preferencias de configuración" class="imagen-fondo" src="img/login/Preferences.gif" style="max-width: 80%; height: auto; margin-bottom: 20px;"/>
-            <div class="texto-imagen" style="color: black;">
-                <h2 class="titulo-imagen" style="color: black;">Reporta y mejora la infraestructura de tu universidad.</h2>
-                <p class="subtitulo-imagen" style="color: black;">Tu voz es clave para un mejor campus.</p>
+        <div class="seccion-imagen">
+            <img alt="Preferencias de configuración" class="imagen-fondo" src="img/login/Preferences.gif"/>
+            <div class="texto-imagen">
+                <h2 class="titulo-imagen">Reporta y mejora la infraestructura de tu universidad.</h2>
+                <p class="subtitulo-imagen">Tu voz es clave para un mejor campus.</p>
             </div>
         </div>
 
@@ -37,7 +37,7 @@
                 </div>
 
                 <div class="contenedor-form">
-                    <form action="#" class="formulario-login" method="POST">
+                    <form action="/auth/login" class="formulario-login" method="POST">
                         <input name="remember" type="hidden" value="true"/>
                         
                         <div class="campo-formulario">
@@ -82,5 +82,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Scripts -->
+    <script src="js/login.js"></script>
 </body>
 </html>
