@@ -6,6 +6,11 @@ import { fileURLToPath } from 'url';
 import { setupEnv } from './src/utils/envLoader.js';
 import authRoutes from './src/routes/authRoutes.js';
 import pageRoutes from './src/routes/pageRoutes.js';
+import reportRoutes from './src/routes/reportRoutes.js';
+import categoryRoutes from './src/routes/categoryRoutes.js';
+import userRoutes from './src/routes/userRoutes.js';
+import dashboardRoutes from './src/routes/dashboardRoutes.js';
+import loadingRoutes from './src/routes/loadingRoutes.js';
 import pool from './src/config/db.js';
 
 // Configurar variables de entorno (soporta archivos cifrados)
@@ -36,8 +41,17 @@ app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
 app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
 app.use('/components', express.static(path.join(__dirname, 'public', 'components')));
 
-// Rutas
+// Rutas de autenticación
 app.use('/auth', authRoutes);
+
+// Rutas API
+app.use('/api/reports', reportRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/loading', loadingRoutes);
+
+// Rutas de páginas (deben ir al final)
 app.use('/', pageRoutes);
 
 // Fallback 404 con archivo estático si existe
