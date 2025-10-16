@@ -12,17 +12,15 @@ const router = Router();
 
 // Páginas públicas
 router.get(['/', '/index.html'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 router.get('/login.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login.html'));
-});
-router.get('/pantalla-carga.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pantalla-carga.html'));
+  res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
 // Páginas protegidas (requieren sesión)
 const protectedPages = [
+  'pantalla-carga.html',
   'dashboard.html',
   'perfil.html',
   'crear-reporte.html',
@@ -33,8 +31,22 @@ const protectedPages = [
 
 protectedPages.forEach((file) => {
   router.get('/' + file, requireAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, file));
+    res.sendFile(path.join(__dirname, 'views', file));
   });
 });
 
-export default router;
+// Páginas de administrador (también requieren sesión)
+const adminPages = [
+  'admin-dashboard.html',
+  'admin-settings.html',
+  'crear-usuario.html',
+  'explorar-reportes.html'
+];
+
+adminPages.forEach((file) => {
+  router.get('/' + file, requireAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', file));
+  });
+});
+
+export default router;

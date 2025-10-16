@@ -9,6 +9,7 @@ $(document).ready(function() {
         'Estableciendo conexión segura...',
         'Verificando credenciales...',
         'Cargando datos del usuario...',
+        'Configurando tu sesión...',
         'Preparando la interfaz...',
         'Casi listo...'
     ];
@@ -79,12 +80,15 @@ $(document).ready(function() {
         let paginaDestino = 'dashboard.html'; // Por defecto
         
         // Mapear destinos específicos
-        if (destino === 'login.html') {
-            paginaDestino = 'login.html';
-        } else if (destino === 'registro.html') {
-            paginaDestino = 'registro.html';
-        } else if (destino === 'dashboard.html') {
+        if (destino === 'dashboard') {
             paginaDestino = 'dashboard.html';
+        } else if (destino === 'admin-dashboard') {
+            paginaDestino = 'admin-dashboard.html';
+        } else if (destino === 'login') {
+            paginaDestino = 'login.html';
+        } else if (destino) {
+            // Si hay un destino específico, usarlo
+            paginaDestino = destino.endsWith('.html') ? destino : destino + '.html';
         }
         
         // Agregar efecto de salida

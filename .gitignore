@@ -6,6 +6,12 @@ node_modules/
 .env.local
 .env.*.local
 
+# Encrypted environment files (incluir en producción)
+# .env.encrypted
+
+# Environment templates (incluir en repositorio)
+# .env.example
+
 # Logs
 logs
 *.log

@@ -3,10 +3,13 @@ import session from 'express-session';
 import path from 'path';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
+import { setupEnv } from './src/utils/envLoader.js';
 import authRoutes from './src/routes/authRoutes.js';
 import pageRoutes from './src/routes/pageRoutes.js';
 import pool from './src/config/db.js';
 
+// Configurar variables de entorno (soporta archivos cifrados)
+setupEnv();
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -27,10 +30,11 @@ app.use(
   })
 );
 
-// Servir estáticos (no rompe tu CSS/JS)
-app.use('/css', express.static(path.join(__dirname, 'css')));
-app.use('/js', express.static(path.join(__dirname, 'js')));
-app.use('/img', express.static(path.join(__dirname, 'img')));
+// Servir estáticos desde la carpeta public
+app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
+app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
+app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
+app.use('/components', express.static(path.join(__dirname, 'public', 'components')));
 
 // Rutas
 app.use('/auth', authRoutes);
@@ -38,7 +42,7 @@ app.use('/', pageRoutes);
 
 // Fallback 404 con archivo estático si existe
 app.use((req, res) => {
-  res.status(404).sendFile(path.join(__dirname, 'index.html'));
+  res.status(404).sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 app.listen(PORT, async () => {
