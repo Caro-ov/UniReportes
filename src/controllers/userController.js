@@ -99,10 +99,10 @@ export async function createUser(req, res) {
             });
         }
 
-        const { nombre, correo, codigo_estudiante, contrasena, rol } = req.body;
+        const { nombre, correo, codigo, contrasena, rol } = req.body;
 
         // Validar campos requeridos
-        if (!nombre || !correo || !codigo_estudiante || !contrasena) {
+        if (!nombre || !correo || !codigo || !contrasena) {
             return res.status(400).json({
                 success: false,
                 message: 'Todos los campos son requeridos'
@@ -135,18 +135,18 @@ export async function createUser(req, res) {
             });
         }
 
-        // Verificar si el código de estudiante ya existe
-        const codeExists = await userModel.studentCodeExists(codigo_estudiante);
+        // Verificar si el código ya existe
+        const codeExists = await userModel.studentCodeExists(codigo);
         if (codeExists) {
             return res.status(400).json({
                 success: false,
-                message: 'Ya existe un usuario con ese código de estudiante'
+                message: 'Ya existe un usuario con ese código'
             });
         }
 
         // Validar rol
-        const validRoles = ['usuario', 'admin', 'monitor'];
-        const userRole_new = rol && validRoles.includes(rol) ? rol : 'usuario';
+        const validRoles = ['monitor', 'admin'];
+        const userRole_new = rol && validRoles.includes(rol) ? rol : 'monitor';
 
         // Cifrar contraseña
         const contrasenaHash = await bcrypt.hash(contrasena, 10);
@@ -154,7 +154,7 @@ export async function createUser(req, res) {
         const userData = {
             nombre: nombre.trim(),
             correo: correo.trim().toLowerCase(),
-            codigo_estudiante: codigo_estudiante.trim(),
+            codigo: codigo.trim(),
             contrasenaHash,
             rol: userRole_new
         };
@@ -208,7 +208,7 @@ export async function updateUser(req, res) {
             });
         }
 
-        const { nombre, correo, codigo_estudiante, contrasena, rol } = req.body;
+        const { nombre, correo, codigo, contrasena, rol } = req.body;
         const updateData = {};
 
         if (nombre) updateData.nombre = nombre.trim();
@@ -234,17 +234,17 @@ export async function updateUser(req, res) {
             updateData.correo = correo.trim().toLowerCase();
         }
 
-        if (codigo_estudiante) {
+        if (codigo) {
             // Verificar si el código ya existe (excluyendo el usuario actual)
-            const codeExists = await userModel.studentCodeExists(codigo_estudiante, userId);
+            const codeExists = await userModel.studentCodeExists(codigo, userId);
             if (codeExists) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Ya existe otro usuario con ese código de estudiante'
+                    message: 'Ya existe otro usuario con ese código'
                 });
             }
 
-            updateData.codigo_estudiante = codigo_estudiante.trim();
+            updateData.codigo = codigo.trim();
         }
 
         if (contrasena) {

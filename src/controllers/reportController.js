@@ -114,7 +114,7 @@ export async function createReport(req, res) {
             });
         }
 
-        const { titulo, descripcion, ubicacion, categoria_id, prioridad } = req.body;
+        const { titulo, descripcion, ubicacion, id_categoria } = req.body;
 
         // Validar campos requeridos
         if (!titulo || !descripcion || !ubicacion) {
@@ -125,8 +125,8 @@ export async function createReport(req, res) {
         }
 
         // Validar que la categoría existe si se proporciona
-        if (categoria_id) {
-            const category = await categoryModel.getCategoryById(categoria_id);
+        if (id_categoria) {
+            const category = await categoryModel.getCategoryById(id_categoria);
             if (!category) {
                 return res.status(400).json({
                     success: false,
@@ -139,9 +139,8 @@ export async function createReport(req, res) {
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
             ubicacion: ubicacion.trim(),
-            categoria_id: categoria_id || null,
-            usuario_id: userId,
-            prioridad: prioridad || 'media'
+            id_categoria: id_categoria || null,
+            id_usuario: userId
         };
 
         const reportId = await reportModel.createReport(reportData);
@@ -186,22 +185,21 @@ export async function updateReport(req, res) {
         }
 
         // Verificar permisos: solo el propietario o admin pueden actualizar
-        if (existingReport.usuario_id !== userId && userRole !== 'admin') {
+        if (existingReport.id_usuario !== userId && userRole !== 'admin') {
             return res.status(403).json({
                 success: false,
                 message: 'No tienes permisos para actualizar este reporte'
             });
         }
 
-        const { titulo, descripcion, ubicacion, categoria_id, prioridad, estado } = req.body;
+        const { titulo, descripcion, ubicacion, id_categoria, estado } = req.body;
         const updateData = {};
 
         // Solo permitir ciertos campos según el rol
         if (titulo) updateData.titulo = titulo.trim();
         if (descripcion) updateData.descripcion = descripcion.trim();
         if (ubicacion) updateData.ubicacion = ubicacion.trim();
-        if (categoria_id) updateData.categoria_id = categoria_id;
-        if (prioridad) updateData.prioridad = prioridad;
+        if (id_categoria) updateData.id_categoria = id_categoria;
 
         // Solo admin puede cambiar estado
         if (estado && userRole === 'admin') {
@@ -309,7 +307,7 @@ export async function deleteReport(req, res) {
         }
 
         // Verificar permisos: solo el propietario o admin pueden eliminar
-        if (existingReport.usuario_id !== userId && userRole !== 'admin') {
+        if (existingReport.id_usuario !== userId && userRole !== 'admin') {
             return res.status(403).json({
                 success: false,
                 message: 'No tienes permisos para eliminar este reporte'
@@ -345,8 +343,7 @@ export async function searchReports(req, res) {
     try {
         const filters = {
             estado: req.query.estado,
-            categoria_id: req.query.categoria_id,
-            prioridad: req.query.prioridad,
+            id_categoria: req.query.id_categoria,
             fecha_desde: req.query.fecha_desde,
             fecha_hasta: req.query.fecha_hasta,
             buscar: req.query.q,
@@ -356,7 +353,7 @@ export async function searchReports(req, res) {
         // Si no es admin, solo mostrar reportes del usuario
         const userRole = req.session.user?.rol;
         if (userRole !== 'admin') {
-            filters.usuario_id = req.session.user?.id;
+            filters.id_usuario = req.session.user?.id;
         }
 
         const reports = await reportModel.getReportsFiltered(filters);

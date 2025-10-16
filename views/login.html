@@ -33,7 +33,6 @@
                         <h1 class="titulo-logo">Unireportes</h1>
                     </div>
                     <h2 class="titulo-login">Iniciar Sesión</h2>
-                    <p class="subtitulo-login">o <a class="enlace-registro" href="#">crea una cuenta nueva</a></p>
                 </div>
 
                 <div class="contenedor-form">
@@ -44,7 +43,18 @@
                             <label class="etiqueta-campo" for="student-id">Código</label>
                             <div class="campo-con-icono">
                                 <span class="material-symbols-outlined icono-campo">badge</span>
-                                <input class="input-campo" id="student-id" name="student-id" placeholder="202412345" required type="text"/>
+                                <input 
+                                    class="input-campo" 
+                                    id="student-id" 
+                                    name="student-id" 
+                                    placeholder="2024123456" 
+                                    required 
+                                    type="text"
+                                    maxlength="10"
+                                    pattern="[0-9]{10}"
+                                    title="El código debe tener exactamente 10 dígitos"
+                                    autocomplete="off"
+                                />
                             </div>
                         </div>
 

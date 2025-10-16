@@ -8,15 +8,15 @@ export async function createReport(reportData) {
         titulo,
         descripcion,
         ubicacion,
-        categoria_id,
-        usuario_id,
-        prioridad = 'media'
+        id_categoria,
+        id_usuario,
+        id_objeto = null
     } = reportData;
 
     const [result] = await pool.execute(
-        `INSERT INTO reportes (titulo, descripcion, ubicacion, categoria_id, usuario_id, prioridad) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [titulo, descripcion, ubicacion, categoria_id, usuario_id, prioridad]
+        `INSERT INTO reportes (titulo, descripcion, ubicacion, id_categoria, id_usuario, id_objeto, fecha_reporte) 
+         VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+        [titulo, descripcion, ubicacion, id_categoria, id_usuario, id_objeto]
     );
 
     return result.insertId;
@@ -31,11 +31,10 @@ export async function getAllReports(limit = 50, offset = 0) {
             r.*,
             u.nombre as usuario_nombre,
             u.correo as usuario_correo,
-            c.nombre as categoria_nombre,
-            c.color as categoria_color
+            c.nombre as categoria_nombre
          FROM reportes r
-         LEFT JOIN usuarios u ON r.usuario_id = u.id_usuario
-         LEFT JOIN categorias c ON r.categoria_id = c.id_categoria
+         LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
+         LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
          ORDER BY r.fecha_creacion DESC
          LIMIT ? OFFSET ?`,
         [limit, offset]
@@ -51,12 +50,11 @@ export async function getReportsByUser(userId, limit = 50, offset = 0) {
         `SELECT 
             r.*,
             u.nombre as usuario_nombre,
-            c.nombre as categoria_nombre,
-            c.color as categoria_color
+            c.nombre as categoria_nombre
          FROM reportes r
-         LEFT JOIN usuarios u ON r.usuario_id = u.id_usuario
-         LEFT JOIN categorias c ON r.categoria_id = c.id_categoria
-         WHERE r.usuario_id = ?
+         LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
+         LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
+         WHERE r.id_usuario = ?
          ORDER BY r.fecha_creacion DESC
          LIMIT ? OFFSET ?`,
         [userId, limit, offset]
@@ -74,11 +72,10 @@ export async function getReportById(reportId) {
             u.nombre as usuario_nombre,
             u.correo as usuario_correo,
             c.nombre as categoria_nombre,
-            c.color as categoria_color,
             c.descripcion as categoria_descripcion
          FROM reportes r
-         LEFT JOIN usuarios u ON r.usuario_id = u.id_usuario
-         LEFT JOIN categorias c ON r.categoria_id = c.id_categoria
+         LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
+         LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
          WHERE r.id_reporte = ?`,
         [reportId]
     );
@@ -90,7 +87,7 @@ export async function getReportById(reportId) {
  */
 export async function updateReportStatus(reportId, newStatus) {
     const [result] = await pool.execute(
-        'UPDATE reportes SET estado = ?, fecha_actualizacion = CURRENT_TIMESTAMP WHERE id_reporte = ?',
+        'UPDATE reportes SET estado = ? WHERE id_reporte = ?',
         [newStatus, reportId]
     );
     return result.affectedRows > 0;
@@ -115,7 +112,6 @@ export async function updateReport(reportId, updateData) {
         return false;
     }
 
-    fields.push('fecha_actualizacion = CURRENT_TIMESTAMP');
     values.push(reportId);
 
     const [result] = await pool.execute(
@@ -145,11 +141,10 @@ export async function getReportsFiltered(filters = {}) {
         SELECT 
             r.*,
             u.nombre as usuario_nombre,
-            c.nombre as categoria_nombre,
-            c.color as categoria_color
+            c.nombre as categoria_nombre
         FROM reportes r
-        LEFT JOIN usuarios u ON r.usuario_id = u.id_usuario
-        LEFT JOIN categorias c ON r.categoria_id = c.id_categoria
+        LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
+        LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
         WHERE 1=1
     `;
     
@@ -160,14 +155,9 @@ export async function getReportsFiltered(filters = {}) {
         values.push(filters.estado);
     }
 
-    if (filters.categoria_id) {
-        query += ' AND r.categoria_id = ?';
-        values.push(filters.categoria_id);
-    }
-
-    if (filters.prioridad) {
-        query += ' AND r.prioridad = ?';
-        values.push(filters.prioridad);
+    if (filters.id_categoria) {
+        query += ' AND r.id_categoria = ?';
+        values.push(filters.id_categoria);
     }
 
     if (filters.fecha_desde) {
@@ -208,7 +198,6 @@ export async function getReportsStats() {
             SUM(CASE WHEN estado = 'en_proceso' THEN 1 ELSE 0 END) as en_proceso,
             SUM(CASE WHEN estado = 'resuelto' THEN 1 ELSE 0 END) as resueltos,
             SUM(CASE WHEN estado = 'cerrado' THEN 1 ELSE 0 END) as cerrados,
-            SUM(CASE WHEN prioridad = 'alta' THEN 1 ELSE 0 END) as alta_prioridad,
             SUM(CASE WHEN DATE(fecha_creacion) = CURDATE() THEN 1 ELSE 0 END) as hoy,
             SUM(CASE WHEN WEEK(fecha_creacion, 1) = WEEK(CURDATE(), 1) THEN 1 ELSE 0 END) as esta_semana
         FROM reportes
