@@ -42,10 +42,10 @@ export async function postLogin(req, res) {
       rol: user.rol,
     };
 
-    // Redireccionar directamente al dashboard según el rol del usuario
-    const destino = user.rol === 'admin' ? '/admin-dashboard.html' : '/dashboard.html';
+    // Redireccionar a pantalla de carga para transición login -> dashboard
+    const destino = user.rol === 'admin' ? 'admin-dashboard' : 'dashboard';
     
-    return res.redirect(destino);
+    return res.redirect(`/pantalla-carga.html?destino=${destino}`);
   } catch (err) {
     console.error('Error en login:', err);
     return res.redirect('/login.html?error=server');

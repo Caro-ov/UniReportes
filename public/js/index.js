@@ -64,8 +64,8 @@ $(document).ready(function() {
     $('.boton-secundario').on('click', function(e) {
         e.preventDefault();
         
-        // Redireccionar a pantalla de carga con destino login
-        window.location.href = 'pantalla-carga.html?destino=login.html';
+        // Redireccionar directamente a login
+        window.location.href = 'login.html';
     });
     
     // Botón "Registrarse"
@@ -84,8 +84,8 @@ $(document).ready(function() {
             return;
         }
         
-        // Para el botón de registro del header
-        window.location.href = 'pantalla-carga.html?destino=registro.html';
+        // Para el botón de registro del header - redirigir al login por ahora
+        window.location.href = 'login.html';
     });
     
     // ===========================

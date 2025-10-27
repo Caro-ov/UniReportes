@@ -20,7 +20,7 @@ router.get('/login.html', (req, res) => {
 
 // Páginas protegidas (requieren sesión)
 const protectedPages = [
-  // 'pantalla-carga.html', // DESHABILITADO - Causaba interferencias
+  'pantalla-carga.html', // Solo para transición login -> dashboard
   'dashboard.html',
   'perfil.html',
   'crear-reporte.html',
