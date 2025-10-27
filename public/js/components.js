@@ -1,9 +1,26 @@
-// Sistema de carga de componentes reutilizables
+// PRECARGA INMEDIATA DE CSS (antes de document ready)
+(function() {
+    const pageCSS = document.body.getAttribute('data-css');
+    if (pageCSS) {
+        const existingLink = document.querySelector('link[href="css/' + pageCSS + '.css"]');
+        if (!existingLink) {
+            console.log('Precargando CSS específico:', pageCSS);
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'css/' + pageCSS + '.css';
+            document.head.appendChild(link);
+        }
+    }
+})();
+
+// Sistema de carga de componentes reutilizables (OPTIMIZADO)
 $(document).ready(function() {
+    console.log('Componentes iniciando...');
+    
     // Verificar sesión al cargar cualquier página protegida
     verifySession();
     
-    // Función para cargar componentes HTML
+    // Función para cargar componentes HTML únicamente
     function loadComponent(selector, path, callback) {
         $.get(path)
             .done(function(data) {
@@ -15,26 +32,8 @@ $(document).ready(function() {
             });
     }
 
-    // Cargar head común primero
-    if ($('#head-container').length) {
-        loadComponent('#head-container', 'components/head-common.html', function() {
-            // Agregar título específico de la página
-            const pageTitle = $('body').data('title') || 'UniReportes';
-            $('title').text(pageTitle);
-            
-            // Agregar CSS específico de la página si existe
-            const pageCSS = $('body').data('css');
-            if (pageCSS) {
-                console.log('Cargando CSS específico:', pageCSS);
-                $('head').append('<link rel="stylesheet" href="css/' + pageCSS + '.css"/>');
-            }
-            
-            // Cargar components.css al final para que tenga prioridad
-            console.log('Cargando components.css');
-            $('head').append('<link rel="stylesheet" href="css/components.css"/>');
-        });
-    }
-
+    // NO cargar head común - ya está estático en cada página
+    
     // Cargar sidebar
     if ($('#sidebar-container').length) {
         // Consultar el rol del usuario desde el servidor

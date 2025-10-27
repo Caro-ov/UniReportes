@@ -1,18 +1,28 @@
 /**
- * Controlador para manejar la pantalla de carga
+ * Controlador para manejar EXCLUSIVAMENTE la pantalla de carga del login
+ * Este controlador NO debe interferir con otras partes del sistema
  */
 
 /**
- * Simular tiempo de carga (API)
+ * Simular tiempo de carga SOLO para pantalla de carga (API)
  */
 export async function simulateLoading(req, res) {
     try {
+        // Verificar que la petición viene del contexto correcto
+        const referer = req.get('Referer') || '';
+        if (!referer.includes('pantalla-carga.html') && !referer.includes('login.html')) {
+            return res.status(403).json({
+                success: false,
+                message: 'Endpoint solo disponible para pantalla de carga'
+            });
+        }
+
         const duration = parseInt(req.query.duration) || 2000; // 2 segundos por defecto
-        const maxDuration = 10000; // Máximo 10 segundos
+        const maxDuration = 5000; // Máximo 5 segundos para no interferir
         
         const loadingTime = Math.min(duration, maxDuration);
         
-        // Simular operaciones de carga
+        // Simular operaciones de carga mínimas
         await new Promise(resolve => setTimeout(resolve, loadingTime));
         
         res.json({
@@ -30,60 +40,59 @@ export async function simulateLoading(req, res) {
 }
 
 /**
- * Obtener estado de carga del sistema (API)
+ * Obtener estado de carga SOLO para pantalla de carga (API)
  */
 export async function getSystemStatus(req, res) {
     try {
-        // Verificar estado de componentes del sistema
+        // Verificar que la petición viene del contexto correcto
+        const referer = req.get('Referer') || '';
+        if (!referer.includes('pantalla-carga.html') && !referer.includes('login.html')) {
+            return res.status(403).json({
+                success: false,
+                message: 'Endpoint solo disponible para pantalla de carga'
+            });
+        }
+
+        // Estado básico para pantalla de carga únicamente
         const status = {
-            database: 'ok',
-            server: 'ok',
+            loading: 'ok',
             timestamp: new Date().toISOString()
         };
 
-        // Verificar conexión a base de datos
-        try {
-            const pool = (await import('../config/db.js')).default;
-            await pool.execute('SELECT 1');
-            status.database = 'ok';
-        } catch (dbError) {
-            status.database = 'error';
-            console.error('Error de base de datos:', dbError);
-        }
-
-        const allSystemsOk = Object.values(status).every(s => s === 'ok' || typeof s === 'string');
-
         res.json({
-            success: allSystemsOk,
+            success: true,
             data: status,
-            message: allSystemsOk ? 'Sistema funcionando correctamente' : 'Hay problemas en el sistema'
+            message: 'Sistema de carga funcionando'
         });
     } catch (error) {
-        console.error('Error al verificar estado del sistema:', error);
+        console.error('Error al verificar estado de carga:', error);
         res.status(500).json({
             success: false,
-            message: 'Error al verificar estado del sistema',
-            data: {
-                database: 'error',
-                server: 'error',
-                timestamp: new Date().toISOString()
-            }
+            message: 'Error al verificar estado de carga'
         });
     }
 }
 
 /**
- * Obtener progreso de inicialización (API)
+ * Obtener progreso de inicialización SOLO para pantalla de carga (API)
  */
 export async function getInitializationProgress(req, res) {
     try {
+        // Verificar que la petición viene del contexto correcto
+        const referer = req.get('Referer') || '';
+        if (!referer.includes('pantalla-carga.html') && !referer.includes('login.html')) {
+            return res.status(403).json({
+                success: false,
+                message: 'Endpoint solo disponible para pantalla de carga'
+            });
+        }
+
+        // Pasos simplificados solo para pantalla de carga
         const steps = [
-            { name: 'Estableciendo conexión segura', completed: true, duration: 500 },
+            { name: 'Estableciendo conexión', completed: true, duration: 500 },
             { name: 'Verificando credenciales', completed: true, duration: 800 },
-            { name: 'Cargando datos del usuario', completed: true, duration: 600 },
-            { name: 'Configurando sesión', completed: true, duration: 400 },
-            { name: 'Preparando interfaz', completed: true, duration: 700 },
-            { name: 'Finalizando', completed: true, duration: 200 }
+            { name: 'Cargando sesión', completed: true, duration: 600 },
+            { name: 'Preparando interfaz', completed: true, duration: 400 }
         ];
 
         const totalDuration = steps.reduce((sum, step) => sum + step.duration, 0);
@@ -100,10 +109,10 @@ export async function getInitializationProgress(req, res) {
             }
         });
     } catch (error) {
-        console.error('Error al obtener progreso:', error);
+        console.error('Error al obtener progreso de carga:', error);
         res.status(500).json({
             success: false,
-            message: 'Error al obtener progreso de inicialización'
+            message: 'Error al obtener progreso de carga'
         });
     }
 }

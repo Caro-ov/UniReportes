@@ -1,8 +1,33 @@
 $(document).ready(function() {
     
     // ===========================
-    // CONFIGURACIÓN INICIAL
+    // SISTEMA DE PANTALLA DE CARGA DESHABILITADO
     // ===========================
+    
+    console.log('Sistema de pantalla de carga deshabilitado para evitar interferencias');
+    
+    // Si por alguna razón se llega a esta página, redirigir inmediatamente
+    if (window.location.pathname.includes('pantalla-carga.html')) {
+        console.log('Redirigiendo desde pantalla de carga...');
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const destino = urlParams.get('destino');
+        
+        let paginaDestino = '/dashboard.html'; // Por defecto
+        
+        if (destino === 'admin-dashboard') {
+            paginaDestino = '/admin-dashboard.html';
+        } else if (destino === 'dashboard') {
+            paginaDestino = '/dashboard.html';
+        }
+        
+        // Redirección inmediata
+        window.location.replace(paginaDestino);
+        return;
+    }
+    
+    // El resto del código está deshabilitado
+    return;
     
     const DURACION_CARGA = 3000; // 3 segundos
     const MENSAJES_CARGA = [

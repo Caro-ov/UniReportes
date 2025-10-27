@@ -10,7 +10,7 @@ import reportRoutes from './src/routes/reportRoutes.js';
 import categoryRoutes from './src/routes/categoryRoutes.js';
 import userRoutes from './src/routes/userRoutes.js';
 import dashboardRoutes from './src/routes/dashboardRoutes.js';
-import loadingRoutes from './src/routes/loadingRoutes.js';
+// import loadingRoutes from './src/routes/loadingRoutes.js'; // DESHABILITADO
 import pool from './src/config/db.js';
 
 // Configurar variables de entorno (soporta archivos cifrados)
@@ -66,7 +66,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/loading', loadingRoutes);
+// app.use('/api/loading', loadingRoutes); // DESHABILITADO - Causaba interferencias
 
 // Rutas de páginas (deben ir al final)
 app.use('/', pageRoutes);

@@ -1,7 +1,38 @@
 <!DOCTYPE html>
 <html lang="es">
-<head id="head-container">
-    <!-- Head common será cargado aquí -->
+<head>
+    <!-- Head común -->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UniReportes - Crear Reporte</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- CSS - Cargado estáticamente para evitar retrasos -->
+    <link rel="stylesheet" href="css/components.css"/>
+    <link rel="stylesheet" href="css/crear-reporte.css"/>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Script de seguridad -->
+    <script>
+    if (window.location.pathname !== '/login.html' && 
+        window.location.pathname !== '/' && 
+        !window.location.pathname.includes('index.html')) {
+        if (sessionStorage.getItem('logout_flag')) {
+            sessionStorage.removeItem('logout_flag');
+            window.location.replace('/login.html');
+        }
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted || sessionStorage.getItem('logout_flag')) {
+                sessionStorage.removeItem('logout_flag');
+                window.location.replace('/login.html');
+            }
+        });
+    }
+    </script>
 </head>
 <body data-page="new-report" data-title="UniReportes - Crear Reporte" data-css="crear-reporte">
     <div class="contenedor-principal">
