@@ -27,6 +27,23 @@ const PORT = process.env.PORT || 3000;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Middleware de seguridad global
+app.use((req, res, next) => {
+  // Headers de seguridad para prevenir caché en páginas sensibles
+  if (req.path.includes('dashboard') || req.path.includes('perfil') || 
+      req.path.includes('crear-') || req.path.includes('mis-') ||
+      req.path.includes('admin-') || req.path.includes('explorar-')) {
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate, private',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'X-Frame-Options': 'DENY',
+      'X-Content-Type-Options': 'nosniff'
+    });
+  }
+  next();
+});
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'cambia-esto',

@@ -1,6 +1,22 @@
 export function requireAuth(req, res, next) {
+  // Configurar headers de seguridad para prevenir caché en páginas protegidas
+  res.set({
+    'Cache-Control': 'no-cache, no-store, must-revalidate, private',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+  });
+  
   if (req.session && req.session.user) return next();
-  // Redirige al login si no hay sesión
+  
+  // Para peticiones API, devolver JSON
+  if (req.path.startsWith('/api/')) {
+    return res.status(401).json({
+      success: false,
+      message: 'No autenticado'
+    });
+  }
+  
+  // Para páginas web, redirigir al login
   return res.redirect('/login.html');
 }
 

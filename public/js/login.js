@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Limpiar flag de logout cuando se llega a la página de login
+  sessionStorage.removeItem('logout_flag');
+  
   // Mostrar mensajes de error si vienen en la URL
   const params = new URLSearchParams(window.location.search);
   const err = params.get('error');

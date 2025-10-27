@@ -54,7 +54,28 @@ export async function postLogin(req, res) {
 }
 
 export function logout(req, res) {
-  req.session.destroy(() => {
-    res.redirect('/login.html');
+  // Destruir la sesión completamente
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error al destruir sesión:', err);
+      return res.status(500).json({ success: false, message: 'Error al cerrar sesión' });
+    }
+    
+    // Limpiar la cookie de sesión
+    res.clearCookie('connect.sid');
+    
+    // Configurar headers para prevenir caché
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
+    // Responder con JSON para manejar desde JavaScript
+    res.json({ 
+      success: true, 
+      message: 'Sesión cerrada correctamente',
+      redirect: '/login.html'
+    });
   });
 }
