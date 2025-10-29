@@ -84,7 +84,7 @@ app.listen(PORT, async () => {
   try {
     const [rows] = await pool.execute('SELECT 1 AS ok');
     console.log('✅ MySQL conectado correctamente');
-    console.log('🚀 Usuario demo: admin@uni.local / Admin123! / Código: 202412345');
+    console.log('🚀 Usuario demo: admin@uni.local / admin123 / Código: 2024000001');
   } catch (err) {
     console.error('❌ Error conectando a MySQL:', err.message);
     console.log('💡 Verifica que MySQL esté corriendo y las credenciales en .env sean correctas');

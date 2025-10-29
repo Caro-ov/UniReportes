@@ -1,0 +1,145 @@
+<!-- Contenido principal para Ver Usuarios (SPA) -->
+<div class="contenedor-contenido">
+    <!-- Encabezado de la página -->
+    <header class="encabezado-pagina">
+        <h2 class="titulo-pagina">Gestión de Usuarios</h2>
+        <p class="descripcion-pagina">
+            Visualiza y gestiona todos los usuarios registrados en el sistema.
+        </p>
+    </header>
+
+    <!-- Controles superiores -->
+    <section class="controles-superiores">
+        <div class="controles-izquierda">
+            <!-- Buscador -->
+            <div class="campo-busqueda">
+                <span class="material-symbols-outlined icono-busqueda">search</span>
+                <input type="text" id="buscar-usuarios" placeholder="Buscar usuarios por nombre, correo o código..." class="input-busqueda">
+            </div>
+            <!-- Filtros -->
+            <div class="filtros">
+                <select id="filtro-rol" class="select-filtro">
+                    <option value="">Todos los roles</option>
+                    <option value="admin">Administradores</option>
+                    <option value="monitor">Monitores</option>
+                </select>
+            </div>
+        </div>
+        <div class="controles-derecha">
+            <button class="boton-secundario" id="btn-exportar-usuarios">
+                <span class="material-symbols-outlined">download</span>
+                Exportar
+            </button>
+            <button class="boton-secundario" id="btn-refrescar">
+                <span class="material-symbols-outlined">refresh</span>
+                Refrescar
+            </button>
+            <button class="boton-principal" id="btn-nuevo-usuario">
+                <span class="material-symbols-outlined">person_add</span>
+                Nuevo Usuario
+            </button>
+        </div>
+    </section>
+
+    <!-- Estadísticas rápidas -->
+    <section class="estadisticas-rapidas">
+        <div class="tarjeta-estadistica">
+            <div class="contenido-estadistica">
+                <h4>Total Usuarios</h4>
+                <span class="numero-estadistica" id="total-usuarios">0</span>
+            </div>
+            <div class="icono-estadistica">
+                <span class="material-symbols-outlined">people</span>
+            </div>
+        </div>
+        <div class="tarjeta-estadistica">
+            <div class="contenido-estadistica">
+                <h4>Administradores</h4>
+                <span class="numero-estadistica" id="total-admins">0</span>
+            </div>
+            <div class="icono-estadistica">
+                <span class="material-symbols-outlined">admin_panel_settings</span>
+            </div>
+        </div>
+        <div class="tarjeta-estadistica">
+            <div class="contenido-estadistica">
+                <h4>Monitores</h4>
+                <span class="numero-estadistica" id="total-monitores">0</span>
+            </div>
+            <div class="icono-estadistica">
+                <span class="material-symbols-outlined">support_agent</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tabla de usuarios -->
+    <section class="seccion-tabla">
+        <div class="contenedor-tabla">
+            <div class="indicador-carga" id="indicador-carga">
+                <div class="spinner"></div>
+                <p>Cargando usuarios...</p>
+            </div>
+            
+            <table class="tabla-usuarios" id="tabla-usuarios">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Correo</th>
+                        <th>Código</th>
+                        <th>Rol</th>
+                        <th>Fecha de Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-usuarios">
+                    <!-- Los usuarios se cargarán aquí dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="paginacion" id="paginacion">
+            <button class="btn-paginacion" id="btn-anterior" disabled>
+                <span class="material-symbols-outlined">chevron_left</span>
+                Anterior
+            </button>
+            <span class="info-paginacion" id="info-paginacion">
+                Página 1 de 1
+            </span>
+            <button class="btn-paginacion" id="btn-siguiente" disabled>
+                Siguiente
+                <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+        </div>
+    </section>
+</div>
+
+<!-- Modal de confirmación para eliminar usuario -->
+<div class="modal-overlay" id="modal-eliminar" style="display: none;">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>
+                <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 0.5rem; color: #dc2626;">warning</span>
+                Confirmar Eliminación
+            </h3>
+            <button class="btn-cerrar-modal" id="btn-cerrar-eliminar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="modal-contenido">
+            <p>¿Estás seguro de que deseas eliminar este usuario?</p>
+            <p class="nombre-usuario-eliminar"></p>
+            <p class="texto-advertencia">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="boton-secundario" id="btn-cancelar-eliminar">
+                <span class="material-symbols-outlined">close</span>
+                Cancelar
+            </button>
+            <button class="boton-peligro" id="btn-confirmar-eliminar">
+                <span class="material-symbols-outlined">delete</span>
+                Eliminar Usuario
+            </button>
+        </div>
+    </div>
+</div>

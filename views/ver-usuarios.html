@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Head común -->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UniReportes - Ver Usuarios</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- CSS - Cargado estáticamente para evitar retrasos -->
+    <link rel="stylesheet" href="css/components.css"/>
+    <link rel="stylesheet" href="css/ver-usuarios.css"/>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Script de seguridad -->
+    <script>
+    if (window.location.pathname !== '/login.html' && 
+        window.location.pathname !== '/' && 
+        !window.location.pathname.includes('index.html')) {
+        if (sessionStorage.getItem('logout_flag')) {
+            sessionStorage.removeItem('logout_flag');
+            window.location.replace('/login.html');
+        }
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted || sessionStorage.getItem('logout_flag')) {
+                sessionStorage.removeItem('logout_flag');
+                window.location.replace('/login.html');
+            }
+        });
+    }
+    </script>
+</head>
+<body data-page="ver-usuarios" data-title="UniReportes - Ver Usuarios" data-css="ver-usuarios">
+    <div class="contenedor-principal">
+        <!-- Overlay para móvil -->
+        <div class="overlay"></div>
+        
+        <!-- Sidebar de navegación -->
+        <aside id="sidebar-container" class="sidebar">
+            <!-- Sidebar será cargado aquí -->
+        </aside>
+
+        <!-- Contenido wrapper -->
+        <div class="contenido-wrapper">
+            <!-- Header superior -->
+            <header id="header-container" class="header-principal">
+                <!-- Header será cargado aquí -->
+            </header>
+
+            <!-- Contenido principal -->
+            <main class="contenido-principal">
+                <div class="contenedor-contenido">
+                    <!-- Encabezado de la página -->
+                    <header class="encabezado-pagina">
+                        <h2 class="titulo-pagina">Gestión de Usuarios</h2>
+                        <p class="descripcion-pagina">
+                            Visualiza y gestiona todos los usuarios registrados en el sistema.
+                        </p>
+                    </header>
+
+                    <!-- Controles superiores -->
+                    <section class="controles-superiores">
+                        <div class="controles-izquierda">
+                            <!-- Buscador -->
+                            <div class="campo-busqueda">
+                                <span class="material-symbols-outlined icono-busqueda">search</span>
+                                <input type="text" id="buscar-usuarios" placeholder="Buscar usuarios por nombre, correo o código..." class="input-busqueda">
+                            </div>
+                            <!-- Filtros -->
+                            <div class="filtros">
+                                <select id="filtro-rol" class="select-filtro">
+                                    <option value="">Todos los roles</option>
+                                    <option value="admin">Administradores</option>
+                                    <option value="monitor">Monitores</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="controles-derecha">
+                            <button class="boton-secundario" id="btn-refrescar">
+                                <span class="material-symbols-outlined">refresh</span>
+                                Refrescar
+                            </button>
+                            <button class="boton-principal" id="btn-nuevo-usuario">
+                                <span class="material-symbols-outlined">person_add</span>
+                                Nuevo Usuario
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- Estadísticas rápidas -->
+                    <section class="estadisticas-rapidas">
+                        <div class="tarjeta-estadistica">
+                            <div class="contenido-estadistica">
+                                <h4>Total Usuarios</h4>
+                                <span class="numero-estadistica" id="total-usuarios">0</span>
+                            </div>
+                            <div class="icono-estadistica icono-azul">
+                                <span class="material-symbols-outlined">people</span>
+                            </div>
+                        </div>
+                        <div class="tarjeta-estadistica">
+                            <div class="contenido-estadistica">
+                                <h4>Administradores</h4>
+                                <span class="numero-estadistica" id="total-admins">0</span>
+                            </div>
+                            <div class="icono-estadistica icono-verde">
+                                <span class="material-symbols-outlined">admin_panel_settings</span>
+                            </div>
+                        </div>
+                        <div class="tarjeta-estadistica">
+                            <div class="contenido-estadistica">
+                                <h4>Monitores</h4>
+                                <span class="numero-estadistica" id="total-monitores">0</span>
+                            </div>
+                            <div class="icono-estadistica icono-amarillo">
+                                <span class="material-symbols-outlined">monitor_heart</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tabla de usuarios -->
+                    <section class="seccion-tabla">
+                        <div class="contenedor-tabla">
+                            <!-- Indicador de carga -->
+                            <div class="indicador-carga" id="loading-usuarios">
+                                <div class="spinner"></div>
+                                <p>Cargando usuarios...</p>
+                            </div>
+
+                            <!-- Tabla -->
+                            <table class="tabla-usuarios" id="tabla-usuarios" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Correo</th>
+                                        <th>Código</th>
+                                        <th>Rol</th>
+                                        <th>Fecha de Registro</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-usuarios">
+                                    <!-- Los usuarios se cargarán aquí dinámicamente -->
+                                </tbody>
+                            </table>
+
+                            <!-- Estado vacío -->
+                            <div class="estado-vacio" id="estado-vacio" style="display: none;">
+                                <span class="material-symbols-outlined icono-vacio">people_outline</span>
+                                <h3>No se encontraron usuarios</h3>
+                                <p>No hay usuarios que coincidan con los criterios de búsqueda.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Paginación -->
+                    <section class="paginacion" id="paginacion-usuarios" style="display: none;">
+                        <button class="btn-paginacion" id="btn-anterior" disabled>
+                            <span class="material-symbols-outlined">chevron_left</span>
+                            Anterior
+                        </button>
+                        <span class="info-paginacion" id="info-paginacion">Página 1 de 1</span>
+                        <button class="btn-paginacion" id="btn-siguiente" disabled>
+                            Siguiente
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </section>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Indicador de carga SPA -->
+        <div class="spa-loader"></div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar usuario -->
+    <div class="modal-overlay" id="modal-eliminar" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Confirmar Eliminación</h3>
+                <button class="btn-cerrar-modal" id="btn-cerrar-eliminar">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-contenido">
+                <p>¿Estás seguro de que deseas eliminar este usuario?</p>
+                <p class="nombre-usuario-eliminar"></p>
+                <p class="texto-advertencia">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="boton-secundario" id="btn-cancelar-eliminar">Cancelar</button>
+                <button class="boton-peligro" id="btn-confirmar-eliminar">Eliminar Usuario</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de componentes -->
+    <script src="js/components.js"></script>
+    <!-- Sistema de navegación SPA -->
+    <script src="js/spa-navigation.js"></script>
+    <!-- JavaScript personalizado -->
+    <script src="js/ver-usuarios.js"></script>
+</body>
+</html>

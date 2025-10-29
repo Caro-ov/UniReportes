@@ -20,7 +20,7 @@ export async function findUserById(userId) {
  * Buscar usuario por código de estudiante
  */
 export async function findUserByStudentCode(codigo) {
-  const [rows] = await pool.execute('SELECT * FROM usuarios WHERE codigo_estudiante = ? LIMIT 1', [codigo]);
+  const [rows] = await pool.execute('SELECT * FROM usuarios WHERE codigo = ? LIMIT 1', [codigo]);
   return rows[0] || null;
 }
 
@@ -29,7 +29,7 @@ export async function findUserByStudentCode(codigo) {
  */
 export async function createUser({ nombre, correo, codigo_estudiante, contrasenaHash, rol = 'usuario' }) {
   const [result] = await pool.execute(
-    'INSERT INTO usuarios (nombre, correo, codigo_estudiante, contrasena, rol) VALUES (?, ?, ?, ?, ?)',
+    'INSERT INTO usuarios (nombre, correo, codigo, contrasena, rol) VALUES (?, ?, ?, ?, ?)',
     [nombre, correo, codigo_estudiante, contrasenaHash, rol]
   );
   return result.insertId;
@@ -41,8 +41,8 @@ export async function createUser({ nombre, correo, codigo_estudiante, contrasena
 export async function getAllUsers(limit = 50, offset = 0) {
   const [rows] = await pool.execute(
     `SELECT 
-       id_usuario, nombre, correo, codigo_estudiante, rol, 
-       fecha_creacion, fecha_actualizacion
+       id_usuario, nombre, correo, codigo, rol, 
+       fecha_creacion
      FROM usuarios 
      ORDER BY fecha_creacion DESC 
      LIMIT ? OFFSET ?`,
@@ -115,8 +115,8 @@ export async function getUsersStats() {
 export async function getUsersFiltered(filters = {}) {
   let query = `
     SELECT 
-      id_usuario, nombre, correo, codigo_estudiante, rol, 
-      fecha_creacion, fecha_actualizacion
+      id_usuario, nombre, correo, codigo, rol, 
+      fecha_creacion
     FROM usuarios 
     WHERE 1=1
   `;
@@ -129,7 +129,7 @@ export async function getUsersFiltered(filters = {}) {
   }
 
   if (filters.buscar) {
-    query += ' AND (nombre LIKE ? OR correo LIKE ? OR codigo_estudiante LIKE ?)';
+    query += ' AND (nombre LIKE ? OR correo LIKE ? OR codigo LIKE ?)';
     const searchTerm = `%${filters.buscar}%`;
     values.push(searchTerm, searchTerm, searchTerm);
   }
@@ -165,7 +165,7 @@ export async function emailExists(email, excludeUserId = null) {
  * Verificar si un código de estudiante ya existe
  */
 export async function studentCodeExists(codigo, excludeUserId = null) {
-  let query = 'SELECT COUNT(*) as count FROM usuarios WHERE codigo_estudiante = ?';
+  let query = 'SELECT COUNT(*) as count FROM usuarios WHERE codigo = ?';
   const values = [codigo];
   
   if (excludeUserId) {

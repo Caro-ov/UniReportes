@@ -43,6 +43,12 @@ class SPANavigation {
                 css: 'admin-settings',
                 contentSelector: '.contenido-principal'
             },
+            'ver-usuarios': {
+                url: '/partials/ver-usuarios.html',
+                title: 'Ver Usuarios',
+                css: 'ver-usuarios',
+                contentSelector: '.contenido-principal'
+            },
             
             // Páginas de usuario
             'dashboard': {
@@ -100,6 +106,7 @@ class SPANavigation {
         if (path.includes('explorar-reportes.html')) return 'explorar-reportes';
         if (path.includes('crear-reporte.html')) return 'crear-reporte';
         if (path.includes('crear-usuario.html')) return 'crear-usuario';
+        if (path.includes('ver-usuarios.html')) return 'ver-usuarios';
         if (path.includes('admin-settings.html')) return 'admin-settings';
         if (path.includes('dashboard.html')) return 'dashboard';
         if (path.includes('mis-reportes.html')) return 'mis-reportes';
@@ -147,7 +154,7 @@ class SPANavigation {
             return;
         }
         
-        console.log('Navegando a:', page);
+        console.log('🧭 SPA: Navegando a página:', page);
         this.isLoading = true;
         
         try {
@@ -158,6 +165,8 @@ class SPANavigation {
             const content = await this.loadPageContent(page);
             
             if (content) {
+                console.log('📄 SPA: Contenido cargado para:', page);
+                
                 // Actualizar contenido principal
                 this.updateMainContent(content, config);
                 
@@ -173,6 +182,7 @@ class SPANavigation {
                 // Cargar CSS específico si es necesario
                 this.loadPageCSS(config.css);
                 
+                console.log('🎯 SPA: A punto de disparar evento para:', page);
                 // Disparar evento personalizado
                 this.triggerPageChangeEvent(page);
             }
@@ -200,10 +210,18 @@ class SPANavigation {
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             
             const html = await response.text();
+            
+            // Para archivos parciales (en /partials/), usar todo el contenido directamente
+            if (config.url.includes('/partials/')) {
+                console.log('📄 Cargando archivo partial:', page);
+                this.pageCache.set(page, html);
+                return html;
+            }
+            
+            // Para páginas completas, extraer el contenido principal
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             
-            // Extraer solo el contenido principal
             const mainContent = doc.querySelector(config.contentSelector);
             if (!mainContent) {
                 throw new Error('Contenido principal no encontrado');
@@ -224,6 +242,12 @@ class SPANavigation {
     
     updateMainContent(content, config) {
         const mainContainer = document.querySelector('.contenido-principal');
+        console.log('🎯 Actualizando contenido principal:', {
+            contenedor: mainContainer ? 'Encontrado' : 'NO ENCONTRADO',
+            contenidoLength: content.length,
+            config: config
+        });
+        
         if (mainContainer) {
             // Animación de salida
             $(mainContainer).fadeOut(150, () => {
@@ -233,12 +257,20 @@ class SPANavigation {
                 // Actualizar título del body
                 document.body.setAttribute('data-title', `UniReportes - ${config.title}`);
                 
+                console.log('✅ Contenido actualizado, elementos encontrados:', {
+                    'tabla-usuarios': $('#tabla-usuarios').length,
+                    'buscar-usuarios': $('#buscar-usuarios').length,
+                    'btn-refrescar': $('#btn-refrescar').length
+                });
+                
                 // Animación de entrada
                 $(mainContainer).fadeIn(200);
                 
                 // Scroll al top
                 mainContainer.scrollTop = 0;
             });
+        } else {
+            console.error('❌ No se encontró el contenedor .contenido-principal');
         }
     }
     
@@ -272,17 +304,30 @@ class SPANavigation {
     loadPageCSS(cssName) {
         const cssId = `css-${cssName}`;
         
-        // Verificar si ya está cargado
-        if (document.getElementById(cssId)) return;
+        console.log('🎨 Cargando CSS:', cssName, 'ID:', cssId);
         
-        // Crear enlace CSS
+        // Verificar si ya está cargado
+        if (document.getElementById(cssId)) {
+            console.log('✅ CSS ya estaba cargado:', cssName);
+            return;
+        }
+        
+        // Crear enlace CSS - Usar ruta ABSOLUTA para evitar problemas con rutas relativas
         const link = document.createElement('link');
         link.id = cssId;
         link.rel = 'stylesheet';
-        link.href = `css/${cssName}.css`;
+        link.href = `/css/${cssName}.css`; // Ruta absoluta con / al inicio
+        
+        console.log('📎 Agregando CSS al head:', link.href);
         
         // Agregar al head
         document.head.appendChild(link);
+        
+        // Verificar que se agregó
+        setTimeout(() => {
+            const added = document.getElementById(cssId);
+            console.log('🔍 CSS agregado correctamente:', added ? 'SÍ' : 'NO');
+        }, 100);
     }
     
     showLoadingIndicator() {
@@ -311,10 +356,12 @@ class SPANavigation {
     }
     
     triggerPageChangeEvent(page) {
+        console.log('🚀 SPA: Disparando evento spaPageChange para página:', page);
         const event = new CustomEvent('spaPageChange', {
             detail: { page, config: this.pageConfig[page] }
         });
         document.dispatchEvent(event);
+        console.log('✅ SPA: Evento spaPageChange disparado');
     }
     
     // Método público para navegación programática

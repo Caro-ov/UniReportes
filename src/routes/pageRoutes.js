@@ -40,13 +40,20 @@ const adminPages = [
   'admin-dashboard.html',
   'admin-settings.html',
   'crear-usuario.html',
-  'explorar-reportes.html'
+  'explorar-reportes.html',
+  'ver-usuarios.html'
 ];
 
 adminPages.forEach((file) => {
   router.get('/' + file, requireAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', file));
   });
+});
+
+// Ruta para archivos parciales del SPA
+router.get('/partials/:filename', requireAuth, (req, res) => {
+  const filename = req.params.filename;
+  res.sendFile(path.join(__dirname, 'views', 'partials', filename));
 });
 
 export default router;
