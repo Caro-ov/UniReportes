@@ -70,8 +70,8 @@
                             </button>
                         </div>
                         <div class="info-perfil">
-                            <h2 class="nombre-completo">Lucia Rodriguez</h2>
-                            <p class="rol">Administradora</p>
+                            <h2 class="nombre-completo nombre-usuario">Lucia Rodriguez</h2>
+                            <p class="rol rol-usuario">Administradora</p>
                             <p class="institucion">Universidad Nacional de Colombia</p>
                         </div>
                     </div>
@@ -123,19 +123,23 @@
                             <div class="tabla-informacion">
                                 <div class="fila-informacion">
                                     <span class="etiqueta">Nombre</span>
-                                    <span class="valor">Lucia Rodriguez</span>
+                                    <span class="valor nombre-usuario">Lucia Rodriguez</span>
                                 </div>
                                 <div class="fila-informacion">
                                     <span class="etiqueta">Rol</span>
-                                    <span class="valor">Administradora</span>
+                                    <span class="valor rol-usuario">Administradora</span>
                                 </div>
                                 <div class="fila-informacion">
                                     <span class="etiqueta">Correo</span>
-                                    <span class="valor">lucia.rodriguez@unal.edu.co</span>
+                                    <span class="valor correo-usuario">lucia.rodriguez@unal.edu.co</span>
                                 </div>
                                 <div class="fila-informacion">
-                                    <span class="etiqueta">Idioma</span>
-                                    <span class="valor">Español</span>
+                                    <span class="etiqueta">Código</span>
+                                    <span class="valor codigo-estudiante">2024000001</span>
+                                </div>
+                                <div class="fila-informacion">
+                                    <span class="etiqueta">Fecha de registro</span>
+                                    <span class="valor fecha-registro">1 de enero de 2024</span>
                                 </div>
                             </div>
                             
@@ -179,12 +183,17 @@
                 </div>
             </main>
         </div>
+        
+        <!-- Indicador de carga SPA -->
+        <div class="spa-loader"></div>
     </div>
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Sistema de componentes -->
     <script src="js/components.js"></script>
+    <!-- Sistema de navegación SPA -->
+    <script src="js/spa-navigation.js"></script>
     <!-- JavaScript personalizado -->
     <script src="js/perfil.js"></script>
 </body>

@@ -45,6 +45,8 @@ export async function postLogin(req, res) {
     // Redireccionar a pantalla de carga para transición login -> dashboard
     const destino = user.rol === 'admin' ? 'admin-dashboard' : 'dashboard';
     
+    console.log('Login exitoso - Usuario:', user.nombre, 'Rol:', user.rol, 'Destino:', destino);
+    
     return res.redirect(`/pantalla-carga.html?destino=${destino}`);
   } catch (err) {
     console.error('Error en login:', err);

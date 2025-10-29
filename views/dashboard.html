@@ -34,7 +34,7 @@
     }
     </script>
 </head>
-<body data-page="home" data-title="UniReportes - Dashboard" data-css="dashboard">
+<body data-page="dashboard" data-title="UniReportes - Dashboard" data-css="dashboard">
     <div class="contenedor-principal">
         <!-- Overlay para móvil -->
         <div class="overlay"></div>
@@ -68,7 +68,7 @@
                     
                     <div class="grid-opciones">
                         <!-- Opción 1: Explorar reportes -->
-                        <div class="tarjeta-opcion">
+                        <div class="tarjeta-opcion" data-spa-nav="mis-reportes">
                             <span class="material-symbols-outlined icono-opcion">visibility</span>
                             <div class="contenido-opcion">
                                 <h4 class="titulo-opcion">Explorar reportes</h4>
@@ -77,7 +77,7 @@
                         </div>
                         
                         <!-- Opción 2: Crear nuevo reporte -->
-                        <div class="tarjeta-opcion">
+                        <div class="tarjeta-opcion" data-spa-nav="crear-reporte">
                             <span class="material-symbols-outlined icono-opcion">edit_document</span>
                             <div class="contenido-opcion">
                                 <h4 class="titulo-opcion">Crear un nuevo reporte</h4>
@@ -89,12 +89,15 @@
             </div>
         </main>
         </div>
+        
+        <!-- Indicador de carga SPA -->
+        <div class="spa-loader"></div>
     </div>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Sistema de componentes -->
     <script src="js/components.js"></script>
+    <!-- Sistema de navegación SPA -->
+    <script src="js/spa-navigation.js"></script>
     <!-- JavaScript personalizado -->
     <script src="js/dashboard.js"></script>
 </body>

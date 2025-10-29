@@ -10,8 +10,49 @@ $(document).ready(function() {
     // INTERACCIONES DEL PANEL
     // ===========================
     
-    // Manejar clicks en las tarjetas de opciones
-    $('.tarjeta-opcion').on('click', function() {
+    // Manejar clicks en las tarjetas de opciones con navegación SPA
+    $('.tarjeta-opcion[data-spa-nav]').on('click', function() {
+        const $tarjeta = $(this);
+        const destino = $tarjeta.data('spa-nav');
+        const titulo = $tarjeta.find('.titulo-opcion').text().trim();
+        
+        // Efecto visual
+        $tarjeta.addClass('seleccionada');
+        setTimeout(() => $tarjeta.removeClass('seleccionada'), 200);
+        
+        console.log('Admin navegando a:', destino);
+        
+        // Mostrar toast según el destino
+        let mensaje = '';
+        switch(destino) {
+            case 'explorar-reportes':
+                mensaje = 'Redirigiendo a la gestión de reportes...';
+                break;
+            case 'crear-reporte':
+                mensaje = 'Redirigiendo al formulario de reportes...';
+                break;
+            case 'crear-usuario':
+                mensaje = 'Redirigiendo al formulario de usuarios...';
+                break;
+            default:
+                mensaje = 'Redirigiendo...';
+        }
+        
+        mostrarToast(mensaje, 'info');
+        
+        // Usar navegación SPA
+        setTimeout(() => {
+            if (window.spaNav) {
+                window.spaNav.navigateTo(destino);
+            } else {
+                // Fallback a navegación tradicional
+                window.location.href = destino + '.html';
+            }
+        }, 1000);
+    });
+    
+    // Manejar clicks en las tarjetas de opciones SIN data-spa-nav (para compatibilidad hacia atrás)
+    $('.tarjeta-opcion:not([data-spa-nav])').on('click', function() {
         const $tarjeta = $(this);
         const titulo = $tarjeta.find('.titulo-opcion').text().trim();
         
@@ -24,21 +65,33 @@ $(document).ready(function() {
             case 'Explorar reportes':
                 mostrarToast('Redirigiendo a la gestión de reportes...', 'info');
                 setTimeout(() => {
-                    window.location.href = 'mis-reportes.html';
+                    if (window.spaNav) {
+                        window.spaNav.navigateTo('explorar-reportes');
+                    } else {
+                        window.location.href = 'mis-reportes.html';
+                    }
                 }, 1000);
                 break;
                 
             case 'Crear un nuevo reporte':
                 mostrarToast('Redirigiendo al formulario de reportes...', 'info');
                 setTimeout(() => {
-                    window.location.href = 'crear-reporte.html';
+                    if (window.spaNav) {
+                        window.spaNav.navigateTo('crear-reporte');
+                    } else {
+                        window.location.href = 'crear-reporte.html';
+                    }
                 }, 1000);
                 break;
                 
             case 'Crear nuevo usuario':
                 mostrarToast('Redirigiendo al formulario de usuarios...', 'admin');
                 setTimeout(() => {
-                    window.location.href = 'crear-usuario.html';
+                    if (window.spaNav) {
+                        window.spaNav.navigateTo('crear-usuario');
+                    } else {
+                        window.location.href = 'crear-usuario.html';
+                    }
                 }, 1000);
                 break;
         }
@@ -159,15 +212,27 @@ $(document).ready(function() {
 
 // Función para navegar a crear usuario
 function crearUsuario() {
-    window.location.href = 'crear-usuario.html';
+    if (window.spaNav) {
+        window.spaNav.navigateTo('crear-usuario');
+    } else {
+        window.location.href = 'crear-usuario.html';
+    }
 }
 
 // Función para navegar a gestión de reportes
 function gestionarReportes() {
-    window.location.href = 'mis-reportes.html';
+    if (window.spaNav) {
+        window.spaNav.navigateTo('explorar-reportes');
+    } else {
+        window.location.href = 'mis-reportes.html';
+    }
 }
 
 // Función para crear nuevo reporte
 function crearReporte() {
-    window.location.href = 'crear-reporte.html';
+    if (window.spaNav) {
+        window.spaNav.navigateTo('crear-reporte');
+    } else {
+        window.location.href = 'crear-reporte.html';
+    }
 }

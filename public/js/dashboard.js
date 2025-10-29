@@ -31,49 +31,8 @@ $(document).ready(function() {
     // NAVEGACIÓN SIDEBAR
     // ===========================
     
-    // Manejar navegación en sidebar
-    $('.nav-item').on('click', function(e) {
-        e.preventDefault();
-        
-        const $item = $(this);
-        const texto = $item.find('.nav-text').text().trim();
-        
-        // Remover clase activa de todos los elementos
-        $('.nav-item').removeClass('active');
-        
-        // Agregar clase activa al elemento clickeado
-        $item.addClass('active');
-        
-        // Determinar a dónde redireccionar basado en el texto
-        let destino = '';
-        
-        switch(texto) {
-            case 'Inicio':
-                destino = 'dashboard.html';
-                break;
-            case 'Mis reportes':
-                destino = 'mis-reportes.html';
-                break;
-            case 'Nuevo reporte':
-                destino = 'crear-reporte.html';
-                break;
-            case 'Ayuda':
-                destino = 'ayuda.html';
-                break;
-            default:
-                destino = 'dashboard.html';
-        }
-        
-        // Si es la misma página, no redirigir
-        if (destino === 'dashboard.html') {
-            return;
-        }
-        
-        // Agregar pequeño delay para mostrar el estado activo
-        setTimeout(function() {
-            window.location.href = destino;
-        }, 150);
-    });
+    // La navegación del sidebar ahora es manejada por el sistema SPA
+    // No necesitamos manejar navegación aquí ya que spa-navigation.js se encarga
     
     // ===========================
     // BOTONES DE ACCIÓN PRINCIPAL
@@ -87,9 +46,13 @@ $(document).ready(function() {
         const $boton = $(this);
         $boton.addClass('presionado');
         
-        // Redireccionar a crear reporte directamente
+        // Usar navegación SPA en lugar de redirección directa
         setTimeout(function() {
-            window.location.href = 'crear-reporte.html';
+            if (window.spaNav) {
+                window.spaNav.navigateTo('crear-reporte');
+            } else {
+                window.location.href = 'crear-reporte.html';
+            }
         }, 200);
     });
     
@@ -97,8 +60,58 @@ $(document).ready(function() {
     // TARJETAS DE OPCIONES
     // ===========================
     
-    // Manejar clic en tarjetas de opciones
-    $('.tarjeta-opcion').on('click', function(e) {
+    // Manejar clic en tarjetas de opciones con navegación SPA
+    $('.tarjeta-opcion[data-spa-nav]').on('click', function(e) {
+        e.preventDefault();
+        
+        const $tarjeta = $(this);
+        const destino = $tarjeta.data('spa-nav');
+        const titulo = $tarjeta.find('.titulo-opcion').text().trim();
+        
+        // Efecto visual
+        $tarjeta.addClass('seleccionada');
+        setTimeout(() => $tarjeta.removeClass('seleccionada'), 200);
+        
+        console.log('Navegando a:', destino);
+        
+        // Usar navegación SPA
+        setTimeout(() => {
+            if (window.spaNav) {
+                window.spaNav.navigateTo(destino);
+            } else {
+                // Fallback a navegación tradicional
+                window.location.href = destino + '.html';
+            }
+        }, 300);
+    });
+    
+    // Manejar clic en tarjetas de opciones con navegación SPA
+    $('.tarjeta-opcion[data-spa-nav]').on('click', function(e) {
+        e.preventDefault();
+        
+        const $tarjeta = $(this);
+        const destino = $tarjeta.data('spa-nav');
+        const titulo = $tarjeta.find('.titulo-opcion').text().trim();
+        
+        // Efecto visual
+        $tarjeta.addClass('seleccionada');
+        setTimeout(() => $tarjeta.removeClass('seleccionada'), 200);
+        
+        console.log('Navegando a:', destino);
+        
+        // Usar navegación SPA
+        setTimeout(() => {
+            if (window.spaNav) {
+                window.spaNav.navigateTo(destino);
+            } else {
+                // Fallback a navegación tradicional
+                window.location.href = destino + '.html';
+            }
+        }, 300);
+    });
+    
+    // Manejar clic en tarjetas de opciones SIN data-spa-nav (para compatibilidad hacia atrás)
+    $('.tarjeta-opcion:not([data-spa-nav])').on('click', function(e) {
         e.preventDefault();
         
         const $tarjeta = $(this);
@@ -110,14 +123,18 @@ $(document).ready(function() {
         let destino = '';
         
         if (titulo.includes('Explorar reportes') || titulo.includes('reportes')) {
-            destino = 'mis-reportes.html';
+            destino = 'mis-reportes';
         } else if (titulo.includes('Crear') || titulo.includes('nuevo reporte')) {
-            destino = 'crear-reporte.html';
+            destino = 'crear-reporte';
         }
         
         if (destino) {
             setTimeout(function() {
-                window.location.href = destino;
+                if (window.spaNav) {
+                    window.spaNav.navigateTo(destino);
+                } else {
+                    window.location.href = destino + '.html';
+                }
             }, 300);
         }
     });
@@ -178,7 +195,7 @@ $(document).ready(function() {
                     </div>
                 </div>
                 <div class="footer-panel">
-                    <a href="mis-reportes.html" class="ver-todos">Ver todos los reportes</a>
+                    <a href="#" class="ver-todos" data-spa-nav="mis-reportes">Ver todos los reportes</a>
                 </div>
             </div>
         `);
@@ -193,6 +210,20 @@ $(document).ready(function() {
         
         // Cerrar panel
         $panel.find('.cerrar-panel').on('click', function() {
+            $panel.removeClass('mostrar');
+            setTimeout(function() {
+                $panel.remove();
+            }, 300);
+        });
+        
+        // Manejar navegación SPA en enlaces del panel
+        $panel.find('[data-spa-nav]').on('click', function(e) {
+            e.preventDefault();
+            const page = $(this).data('spa-nav');
+            if (window.spaNav) {
+                window.spaNav.navigateTo(page);
+            }
+            // Cerrar panel
             $panel.removeClass('mostrar');
             setTimeout(function() {
                 $panel.remove();
@@ -224,9 +255,9 @@ $(document).ready(function() {
                 </div>
                 <hr class="separador-menu">
                 <ul class="opciones-menu">
-                    <li><a href="#"><span class="material-symbols-outlined">person</span>Mi perfil</a></li>
+                    <li><a href="#" data-spa-nav="perfil"><span class="material-symbols-outlined">person</span>Mi perfil</a></li>
                     <li><a href="#"><span class="material-symbols-outlined">settings</span>Configuración</a></li>
-                    <li><a href="ayuda.html"><span class="material-symbols-outlined">help</span>Ayuda</a></li>
+                    <li><a href="#" data-spa-nav="ayuda"><span class="material-symbols-outlined">help</span>Ayuda</a></li>
                     <li><a href="#" class="cerrar-sesion"><span class="material-symbols-outlined">logout</span>Cerrar sesión</a></li>
                 </ul>
             </div>
@@ -275,6 +306,21 @@ $(document).ready(function() {
             } catch (_) {
                 window.location.href = 'login.html';
             }
+        });
+        
+        // Manejar navegación SPA en enlaces del menú
+        $menu.find('[data-spa-nav]').on('click', function(e) {
+            e.preventDefault();
+            const page = $(this).data('spa-nav');
+            if (window.spaNav) {
+                window.spaNav.navigateTo(page);
+            }
+            // Cerrar menú
+            $menu.removeClass('mostrar');
+            setTimeout(function() {
+                $menu.remove();
+                $(document).off('click.perfil');
+            }, 300);
         });
     }
     
@@ -387,25 +433,33 @@ $(document).ready(function() {
                 case '1':
                     if (e.ctrlKey) {
                         e.preventDefault();
-                        window.location.href = 'dashboard.html';
+                        if (window.spaNav) {
+                            window.spaNav.navigateTo('dashboard');
+                        }
                     }
                     break;
                 case '2':
                     if (e.ctrlKey) {
                         e.preventDefault();
-                        window.location.href = 'mis-reportes.html';
+                        if (window.spaNav) {
+                            window.spaNav.navigateTo('mis-reportes');
+                        }
                     }
                     break;
                 case '3':
                     if (e.ctrlKey) {
                         e.preventDefault();
-                        window.location.href = 'crear-reporte.html';
+                        if (window.spaNav) {
+                            window.spaNav.navigateTo('crear-reporte');
+                        }
                     }
                     break;
                 case 'n':
                     if (e.ctrlKey) {
                         e.preventDefault();
-                        window.location.href = 'crear-reporte.html';
+                        if (window.spaNav) {
+                            window.spaNav.navigateTo('crear-reporte');
+                        }
                     }
                     break;
             }
@@ -502,7 +556,7 @@ $(document).ready(function() {
 // ===========================
 
 // Función para navegación programática
-window.navegarA = function(pagina) {
+function navegarA(pagina) {
     const destinos = {
         'dashboard': 'dashboard.html',
         'mis-reportes': 'mis-reportes.html',
@@ -511,10 +565,18 @@ window.navegarA = function(pagina) {
     };
     
     const destino = destinos[pagina] || 'dashboard.html';
-    window.location.href = destino;
-};
+    if (window.spaNav) {
+        window.spaNav.navigateTo(pagina);
+    } else {
+        window.location.href = destino;
+    }
+}
 
 // Función para crear nuevo reporte directamente
-window.nuevoReporte = function() {
-    window.location.href = 'crear-reporte.html';
-};
+function nuevoReporte() {
+    if (window.spaNav) {
+        window.spaNav.navigateTo('crear-reporte');
+    } else {
+        window.location.href = 'crear-reporte.html';
+    }
+}

@@ -699,6 +699,154 @@ body {
 
 /* Overlay para móvil */
 .overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity var(--transition-duration) ease;
+}
+
+.overlay.mostrar {
+    display: block;
+    opacity: 1;
+}
+
+/* ===========================
+   SISTEMA SPA - NAVEGACIÓN FLUIDA
+   =========================== */
+
+/* Transiciones suaves para el contenido principal */
+.contenido-principal {
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.spa-loading .contenido-principal {
+    opacity: 0.7;
+    transform: translateY(10px);
+}
+
+/* Indicador de carga SPA */
+.spa-loader {
+    position: fixed;
+    top: 0;
+    left: 256px; /* Después del sidebar */
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    z-index: 1000;
+    transform: translateX(-100%);
+    animation: spaProgress 1s ease-in-out infinite;
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .spa-loader {
+        left: 0; /* Sin sidebar en móvil */
+    }
+}
+
+@keyframes spaProgress {
+    0% {
+        transform: translateX(-100%);
+    }
+    50% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Estilos para navegación activa */
+.nav-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--primary-color);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+}
+
+.nav-item.active::before {
+    transform: scaleY(1);
+}
+
+/* Animaciones para cambio de página */
+.page-enter {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.page-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.page-exit-active {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Estados hover mejorados para navegación */
+.nav-item:hover {
+    background-color: #f3f4f6 !important;
+    color: var(--text-primary) !important;
+    transform: translateX(4px);
+}
+
+.nav-item.active:hover {
+    transform: translateX(0);
+}
+
+/* Efecto de carga en navegación */
+.nav-item.loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.nav-item.loading::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--text-secondary);
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: translateY(-50%) rotate(0deg);
+    }
+    100% {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
+.overlay {
     position: fixed;
     top: 0;
     left: 0;

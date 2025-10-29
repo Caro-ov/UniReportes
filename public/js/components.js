@@ -50,6 +50,9 @@ $(document).ready(function() {
                 loadComponent('#sidebar-container', sidebarPath, function() {
                     setActiveMenuItem();
                     initializeSidebarFunctionality();
+                    
+                    // Disparar evento para indicar que el sidebar está listo
+                    $(document).trigger('sidebarLoaded');
                 });
             })
             .fail(function(xhr, status, error) {
@@ -59,6 +62,9 @@ $(document).ready(function() {
                 loadComponent('#sidebar-container', 'components/sidebar.html', function() {
                     setActiveMenuItem();
                     initializeSidebarFunctionality();
+                    
+                    // Disparar evento para indicar que el sidebar está listo
+                    $(document).trigger('sidebarLoaded');
                 });
             });
     }
@@ -74,8 +80,19 @@ $(document).ready(function() {
     // Función para establecer el elemento activo del menú
     function setActiveMenuItem() {
         const currentPage = $('body').data('page');
+        console.log('Estableciendo elemento activo para página:', currentPage);
+        
+        // Remover cualquier clase active previa
+        $('.sidebar-nav .nav-item').removeClass('active');
+        
         if (currentPage) {
-            $('.sidebar-nav a[data-page="' + currentPage + '"]').addClass('active');
+            const menuItem = $('.sidebar-nav a[data-page="' + currentPage + '"]');
+            if (menuItem.length > 0) {
+                menuItem.addClass('active');
+                console.log('Elemento de menú marcado como activo:', currentPage);
+            } else {
+                console.log('No se encontró enlace del sidebar para la página:', currentPage);
+            }
         }
     }
 
