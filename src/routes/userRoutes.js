@@ -10,6 +10,9 @@ router.use(requireAuth);
 // GET /api/users/profile - Obtener perfil del usuario actual
 router.get('/profile', userController.getCurrentUserProfile);
 
+// PUT /api/users/change-password - Cambiar contraseña del usuario actual
+router.put('/change-password', userController.changePassword);
+
 // GET /api/users/search - Buscar usuarios (solo admin)
 router.get('/search', userController.searchUsers);
 

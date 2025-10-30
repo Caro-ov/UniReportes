@@ -449,6 +449,95 @@ export async function getCurrentUserProfile(req, res) {
     }
 }
 
+// Cambiar contraseña del usuario actual
+export const changePassword = async (req, res) => {
+    try {
+        // Obtener userId de la sesión
+        const userId = req.session?.user?.id;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'No autenticado'
+            });
+        }
+
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+
+        // Validaciones
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Todos los campos son obligatorios'
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Las contraseñas nuevas no coinciden'
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'La nueva contraseña debe tener al menos 6 caracteres'
+            });
+        }
+
+        if (currentPassword === newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'La nueva contraseña debe ser diferente a la actual'
+            });
+        }
+
+        // Obtener el usuario actual
+        const user = await userModel.findUserById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        // Verificar la contraseña actual
+        const isValidPassword = await bcrypt.compare(currentPassword, user.contrasena);
+        if (!isValidPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'La contraseña actual es incorrecta'
+            });
+        }
+
+        // Cifrar la nueva contraseña
+        const saltRounds = 10;
+        const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        // Actualizar la contraseña en la base de datos
+        const updateResult = await userModel.updateUser(userId, { contrasena: hashedNewPassword });
+
+        if (updateResult) {
+            res.json({
+                success: true,
+                message: 'Contraseña actualizada exitosamente'
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                message: 'Error al actualizar la contraseña'
+            });
+        }
+
+    } catch (error) {
+        console.error('Error al cambiar contraseña:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor'
+        });
+    }
+}
+
 export default {
     getAllUsers,
     getUserById,
@@ -457,5 +546,6 @@ export default {
     deleteUser,
     searchUsers,
     getUsersStats,
-    getCurrentUserProfile
+    getCurrentUserProfile,
+    changePassword
 };

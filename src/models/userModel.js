@@ -70,7 +70,6 @@ export async function updateUser(userId, updateData) {
     return false;
   }
 
-  fields.push('fecha_actualizacion = CURRENT_TIMESTAMP');
   values.push(userId);
 
   const [result] = await pool.execute(

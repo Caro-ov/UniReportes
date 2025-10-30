@@ -253,24 +253,25 @@ $(document).ready(function() {
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form class="formulario-password">
+                        <form class="formulario-password" id="form-cambiar-password">
                             <div class="campo-formulario">
                                 <label>Contraseña Actual</label>
-                                <input type="password" placeholder="Ingresa tu contraseña actual" required>
+                                <input type="password" id="current-password" name="currentPassword" placeholder="Ingresa tu contraseña actual" required>
                             </div>
                             <div class="campo-formulario">
                                 <label>Nueva Contraseña</label>
-                                <input type="password" placeholder="Ingresa la nueva contraseña" required>
+                                <input type="password" id="new-password" name="newPassword" placeholder="Ingresa la nueva contraseña" required>
+                                <small class="text-ayuda">Mínimo 6 caracteres</small>
                             </div>
                             <div class="campo-formulario">
                                 <label>Confirmar Nueva Contraseña</label>
-                                <input type="password" placeholder="Confirma la nueva contraseña" required>
+                                <input type="password" id="confirm-password" name="confirmPassword" placeholder="Confirma la nueva contraseña" required>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button class="boton-cancelar">Cancelar</button>
-                        <button class="boton-guardar">Cambiar Contraseña</button>
+                        <button type="button" class="boton-cancelar">Cancelar</button>
+                        <button type="submit" form="form-cambiar-password" class="boton-guardar" id="btn-cambiar-password">Cambiar Contraseña</button>
                     </div>
                 </div>
             </div>
@@ -281,7 +282,135 @@ $(document).ready(function() {
         
         setTimeout(() => $modal.addClass('mostrar'), 10);
         
-        manejarModal($modal);
+        manejarModalPassword($modal);
+    }
+
+    function manejarModalPassword($modal) {
+        // Cerrar modal
+        $modal.find('.cerrar-modal, .boton-cancelar').on('click', function() {
+            cerrarModal($modal);
+        });
+        
+        // Validación en tiempo real
+        $modal.find('#new-password').on('input', function() {
+            const password = $(this).val();
+            if (password.length > 0 && password.length < 6) {
+                $(this).addClass('error');
+            } else {
+                $(this).removeClass('error');
+            }
+        });
+
+        $modal.find('#confirm-password').on('input', function() {
+            const newPassword = $modal.find('#new-password').val();
+            const confirmPassword = $(this).val();
+            
+            if (confirmPassword.length > 0) {
+                if (confirmPassword === newPassword) {
+                    $(this).removeClass('error').addClass('success');
+                } else {
+                    $(this).removeClass('success').addClass('error');
+                }
+            } else {
+                $(this).removeClass('error success');
+            }
+        });
+        
+        // Procesar cambio de contraseña
+        $modal.find('#form-cambiar-password').on('submit', async function(e) {
+            e.preventDefault();
+            console.log('🔐 Formulario de cambio de contraseña enviado'); // Debug log
+            
+            const $btn = $modal.find('#btn-cambiar-password');
+            const currentPassword = $modal.find('#current-password').val();
+            const newPassword = $modal.find('#new-password').val();
+            const confirmPassword = $modal.find('#confirm-password').val();
+            
+            console.log('🔐 Datos del formulario:', { currentPassword: '***', newPassword: '***', confirmPassword: '***' }); // Debug log
+            
+            // Validaciones frontend
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                console.log('🔐 Error: Campos obligatorios faltantes'); // Debug log
+                mostrarToast('Todos los campos son obligatorios', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                console.log('🔐 Error: Contraseña muy corta'); // Debug log
+                mostrarToast('La nueva contraseña debe tener al menos 6 caracteres', 'error');
+                $modal.find('#new-password').addClass('error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                console.log('🔐 Error: Contraseñas no coinciden'); // Debug log
+                mostrarToast('Las contraseñas nuevas no coinciden', 'error');
+                $modal.find('#confirm-password').addClass('error');
+                return;
+            }
+            
+            if (currentPassword === newPassword) {
+                console.log('🔐 Error: Contraseña igual a la actual'); // Debug log
+                mostrarToast('La nueva contraseña debe ser diferente a la actual', 'error');
+                return;
+            }
+            
+            // Deshabilitar botón y mostrar loading
+            $btn.prop('disabled', true).text('Cambiando...');
+            console.log('🔐 Enviando solicitud al servidor...'); // Debug log
+            
+            try {
+                const response = await fetch('/api/users/change-password', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        currentPassword,
+                        newPassword,
+                        confirmPassword
+                    })
+                });
+                
+                console.log('🔐 Respuesta del servidor:', response.status); // Debug log
+                const result = await response.json();
+                console.log('🔐 Resultado:', result); // Debug log
+                
+                if (result.success) {
+                    console.log('🔐 Éxito: Contraseña cambiada'); // Debug log
+                    mostrarToast('Contraseña actualizada exitosamente', 'success');
+                    cerrarModal($modal);
+                } else {
+                    console.log('🔐 Error del servidor:', result.message); // Debug log
+                    mostrarToast(result.message || 'Error al cambiar contraseña', 'error');
+                    
+                    // Manejar error específico de contraseña actual incorrecta
+                    if (result.message && result.message.includes('contraseña actual')) {
+                        $modal.find('#current-password').addClass('error');
+                    }
+                }
+            } catch (error) {
+                console.error('🔐 Error al cambiar contraseña:', error);
+                mostrarToast('Error de conexión al cambiar contraseña', 'error');
+            } finally {
+                // Restaurar botón
+                $btn.prop('disabled', false).text('Cambiar Contraseña');
+            }
+        });
+        
+        // Cerrar con overlay
+        $modal.find('.modal-overlay').on('click', function(e) {
+            if (e.target === this) {
+                cerrarModal($modal);
+            }
+        });
+        
+        // Cerrar con Escape
+        $(document).on('keydown.modal', function(e) {
+            if (e.key === 'Escape') {
+                cerrarModal($modal);
+            }
+        });
     }
     
     function mostrarModalNotificaciones() {
@@ -392,6 +521,63 @@ $(document).ready(function() {
         manejarModal($modal);
     }
     
+    // Función auxiliar para cerrar modal
+    function cerrarModal($modal) {
+        $modal.removeClass('mostrar');
+        setTimeout(() => {
+            $modal.remove();
+            $(document).off('keydown.modal');
+        }, 300);
+    }
+
+    // Función para mostrar notificaciones toast
+    function mostrarToast(mensaje, tipo = 'info') {
+        console.log('🍞 Mostrando toast:', mensaje, tipo); // Debug log
+        
+        // Remover toast existente si existe
+        $('.toast-notification').remove();
+        
+        const iconos = {
+            'success': 'check_circle',
+            'error': 'error',
+            'warning': 'warning',
+            'info': 'info'
+        };
+        
+        const toastHtml = `
+            <div class="toast-notification toast-${tipo}">
+                <span class="material-symbols-outlined">${iconos[tipo] || 'info'}</span>
+                <span class="toast-mensaje">${mensaje}</span>
+                <button class="toast-cerrar">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        `;
+        
+        $('body').append(toastHtml);
+        
+        const $toast = $('.toast-notification');
+        console.log('🍞 Toast agregado al DOM:', $toast.length); // Debug log
+        
+        // Mostrar con animación
+        setTimeout(() => {
+            $toast.addClass('mostrar');
+            console.log('🍞 Toast mostrado con clase mostrar'); // Debug log
+        }, 10);
+        
+        // Auto cerrar después de 5 segundos
+        setTimeout(() => {
+            $toast.removeClass('mostrar');
+            setTimeout(() => $toast.remove(), 300);
+        }, 5000);
+        
+        // Cerrar manualmente
+        $toast.find('.toast-cerrar').on('click', function() {
+            $toast.removeClass('mostrar');
+            setTimeout(() => $toast.remove(), 300);
+        });
+    }
+
     function manejarModal($modal) {
         // Cerrar modal
         $modal.find('.cerrar-modal, .boton-cancelar').on('click', function() {
@@ -499,30 +685,6 @@ $(document).ready(function() {
     // ===========================
     // FUNCIONES DE UTILIDAD
     // ===========================
-    
-    function mostrarToast(mensaje, tipo = 'info') {
-        const iconos = {
-            'success': 'check_circle',
-            'error': 'error',
-            'info': 'info'
-        };
-        
-        const $toast = $(`
-            <div class="toast toast-${tipo}">
-                <span class="material-symbols-outlined">${iconos[tipo]}</span>
-                <span>${mensaje}</span>
-            </div>
-        `);
-        
-        $('body').append($toast);
-        
-        setTimeout(() => $toast.addClass('mostrar'), 100);
-        
-        setTimeout(() => {
-            $toast.removeClass('mostrar');
-            setTimeout(() => $toast.remove(), 300);
-        }, 3000);
-    }
     
     // ===========================
     // ATAJOS DE TECLADO
