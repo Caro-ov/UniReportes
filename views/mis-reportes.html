@@ -66,25 +66,102 @@
                         <span class="material-symbols-outlined icono-titulo">school</span>
                         <h1 class="titulo-pagina">Panel de Control</h1>
                     </div>
-                    <button class="boton-nuevo-reporte">
-                        <span class="material-symbols-outlined">add</span>
-                        <span>Nuevo Reporte</span>
-                    </button>
                 </div>
 
                 <!-- Tarjetas de estadísticas -->
-                <div class="grid-estadisticas">
+                <div class="estadisticas-rapidas">
                     <div class="tarjeta-estadistica">
-                        <p class="etiqueta-estadistica">Reportes Enviados</p>
-                        <p class="numero-estadistica">2</p>
+                        <div class="contenido-estadistica">
+                            <h4>Total Reportes</h4>
+                            <span class="numero-estadistica" id="total-reportes">16</span>
+                        </div>
+                        <div class="icono-estadistica">
+                            <span class="material-symbols-outlined">assignment</span>
+                        </div>
                     </div>
                     <div class="tarjeta-estadistica">
-                        <p class="etiqueta-estadistica">Reportes Resueltos</p>
-                        <p class="numero-estadistica">12</p>
+                        <div class="contenido-estadistica">
+                            <h4>Reportes Enviados</h4>
+                            <span class="numero-estadistica" id="reportes-enviados">2</span>
+                        </div>
+                        <div class="icono-estadistica">
+                            <span class="material-symbols-outlined">send</span>
+                        </div>
                     </div>
                     <div class="tarjeta-estadistica">
-                        <p class="etiqueta-estadistica">Reportes Totales</p>
-                        <p class="numero-estadistica">16</p>
+                        <div class="contenido-estadistica">
+                            <h4>En Revisión</h4>
+                            <span class="numero-estadistica" id="reportes-revision">3</span>
+                        </div>
+                        <div class="icono-estadistica">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </div>
+                    </div>
+                    <div class="tarjeta-estadistica">
+                        <div class="contenido-estadistica">
+                            <h4>En Proceso</h4>
+                            <span class="numero-estadistica" id="reportes-proceso">4</span>
+                        </div>
+                        <div class="icono-estadistica">
+                            <span class="material-symbols-outlined">sync</span>
+                        </div>
+                    </div>
+                    <div class="tarjeta-estadistica">
+                        <div class="contenido-estadistica">
+                            <h4>Resueltos</h4>
+                            <span class="numero-estadistica" id="reportes-resueltos">7</span>
+                        </div>
+                        <div class="icono-estadistica">
+                            <span class="material-symbols-outlined">check_circle</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros de búsqueda -->
+                <div class="contenedor-filtros">
+                    <div class="filtros-reportes">
+                        <div class="campo-busqueda">
+                            <span class="material-symbols-outlined icono-buscar">search</span>
+                            <input type="text" class="input-busqueda" placeholder="Buscar reportes..." id="buscarReportes">
+                        </div>
+                        
+                        <div class="grupo-filtros">
+                            <div class="filtro-categoria">
+                                <label for="filtroCategoria" class="etiqueta-filtro">Categoría</label>
+                                <select id="filtroCategoria" class="select-filtro">
+                                    <option value="">Todas</option>
+                                    <option value="infraestructura">Infraestructura</option>
+                                    <option value="tecnologia">Tecnología</option>
+                                    <option value="mobiliario">Mobiliario</option>
+                                    <option value="servicios">Servicios</option>
+                                    <option value="seguridad">Seguridad</option>
+                                    <option value="limpieza">Limpieza</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filtro-estado">
+                                <label for="filtroEstado" class="etiqueta-filtro">Estado</label>
+                                <select id="filtroEstado" class="select-filtro">
+                                    <option value="">Todos</option>
+                                    <option value="enviado">Enviado</option>
+                                    <option value="revisado">Revisado</option>
+                                    <option value="proceso">En proceso</option>
+                                    <option value="resuelto">Resuelto</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filtro-fecha">
+                                <label for="filtroFecha" class="etiqueta-filtro">Fecha</label>
+                                <select id="filtroFecha" class="select-filtro">
+                                    <option value="">Todas</option>
+                                    <option value="hoy">Hoy</option>
+                                    <option value="semana">Esta semana</option>
+                                    <option value="mes">Este mes</option>
+                                    <option value="trimestre">Último trimestre</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

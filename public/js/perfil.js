@@ -448,13 +448,18 @@ $(document).ready(function() {
     $('.boton-cerrar-sesion').on('click', function(e) {
         e.preventDefault();
         
-        // Mostrar confirmación
-        const confirmar = confirm('¿Estás seguro de que quieres cerrar sesión?');
-        if (confirmar) {
-            mostrarToast('Cerrando sesión...', 'info');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1500);
+        // Usar el modal personalizado si está disponible
+        if (typeof mostrarModalLogout === 'function') {
+            mostrarModalLogout();
+        } else {
+            // Fallback al confirm nativo
+            const confirmar = confirm('¿Estás seguro de que quieres cerrar sesión?');
+            if (confirmar) {
+                mostrarToast('Cerrando sesión...', 'info');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            }
         }
     });
     

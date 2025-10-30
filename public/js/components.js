@@ -130,40 +130,30 @@ $(document).ready(function() {
         // Manejar logout
         $('.logout-btn, .cerrar-sesion').on('click', function(e) {
             e.preventDefault();
-            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                mostrarToast('Cerrando sesión...', 'info');
-                
-                // Marcar flag de logout para prevenir navegación hacia atrás
-                sessionStorage.setItem('logout_flag', 'true');
-                
-                // Hacer petición al servidor para cerrar sesión
-                $.post('/auth/logout')
-                    .done(function(response) {
-                        if (response.success) {
-                            // Limpiar el historial del navegador para prevenir navegación hacia atrás
-                            if (window.history && window.history.pushState) {
-                                window.history.replaceState(null, null, '/login.html');
-                                window.history.pushState(null, null, '/login.html');
-                                
-                                // Prevenir navegación hacia atrás
-                                window.addEventListener('popstate', function(event) {
-                                    window.history.pushState(null, null, '/login.html');
-                                });
-                            }
-                            
-                            // Redirigir al login
-                            window.location.replace('/login.html');
-                        } else {
-                            mostrarToast('Error al cerrar sesión', 'error');
-                        }
-                    })
-                    .fail(function() {
-                        mostrarToast('Error de conexión al cerrar sesión', 'error');
-                        // Forzar redirección incluso si falla
-                        setTimeout(() => {
-                            window.location.replace('/login.html');
-                        }, 1000);
-                    });
+            mostrarModalLogout();
+        });
+
+        // Funcionalidad del modal de logout
+        $('#btn-cancelar-logout').on('click', function() {
+            ocultarModalLogout();
+        });
+
+        $('#btn-confirmar-logout').on('click', function() {
+            ocultarModalLogout();
+            procesarLogout();
+        });
+
+        // Cerrar modal al hacer clic fuera de él
+        $('#modal-logout').on('click', function(e) {
+            if (e.target === this) {
+                ocultarModalLogout();
+            }
+        });
+
+        // Cerrar modal con ESC
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' && $('#modal-logout').hasClass('mostrar')) {
+                ocultarModalLogout();
             }
         });
 
@@ -273,7 +263,57 @@ $(document).ready(function() {
             });
     }
 
+    // Funciones para el modal de logout
+    function mostrarModalLogout() {
+        $('#modal-logout').addClass('mostrar');
+        // Enfocar el botón de cancelar para accesibilidad
+        setTimeout(() => {
+            $('#btn-cancelar-logout').focus();
+        }, 100);
+    }
+
+    function ocultarModalLogout() {
+        $('#modal-logout').removeClass('mostrar');
+    }
+
+    function procesarLogout() {
+        mostrarToast('Cerrando sesión...', 'info');
+        
+        // Marcar flag de logout para prevenir navegación hacia atrás
+        sessionStorage.setItem('logout_flag', 'true');
+        
+        // Hacer petición al servidor para cerrar sesión
+        $.post('/auth/logout')
+            .done(function(response) {
+                if (response.success) {
+                    // Limpiar el historial del navegador para prevenir navegación hacia atrás
+                    if (window.history && window.history.pushState) {
+                        window.history.replaceState(null, null, '/login.html');
+                        window.history.pushState(null, null, '/login.html');
+                        
+                        // Prevenir navegación hacia atrás
+                        window.addEventListener('popstate', function(event) {
+                            window.history.pushState(null, null, '/login.html');
+                        });
+                    }
+                    
+                    // Redirigir al login
+                    window.location.replace('/login.html');
+                } else {
+                    mostrarToast('Error al cerrar sesión', 'error');
+                }
+            })
+            .fail(function() {
+                mostrarToast('Error de conexión al cerrar sesión', 'error');
+                // Forzar redirección incluso si falla
+                setTimeout(() => {
+                    window.location.replace('/login.html');
+                }, 1000);
+            });
+    }
+
     // Hacer funciones globales para compatibilidad
     window.toggleSidebar = toggleSidebar;
     window.mostrarToast = mostrarToast;
+    window.mostrarModalLogout = mostrarModalLogout;
 });

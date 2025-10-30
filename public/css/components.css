@@ -918,3 +918,122 @@ body {
         left: 0;
     }
 }
+
+/* Modal de confirmación personalizado */
+.modal-confirmacion {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-confirmacion.mostrar {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-contenido {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-width: 400px;
+    width: 90%;
+    padding: 32px;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-confirmacion.mostrar .modal-contenido {
+    transform: scale(1);
+}
+
+.modal-icono {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px auto;
+    font-size: 24px;
+}
+
+.modal-titulo {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.modal-mensaje {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+    line-height: 1.5;
+}
+
+.modal-botones {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.boton-modal {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 100px;
+}
+
+.boton-cancelar {
+    background: #f3f4f6;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.boton-cancelar:hover {
+    background: #e5e7eb;
+    color: var(--text-primary);
+}
+
+.boton-confirmar {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+}
+
+.boton-confirmar:hover {
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .modal-contenido {
+        padding: 24px;
+        margin: 16px;
+    }
+    
+    .modal-botones {
+        flex-direction: column;
+    }
+    
+    .boton-modal {
+        width: 100%;
+    }
+}
