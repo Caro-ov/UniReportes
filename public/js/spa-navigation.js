@@ -44,7 +44,7 @@ class SPANavigation {
                 contentSelector: '.contenido-principal'
             },
             'ver-usuarios': {
-                url: '/partials/ver-usuarios.html',
+                url: '/ver-usuarios.html',
                 title: 'Ver Usuarios',
                 css: 'ver-usuarios',
                 contentSelector: '.contenido-principal'
@@ -71,6 +71,12 @@ class SPANavigation {
             },
             'ayuda': {
                 url: '/ayuda.html',
+                title: 'Ayuda',
+                css: 'ayuda',
+                contentSelector: '.contenido-principal'
+            },
+            'ayuda-partial': {
+                url: '/partials/ayuda.html',
                 title: 'Ayuda',
                 css: 'ayuda',
                 contentSelector: '.contenido-principal'
@@ -161,6 +167,9 @@ class SPANavigation {
             // Mostrar indicador de carga
             this.showLoadingIndicator();
             
+            // LIMPIAR estilos problemáticos ANTES de hacer cualquier cosa
+            this.cleanupBodyStyles();
+            
             // Obtener contenido de la página
             const content = await this.loadPageContent(page);
             
@@ -168,7 +177,7 @@ class SPANavigation {
                 console.log('📄 SPA: Contenido cargado para:', page);
                 
                 // Actualizar contenido principal
-                this.updateMainContent(content, config);
+                this.updateMainContent(content, config, page);
                 
                 // Actualizar estado
                 this.currentPage = page;
@@ -179,12 +188,13 @@ class SPANavigation {
                 // Actualizar navegación activa
                 this.updateActiveNavigation(page);
                 
-                // Cargar CSS específico si es necesario
-                this.loadPageCSS(config.css);
+                // Cargar CSS específico y esperar a que se cargue
+                await this.loadPageCSS(config.css);
                 
-                console.log('🎯 SPA: A punto de disparar evento para:', page);
-                // Disparar evento personalizado
-                this.triggerPageChangeEvent(page);
+                // Asegurar que los CSS esenciales estén cargados
+                this.ensureEssentialCSS();
+                
+                console.log('🎯 SPA: CSS cargado, contenido actualizado');
             }
             
         } catch (error) {
@@ -240,22 +250,29 @@ class SPANavigation {
         }
     }
     
-    updateMainContent(content, config) {
+    updateMainContent(content, config, page) {
         const mainContainer = document.querySelector('.contenido-principal');
         console.log('🎯 Actualizando contenido principal:', {
             contenedor: mainContainer ? 'Encontrado' : 'NO ENCONTRADO',
             contenidoLength: content.length,
-            config: config
+            config: config,
+            page: page
         });
         
         if (mainContainer) {
+            const self = this; // Guardar referencia para usar en callbacks
             // Animación de salida
             $(mainContainer).fadeOut(150, () => {
                 // Actualizar contenido
                 mainContainer.innerHTML = content;
                 
-                // Actualizar título del body
+                // Actualizar título del body y página actual
                 document.body.setAttribute('data-title', `UniReportes - ${config.title}`);
+                document.body.setAttribute('data-page', page);
+                document.body.setAttribute('data-css', config.css);
+                
+                // Limpiar estilos problemáticos del body
+                self.cleanupBodyStyles();
                 
                 console.log('✅ Contenido actualizado, elementos encontrados:', {
                     'tabla-usuarios': $('#tabla-usuarios').length,
@@ -264,7 +281,14 @@ class SPANavigation {
                 });
                 
                 // Animación de entrada
-                $(mainContainer).fadeIn(200);
+                $(mainContainer).fadeIn(200, () => {
+                    // Ocultar indicador de carga después de la animación
+                    self.hideLoadingIndicator();
+                    
+                    // Disparar evento de cambio de página DESPUÉS de que todo esté listo
+                    console.log('🎯 SPA: Disparando evento para:', page);
+                    self.triggerPageChangeEvent(page);
+                });
                 
                 // Scroll al top
                 mainContainer.scrollTop = 0;
@@ -309,25 +333,49 @@ class SPANavigation {
         // Verificar si ya está cargado
         if (document.getElementById(cssId)) {
             console.log('✅ CSS ya estaba cargado:', cssName);
-            return;
+            return Promise.resolve();
         }
         
-        // Crear enlace CSS - Usar ruta ABSOLUTA para evitar problemas con rutas relativas
-        const link = document.createElement('link');
-        link.id = cssId;
-        link.rel = 'stylesheet';
-        link.href = `/css/${cssName}.css`; // Ruta absoluta con / al inicio
+        return new Promise((resolve, reject) => {
+            // Crear enlace CSS - Usar ruta ABSOLUTA para evitar problemas con rutas relativas
+            const link = document.createElement('link');
+            link.id = cssId;
+            link.rel = 'stylesheet';
+            link.href = `/css/${cssName}.css`; // Ruta absoluta con / al inicio
+            
+            // Configurar eventos de carga
+            link.onload = () => {
+                console.log('✅ CSS cargado exitosamente:', cssName);
+                resolve();
+            };
+            
+            link.onerror = () => {
+                console.error('❌ Error al cargar CSS:', cssName);
+                reject(new Error(`Failed to load CSS: ${cssName}`));
+            };
+            
+            console.log('� Agregando CSS al head:', link.href);
+            
+            // Agregar al head
+            document.head.appendChild(link);
+        });
+    }
+    
+    ensureEssentialCSS() {
+        // Lista de CSS esenciales que siempre deben estar cargados
+        const essentialCSS = ['components'];
         
-        console.log('📎 Agregando CSS al head:', link.href);
-        
-        // Agregar al head
-        document.head.appendChild(link);
-        
-        // Verificar que se agregó
-        setTimeout(() => {
-            const added = document.getElementById(cssId);
-            console.log('🔍 CSS agregado correctamente:', added ? 'SÍ' : 'NO');
-        }, 100);
+        essentialCSS.forEach(cssName => {
+            const cssId = `css-${cssName}`;
+            if (!document.getElementById(cssId)) {
+                console.log('📎 Cargando CSS esencial:', cssName);
+                const link = document.createElement('link');
+                link.id = cssId;
+                link.rel = 'stylesheet';
+                link.href = `/css/${cssName}.css`;
+                document.head.appendChild(link);
+            }
+        });
     }
     
     showLoadingIndicator() {
@@ -357,11 +405,190 @@ class SPANavigation {
     
     triggerPageChangeEvent(page) {
         console.log('🚀 SPA: Disparando evento spaPageChange para página:', page);
-        const event = new CustomEvent('spaPageChange', {
-            detail: { page, config: this.pageConfig[page] }
-        });
-        document.dispatchEvent(event);
-        console.log('✅ SPA: Evento spaPageChange disparado');
+        
+        // Pequeño delay para asegurar que el DOM esté completamente actualizado
+        setTimeout(() => {
+            const event = new CustomEvent('spaPageChange', {
+                detail: { page, config: this.pageConfig[page] }
+            });
+            document.dispatchEvent(event);
+            console.log('✅ SPA: Evento spaPageChange disparado');
+            
+            // Manejar ver-usuarios específicamente aquí
+            if (page === 'ver-usuarios') {
+                console.log('🎯 SPA: Manejando ver-usuarios directamente...');
+                // Dar más tiempo para que el DOM se estabilice
+                setTimeout(() => {
+                    this.manejarVerUsuarios();
+                }, 200);
+            }
+        }, 50);
+    }
+    
+    // Función específica para manejar la página de ver-usuarios
+    async manejarVerUsuarios() {
+        console.log('🚀 SPA: Iniciando manejo directo de ver-usuarios...');
+        
+        try {
+            // Esperar a que el contenido esté completamente cargado
+            const esperarContenido = () => {
+                return new Promise((resolve) => {
+                    const verificarElementos = () => {
+                        const tabla = document.getElementById('tabla-usuarios');
+                        const loading = document.getElementById('loading-usuarios');
+                        const tbody = document.getElementById('tbody-usuarios');
+                        
+                        if (tabla && loading && tbody) {
+                            console.log('✅ SPA: Elementos encontrados, procediendo con inicialización');
+                            resolve();
+                        } else {
+                            console.log('⏳ SPA: Esperando elementos...');
+                            setTimeout(verificarElementos, 50);
+                        }
+                    };
+                    verificarElementos();
+                });
+            };
+            
+            await esperarContenido();
+            
+            // Configurar eventos para la funcionalidad
+            setTimeout(() => {
+                this.configurarEventosVerUsuarios();
+            }, 100);
+            
+        } catch (error) {
+            console.error('💥 SPA: Error en manejarVerUsuarios:', error);
+        }
+    }
+    
+    configurarEventosVerUsuarios() {
+        console.log('🔧 SPA: Configurando eventos para Ver Usuarios...');
+        
+        try {
+            // Verificar si VerUsuarios está disponible
+            if (typeof window.VerUsuarios === 'undefined') {
+                console.log('📦 SPA: VerUsuarios no está cargado, cargando script...');
+                
+                // Verificar si el script ya existe
+                const scriptExistente = document.querySelector('script[src*="ver-usuarios.js"]');
+                if (scriptExistente) {
+                    console.log('📜 SPA: Script ver-usuarios.js ya existe, esperando carga...');
+                    // Esperar un momento para que se cargue
+                    setTimeout(() => {
+                        this.inicializarVerUsuarios();
+                    }, 200);
+                    return;
+                }
+                
+                // Cargar el script de ver-usuarios
+                const script = document.createElement('script');
+                script.src = '/js/ver-usuarios.js';
+                script.async = false; // Cargar síncronamente para evitar problemas de timing
+                
+                script.onload = () => {
+                    console.log('✅ SPA: Script ver-usuarios.js cargado exitosamente');
+                    setTimeout(() => {
+                        this.inicializarVerUsuarios();
+                    }, 100);
+                };
+                
+                script.onerror = () => {
+                    console.error('❌ SPA: Error cargando script ver-usuarios.js');
+                    // Intentar usando jQuery si está disponible
+                    if (typeof $ !== 'undefined') {
+                        $.getScript('/js/ver-usuarios.js')
+                            .done(() => {
+                                console.log('✅ SPA: Script cargado via jQuery');
+                                setTimeout(() => {
+                                    this.inicializarVerUsuarios();
+                                }, 100);
+                            })
+                            .fail(() => {
+                                console.error('❌ SPA: Error cargando script via jQuery');
+                            });
+                    }
+                };
+                
+                document.head.appendChild(script);
+            } else {
+                console.log('✅ SPA: VerUsuarios ya está disponible');
+                this.inicializarVerUsuarios();
+            }
+        } catch (error) {
+            console.error('❌ SPA: Error configurando eventos Ver Usuarios:', error);
+        }
+    }
+    
+    inicializarVerUsuarios() {
+        console.log('🎯 SPA: Inicializando módulo Ver Usuarios...');
+        
+        try {
+            // Verificar que los elementos estén presentes antes de inicializar
+            const elementosNecesarios = [
+                'tabla-usuarios',
+                'loading-usuarios', 
+                'tbody-usuarios',
+                'buscar-usuarios',
+                'filtro-rol'
+            ];
+            
+            const elementosEncontrados = elementosNecesarios.every(id => {
+                const elemento = document.getElementById(id);
+                console.log(`🔍 SPA: Elemento ${id}:`, !!elemento);
+                return !!elemento;
+            });
+            
+            if (!elementosEncontrados) {
+                console.warn('⚠️ SPA: No todos los elementos necesarios están presentes, reintentando...');
+                setTimeout(() => {
+                    this.inicializarVerUsuarios();
+                }, 200);
+                return;
+            }
+            
+            if (window.VerUsuarios && typeof window.VerUsuarios.init === 'function') {
+                console.log('🚀 SPA: Llamando VerUsuarios.init()...');
+                
+                // Asegurar que cualquier inicialización previa se limpie
+                if (typeof window.VerUsuarios.cleanup === 'function') {
+                    console.log('🧹 SPA: Limpiando inicialización previa...');
+                    window.VerUsuarios.cleanup();
+                }
+                
+                const result = window.VerUsuarios.init();
+                
+                if (result) {
+                    console.log('✅ SPA: VerUsuarios inicializado exitosamente');
+                    
+                    // Verificar que los eventos se hayan configurado correctamente
+                    setTimeout(() => {
+                        const botones = document.querySelectorAll('.btn-accion');
+                        console.log(`🔍 SPA: Botones de acción encontrados: ${botones.length}`);
+                        
+                        if (botones.length > 0) {
+                            console.log('✅ SPA: Botones de acción están presentes');
+                        } else {
+                            console.warn('⚠️ SPA: No se encontraron botones de acción');
+                        }
+                    }, 500);
+                    
+                } else {
+                    console.warn('⚠️ SPA: VerUsuarios.init() retornó false, reintentando...');
+                    setTimeout(() => {
+                        this.inicializarVerUsuarios();
+                    }, 300);
+                }
+            } else {
+                console.error('❌ SPA: VerUsuarios.init no está disponible');
+            }
+        } catch (error) {
+            console.error('❌ SPA: Error inicializando VerUsuarios:', error);
+            // Reintentar una vez en caso de error
+            setTimeout(() => {
+                this.inicializarVerUsuarios();
+            }, 500);
+        }
     }
     
     // Método público para navegación programática
@@ -375,6 +602,27 @@ class SPANavigation {
     clearCache() {
         this.pageCache.clear();
         console.log('Cache de páginas limpiado');
+    }
+    
+    // Función para limpiar estilos problemáticos del body
+    cleanupBodyStyles() {
+        console.log('🧹 Limpiando estilos problemáticos del body...');
+        
+        // Forzar estilos correctos en el body para evitar espacios verdes
+        document.body.style.backgroundColor = '#FFFFFF';
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+        
+        // Asegurar que no haya espacios extraños
+        const html = document.documentElement;
+        html.style.backgroundColor = '#FFFFFF';
+        html.style.margin = '0';
+        html.style.padding = '0';
+        
+        // Eliminar cualquier clase que pueda estar causando problemas
+        document.body.classList.remove('spa-loading');
+        
+        console.log('✅ Estilos del body limpiados');
     }
 }
 

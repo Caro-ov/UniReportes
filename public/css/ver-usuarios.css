@@ -13,19 +13,23 @@
 /* Encabezado de la pÃ¡gina */
 .encabezado-pagina {
     margin-bottom: 2rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
 }
 
 .titulo-pagina {
-    color: #1e293b;
+    color: #4f46e5; /* Azul/morado como en la imagen 1 */
     font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 0.5rem;
+    margin: 0;
 }
 
 .descripcion-pagina {
     color: #64748b;
     font-size: 1.1rem;
     margin: 0;
+    font-weight: 400;
 }
 
 /* Controles superiores modernos */
@@ -106,23 +110,18 @@
 }
 
 .select-filtro {
-    padding: 1rem 1.25rem;
+    padding: 0.75rem 1rem;
     border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    background: #f8fafc;
+    border-radius: 8px;
+    background: white;
     font-size: 1rem;
-    min-width: 160px;
+    min-width: 250px; /* MÃ¡s ancho para texto completo */
+    width: 250px; /* Ancho fijo para asegurar espacio */
     cursor: pointer;
     transition: all 0.3s ease;
     color: #1e293b;
     font-weight: 500;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 0.75rem center;
-    background-repeat: no-repeat;
-    background-size: 1.5em 1.5em;
-    padding-right: 3rem;
 }
 
 .select-filtro:focus {
@@ -649,18 +648,21 @@
 
 /* Modal moderno */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
     backdrop-filter: blur(8px);
     animation: fadeIn 0.2s ease-out;
+    margin: 0 !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
 }
 
 @keyframes fadeIn {
@@ -669,17 +671,24 @@
 }
 
 .modal {
-    background: white;
-    border-radius: 1.5rem;
-    max-width: 500px;
-    width: 90%;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background: white !important;
+    border-radius: 1.5rem !important;
+    max-width: 500px !important;
+    width: 90% !important;
+    max-height: 80vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
     animation: slideUp 0.3s ease-out;
-    border: 1px solid #f1f5f9;
-    overflow: hidden;
+    border: 1px solid #f1f5f9 !important;
+    overflow: hidden !important;
+    position: relative !important;
+    margin: 0 auto !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
 }
 
 @keyframes slideUp {
@@ -918,4 +927,230 @@
         justify-content: center;
         padding: 1rem;
     }
+}
+/* ===========================
+   ESTILOS ESPECï¿½FICOS MEJORADOS PARA SPA
+   ========================== */
+
+/* Selectors mï¿½s especï¿½ficos y agresivos para el desplegable */
+body[data-page="ver-usuarios"] .select-filtro,
+body[data-page="ver-usuarios"] #filtro-rol,
+.contenido-principal .select-filtro,
+.contenido-principal #filtro-rol,
+[id="filtro-rol"] {
+    padding: 0.75rem 1rem !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    background: white !important;
+    font-size: 1rem !important;
+    min-width: 250px !important;
+    width: 250px !important;
+    cursor: pointer !important;
+    color: #1e293b !important;
+    font-weight: 500 !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+    display: block !important;
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+    appearance: menulist !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+}
+
+/* Estados hover y focus */
+body[data-page="ver-usuarios"] .select-filtro:hover,
+body[data-page="ver-usuarios"] #filtro-rol:hover,
+.contenido-principal .select-filtro:hover,
+.contenido-principal #filtro-rol:hover,
+[id="filtro-rol"]:hover {
+    border-color: #cbd5e1 !important;
+    background-color: white !important;
+}
+
+body[data-page="ver-usuarios"] .select-filtro:focus,
+body[data-page="ver-usuarios"] #filtro-rol:focus,
+.contenido-principal .select-filtro:focus,
+.contenido-principal #filtro-rol:focus,
+[id="filtro-rol"]:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    background-color: white !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Opciones del select */
+body[data-page="ver-usuarios"] .select-filtro option,
+body[data-page="ver-usuarios"] #filtro-rol option,
+.contenido-principal .select-filtro option,
+.contenido-principal #filtro-rol option,
+[id="filtro-rol"] option {
+    padding: 0.5rem !important;
+    background: white !important;
+    color: #1e293b !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+}
+
+/* ===========================
+   CORRECCIONES PARA MODALES EN SPA
+   ========================== */
+
+/* Asegurar que los modales se posicionen correctamente en navegaciï¿½n SPA */
+body[data-page="ver-usuarios"] .modal-overlay,
+.contenido-principal .modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 1000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Asegurar centrado perfecto del modal */
+body[data-page="ver-usuarios"] .modal,
+.contenido-principal .modal {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
+    transform: none !important;
+}
+
+/* Prevenir interferencia del header fijo */
+.modal-overlay {
+    transform: translateZ(0); /* Crear nuevo contexto de apilamiento */
+}
+
+/* ===========================
+   CORRECCIÓN AGRESIVA PARA CENTRADO DE MODALES
+   ========================== */
+
+/* Forzar posicionamiento correcto del overlay */
+#modal-ver-usuario,
+#modal-eliminar,
+.modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Forzar centrado del modal */
+#modal-ver-usuario .modal,
+#modal-eliminar .modal,
+.modal-overlay .modal {
+    position: static !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin: 0 !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    max-width: 500px !important;
+    width: 90% !important;
+    max-height: 80vh !important;
+}
+
+/* Resetear cualquier posicionamiento absoluto */
+.modal {
+    position: static !important;
+}
+
+/* ===========================
+   ESTILOS PARA MODAL DE EDITAR USUARIO
+   ========================== */
+
+/* Formulario de edición */
+#form-editar-usuario input,
+#form-editar-usuario select {
+    box-sizing: border-box !important;
+}
+
+#form-editar-usuario input:focus,
+#form-editar-usuario select:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Botones del modal de edición */
+#modal-editar-usuario .modal-footer {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    background: #f8fafc;
+    border-radius: 0 0 12px 12px;
+}
+
+#modal-editar-usuario .boton-secundario,
+#modal-editar-usuario .boton-principal {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-size: 1rem;
+}
+
+#modal-editar-usuario .boton-secundario {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+#modal-editar-usuario .boton-secundario:hover {
+    background: #e5e7eb;
+}
+
+#modal-editar-usuario .boton-principal {
+    background: #3b82f6;
+    color: white;
+}
+
+#modal-editar-usuario .boton-principal:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+#modal-editar-usuario .boton-principal:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Estilos para el avatar en el modal de edición */
+#modal-editar-usuario .avatar-usuario {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
 }

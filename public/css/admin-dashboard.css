@@ -60,12 +60,14 @@ body {
     flex-direction: column;
     margin-left: 256px;
     min-height: 100vh;
+    padding-top: 64px; /* Espacio para el header fijo */
 }
 
 /* Contenido principal */
 .contenido-principal {
     flex: 1;
     padding: 32px;
+    /* El padding-top del header ya está en .contenido-wrapper */
 }
 
 .contenedor-contenido {

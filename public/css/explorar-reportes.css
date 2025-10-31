@@ -500,3 +500,39 @@ body {
         padding: 16px;
     }
 }
+
+/* ===========================
+   CORRECCIÓN PARA ESPACIOS VERDES EN SPA
+   ========================== */
+
+/* Prevenir espacios verdes en navegación SPA */
+body[data-page="explorar-reportes"] {
+    background-color: #FFFFFF !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html {
+    background-color: #FFFFFF !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Asegurar que el contenedor principal no tenga espacios extraños */
+.contenedor-principal {
+    background-color: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.contenido-wrapper {
+    background-color: #F9FAFB !important;
+    margin-left: 256px !important;
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 64px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
+}

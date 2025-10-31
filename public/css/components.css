@@ -11,19 +11,28 @@
     --transition-duration: 200ms;
 }
 
-/* Reset y configuración base */
+/* Reset y configuración base - PREVENIR ESPACIOS VERDES */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+html {
+    background-color: #FFFFFF !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 body {
     font-family: 'Inter', 'Noto Sans', sans-serif;
-    background-color: var(--bg-primary);
+    background-color: #FFFFFF !important;
     color: var(--text-primary);
     line-height: 1.6;
     min-height: 100vh;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden;
 }
 
 /* Contenedor principal */
@@ -109,11 +118,14 @@ body {
     font-size: 14px;
 }
 
-/* Contenido wrapper */
+/* Contenido wrapper - POSICIONAMIENTO GLOBAL CORREGIDO */
 .contenido-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin-left: 256px !important;
+    min-height: 100vh !important;
+    padding-top: 64px !important; /* Espacio para header fijo en TODAS las páginas */
 }
 
 /* ===========================
@@ -281,15 +293,20 @@ body {
     flex-direction: column !important;
     margin-left: 256px !important;
     min-height: 100vh !important;
+    padding-top: 64px !important; /* Espacio para header fijo */
 }
 
-/* Header principal - EXACTAMENTE IGUAL AL DASHBOARD */
+/* Header principal - ARREGLADO PARA EVITAR ESPACIOS DUPLICADOS */
 .header-principal {
-    position: sticky !important;
+    position: fixed !important;
     top: 0 !important;
-    z-index: 10 !important;
+    left: 256px !important;
+    right: 0 !important;
+    height: 64px !important;
+    z-index: 50 !important;
     background-color: var(--bg-secondary) !important;
     box-shadow: 0 1px 3px 0 var(--shadow-color) !important;
+    border-bottom: 1px solid var(--border-color) !important;
 }
 
 .header-contenido {
