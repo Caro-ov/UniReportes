@@ -790,6 +790,10 @@ class SPANavigation {
         // Eliminar cualquier clase que pueda estar causando problemas
         document.body.classList.remove('spa-loading');
         
+        // Limpiar modales residuales
+        $('#modal-eliminar').remove();
+        $('.modal-overlay').remove();
+        
         console.log('✅ Estilos del body limpiados');
     }
 }

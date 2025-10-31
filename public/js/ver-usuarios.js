@@ -30,6 +30,10 @@ window.VerUsuarios = (function() {
         
         console.log('🚀 Inicializando Ver Usuarios...');
         
+        // Limpiar cualquier modal residual
+        $('#modal-eliminar').remove();
+        $('.modal-overlay').remove();
+        
         // Asegurar que el CSS esté cargado
         ensureCSS();
         
@@ -123,6 +127,10 @@ window.VerUsuarios = (function() {
         $('#btn-cerrar-eliminar, #btn-cancelar-eliminar').off('.verusuarios');
         $('#btn-confirmar-eliminar').off('.verusuarios');
         $('#modal-eliminar').off('.verusuarios');
+        
+        // Remover modales existentes
+        $('#modal-eliminar').remove();
+        $('.modal-overlay').remove();
         
         // Remover eventos delegados
         $(document).off('click.verusuarios', '.btn-accion');
@@ -477,7 +485,6 @@ window.VerUsuarios = (function() {
     
     function crearFilaUsuario(usuario) {
         console.log('🔨 Creando fila para usuario:', usuario.nombre, 'ID:', usuario.id_usuario);
-        const iniciales = obtenerIniciales(usuario.nombre);
         const fechaFormateada = formatearFecha(usuario.fecha_creacion);
         const badgeRol = crearBadgeRol(usuario.rol);
         
@@ -485,7 +492,7 @@ window.VerUsuarios = (function() {
             <tr data-usuario-id="${usuario.id_usuario}">
                 <td>
                     <div class="usuario-info">
-                        <div class="avatar-usuario">${iniciales}</div>
+                        <div class="avatar-usuario"></div>
                         <div class="datos-usuario">
                             <div class="nombre-usuario">${escapeHtml(usuario.nombre)}</div>
                             <div class="id-usuario">ID: ${usuario.id_usuario}</div>
@@ -750,9 +757,7 @@ window.VerUsuarios = (function() {
                     </div>
                     <div class="modal-contenido">
                         <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; padding: 1.5rem; background: #f8fafc; border-radius: 12px;">
-                            <div class="avatar-usuario" style="width: 80px; height: 80px; font-size: 2rem;">
-                                ${obtenerIniciales(usuario.nombre)}
-                            </div>
+                            <div class="avatar-usuario" style="width: 80px; height: 80px; font-size: 2rem; border-radius: 50%;"></div>
                             <div>
                                 <h2 style="margin: 0 0 0.5rem 0; color: #1e293b;">${escapeHtml(usuario.nombre)}</h2>
                                 <p style="margin: 0; color: #64748b; font-size: 1.1rem;">${crearBadgeRol(usuario.rol).replace('badge-rol', 'badge-rol').replace('badge-', 'badge-')}</p>
@@ -886,9 +891,7 @@ window.VerUsuarios = (function() {
                         <form id="form-editar-usuario" style="display: grid; gap: 1.5rem;">
                             
                             <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem; padding: 1.5rem; background: #f8fafc; border-radius: 12px;">
-                                <div class="avatar-usuario" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                                    ${obtenerIniciales(usuario.nombre)}
-                                </div>
+                                <div class="avatar-usuario" style="width: 60px; height: 60px; font-size: 1.5rem; border-radius: 50%;"></div>
                                 <div>
                                     <p style="margin: 0; color: #64748b; font-size: 1rem;">Editando usuario</p>
                                     <h4 style="margin: 0.25rem 0 0 0; color: #1e293b;">${escapeHtml(usuario.nombre)}</h4>
@@ -1074,7 +1077,7 @@ window.VerUsuarios = (function() {
         
         // Crear modal de eliminación dinámicamente
         const modalHtml = `
-            <div class="modal-overlay" id="modal-eliminar" style="display: flex !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(0,0,0,0.5) !important; z-index: 9999 !important; visibility: visible !important; opacity: 1 !important;">
+            <div class="modal-overlay" id="modal-eliminar" style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(0,0,0,0.5) !important; z-index: 9999 !important; align-items: center; justify-content: center;">
                 <div class="modal" style="margin: auto !important; background: white !important; border-radius: 12px !important; box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important; max-width: 400px !important; width: 90% !important;">
                     <div class="modal-header">
                         <h3>
@@ -1111,6 +1114,9 @@ window.VerUsuarios = (function() {
         console.log('🎭 Agregando modal de eliminación al body...');
         $('body').append(modalHtml);
         console.log('✅ Modal de eliminación agregado al DOM');
+        
+        // Mostrar el modal
+        $('#modal-eliminar').css('display', 'flex').show();
         
         // Configurar eventos para cerrar modal
         $('#btn-cerrar-eliminar, #btn-cancelar-eliminar').on('click', function() {

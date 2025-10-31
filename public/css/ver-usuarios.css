@@ -417,7 +417,7 @@
 .avatar-usuario {
     width: 44px;
     height: 44px;
-    border-radius: 12px;
+    border-radius: 50%;
     background: linear-gradient(135deg, var(--color-primario), #4f46e5);
     display: flex;
     align-items: center;
@@ -426,6 +426,8 @@
     font-weight: 700;
     font-size: 1.1rem;
     box-shadow: 0 2px 8px rgba(var(--color-primario-rgb), 0.3);
+    flex-shrink: 0;
+    object-fit: cover;
 }
 
 .datos-usuario {
@@ -870,6 +872,9 @@
         width: 40px;
         height: 40px;
         font-size: 1rem;
+        border-radius: 50%;
+        flex-shrink: 0;
+        object-fit: cover;
     }
 
     .acciones-usuario {
