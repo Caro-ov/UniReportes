@@ -422,6 +422,15 @@ class SPANavigation {
                     this.manejarVerUsuarios();
                 }, 200);
             }
+            
+            // Manejar crear-usuario específicamente aquí
+            if (page === 'crear-usuario') {
+                console.log('🎯 SPA: Manejando crear-usuario directamente...');
+                // Dar más tiempo para que el DOM se estabilice
+                setTimeout(() => {
+                    this.manejarCrearUsuario();
+                }, 200);
+            }
         }, 50);
     }
     
@@ -462,6 +471,165 @@ class SPANavigation {
         }
     }
     
+    // Función específica para manejar la página de crear-usuario
+    async manejarCrearUsuario() {
+        console.log('🚀 SPA: Iniciando manejo directo de crear-usuario...');
+        
+        try {
+            // Esperar a que el DOM esté disponible
+            const esperarContenido = () => {
+                return new Promise((resolve) => {
+                    const checkearDOM = () => {
+                        const formulario = document.getElementById('formulario-usuario');
+                        const nombre = document.getElementById('nombre');
+                        const rol = document.getElementById('rol');
+                        
+                        if (formulario && nombre && rol) {
+                            console.log('✅ SPA: DOM de crear-usuario está listo');
+                            resolve();
+                        } else {
+                            console.log('⏳ SPA: Esperando DOM de crear-usuario...');
+                            setTimeout(checkearDOM, 50);
+                        }
+                    };
+                    checkearDOM();
+                });
+            };
+            
+            await esperarContenido();
+            
+            // Configurar eventos para la funcionalidad
+            setTimeout(() => {
+                this.configurarEventosCrearUsuario();
+            }, 100);
+            
+        } catch (error) {
+            console.error('💥 SPA: Error en manejarCrearUsuario:', error);
+        }
+    }
+
+    configurarEventosCrearUsuario() {
+        console.log('🔧 SPA: Configurando eventos para Crear Usuario...');
+        
+        try {
+            // Verificar si CrearUsuario está disponible
+            if (typeof window.CrearUsuario === 'undefined') {
+                console.log('📦 SPA: CrearUsuario no está cargado, cargando script...');
+                
+                // Verificar si el script ya existe
+                const scriptExistente = document.querySelector('script[src*="crear-usuario.js"]');
+                if (scriptExistente) {
+                    console.log('📜 SPA: Script crear-usuario.js ya existe, esperando carga...');
+                    // Esperar un momento para que se cargue
+                    setTimeout(() => {
+                        this.inicializarCrearUsuario();
+                    }, 200);
+                    return;
+                }
+                
+                // Cargar el script de crear-usuario
+                const script = document.createElement('script');
+                script.src = '/js/crear-usuario.js';
+                script.async = false; // Cargar síncronamente para evitar problemas de timing
+                
+                script.onload = () => {
+                    console.log('✅ SPA: Script crear-usuario.js cargado exitosamente');
+                    setTimeout(() => {
+                        this.inicializarCrearUsuario();
+                    }, 100);
+                };
+                
+                script.onerror = () => {
+                    console.error('❌ SPA: Error cargando script crear-usuario.js');
+                    // Intentar usando jQuery si está disponible
+                    if (typeof $ !== 'undefined') {
+                        $.getScript('/js/crear-usuario.js')
+                            .done(() => {
+                                console.log('✅ SPA: Script crear-usuario.js cargado con jQuery');
+                                setTimeout(() => {
+                                    this.inicializarCrearUsuario();
+                                }, 100);
+                            })
+                            .fail(() => {
+                                console.error('❌ SPA: Error cargando crear-usuario.js con jQuery');
+                            });
+                    }
+                };
+                
+                document.head.appendChild(script);
+                
+            } else {
+                console.log('✅ SPA: CrearUsuario ya está disponible');
+                this.inicializarCrearUsuario();
+            }
+            
+        } catch (error) {
+            console.error('💥 SPA: Error en configurarEventosCrearUsuario:', error);
+        }
+    }
+    
+    inicializarCrearUsuario() {
+        console.log('🎬 SPA: Inicializando CrearUsuario...');
+        
+        try {
+            // Verificar que todos los elementos necesarios estén presentes
+            const elementosRequeridos = [
+                '#formulario-usuario',
+                '#nombre',
+                '#email',
+                '#rol',
+                '#btn-cancelar'
+            ];
+            
+            let elementosEncontrados = true;
+            elementosRequeridos.forEach(selector => {
+                const elemento = document.querySelector(selector);
+                if (!elemento) {
+                    console.warn(`⚠️ SPA: Elemento ${selector} no encontrado`);
+                    elementosEncontrados = false;
+                }
+            });
+            
+            if (!elementosEncontrados) {
+                console.warn('⚠️ SPA: No todos los elementos necesarios están presentes, reintentando...');
+                setTimeout(() => {
+                    this.inicializarCrearUsuario();
+                }, 200);
+                return;
+            }
+            
+            if (window.CrearUsuario && typeof window.CrearUsuario.init === 'function') {
+                console.log('🚀 SPA: Llamando CrearUsuario.init()...');
+                
+                // Asegurar que cualquier inicialización previa se limpie
+                if (typeof window.CrearUsuario.cleanup === 'function') {
+                    console.log('🧹 SPA: Limpiando inicialización previa...');
+                    window.CrearUsuario.cleanup();
+                }
+                
+                const result = window.CrearUsuario.init();
+                
+                if (result !== false) {
+                    console.log('✅ SPA: CrearUsuario inicializado exitosamente');
+                } else {
+                    console.warn('⚠️ SPA: CrearUsuario.init() retornó false, reintentando...');
+                    setTimeout(() => {
+                        this.inicializarCrearUsuario();
+                    }, 300);
+                }
+                
+            } else {
+                console.error('❌ SPA: window.CrearUsuario.init no está disponible');
+                setTimeout(() => {
+                    this.inicializarCrearUsuario();
+                }, 500);
+            }
+            
+        } catch (error) {
+            console.error('💥 SPA: Error en inicializarCrearUsuario:', error);
+        }
+    }
+
     configurarEventosVerUsuarios() {
         console.log('🔧 SPA: Configurando eventos para Ver Usuarios...');
         

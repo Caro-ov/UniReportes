@@ -85,11 +85,6 @@
                                         <label for="email" class="etiqueta-campo">Correo electrónico *</label>
                                         <input type="email" id="email" name="email" class="campo-entrada" required>
                                     </div>
-                                    
-                                    <div class="campo-formulario">
-                                        <label for="telefono" class="etiqueta-campo">Teléfono</label>
-                                        <input type="tel" id="telefono" name="telefono" class="campo-entrada">
-                                    </div>
                                 </div>
                             </div>
 
@@ -102,24 +97,8 @@
                                         <label for="rol" class="etiqueta-campo">Rol del usuario *</label>
                                         <select id="rol" name="rol" class="campo-entrada" required>
                                             <option value="">Seleccionar rol</option>
-                                            <option value="estudiante">Estudiante</option>
-                                            <option value="docente">Docente</option>
-                                            <option value="administrativo">Administrativo</option>
                                             <option value="monitor">Monitor</option>
-                                            <option value="administrador">Administrador</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="campo-formulario">
-                                        <label for="facultad" class="etiqueta-campo">Facultad</label>
-                                        <select id="facultad" name="facultad" class="campo-entrada">
-                                            <option value="">Seleccionar facultad</option>
-                                            <option value="ingenieria">Ingeniería</option>
-                                            <option value="ciencias">Ciencias</option>
-                                            <option value="medicina">Medicina</option>
-                                            <option value="derecho">Derecho</option>
-                                            <option value="economia">Economía</option>
-                                            <option value="artes">Artes</option>
+                                            <option value="admin">Administrador</option>
                                         </select>
                                     </div>
                                     
@@ -130,41 +109,25 @@
                                 </div>
                             </div>
 
-                            <!-- Permisos -->
+                            <!-- Información adicional -->
                             <div class="seccion-formulario-grupo">
-                                <h3 class="titulo-grupo">Permisos del Usuario</h3>
+                                <h3 class="titulo-grupo">Información Adicional</h3>
                                 
-                                <div class="grupo-permisos">
-                                    <div class="permiso-item">
-                                        <input type="checkbox" id="puede_crear_reportes" name="permisos[]" value="crear_reportes" checked>
-                                        <label for="puede_crear_reportes">Puede crear reportes</label>
-                                    </div>
-                                    
-                                    <div class="permiso-item">
-                                        <input type="checkbox" id="puede_ver_reportes" name="permisos[]" value="ver_reportes" checked>
-                                        <label for="puede_ver_reportes">Puede ver todos los reportes</label>
-                                    </div>
-                                    
-                                    <div class="permiso-item">
-                                        <input type="checkbox" id="puede_editar_reportes" name="permisos[]" value="editar_reportes">
-                                        <label for="puede_editar_reportes">Puede editar reportes</label>
-                                    </div>
-                                    
-                                    <div class="permiso-item">
-                                        <input type="checkbox" id="puede_eliminar_reportes" name="permisos[]" value="eliminar_reportes">
-                                        <label for="puede_eliminar_reportes">Puede eliminar reportes</label>
-                                    </div>
-                                    
-                                    <div class="permiso-item">
-                                        <input type="checkbox" id="es_administrador" name="permisos[]" value="administrador">
-                                        <label for="es_administrador">Permisos de administrador</label>
+                                <div class="grupo-campos">
+                                    <div class="campo-formulario">
+                                        <label for="contrasena" class="etiqueta-campo">Contraseña temporal *</label>
+                                        <input type="password" id="contrasena" name="contrasena" class="campo-entrada" required>
+                                        <div class="ayuda-campo">
+                                            <span class="material-symbols-outlined">info</span>
+                                            El usuario deberá cambiar esta contraseña en su primer acceso.
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Botones de acción -->
                             <div class="botones-formulario">
-                                <button type="button" class="boton-cancelar" onclick="window.location.href='admin-dashboard.html'">
+                                <button type="button" class="boton-cancelar" id="btn-cancelar">
                                     <span class="material-symbols-outlined">close</span>
                                     Cancelar
                                 </button>

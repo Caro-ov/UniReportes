@@ -102,10 +102,10 @@ export async function createUser(req, res) {
         const { nombre, correo, codigo, contrasena, rol } = req.body;
 
         // Validar campos requeridos
-        if (!nombre || !correo || !codigo || !contrasena) {
+        if (!nombre || !correo || !contrasena) {
             return res.status(400).json({
                 success: false,
-                message: 'Todos los campos son requeridos'
+                message: 'Nombre, correo y contraseña son campos requeridos'
             });
         }
 
@@ -135,13 +135,15 @@ export async function createUser(req, res) {
             });
         }
 
-        // Verificar si el código ya existe
-        const codeExists = await userModel.studentCodeExists(codigo);
-        if (codeExists) {
-            return res.status(400).json({
-                success: false,
-                message: 'Ya existe un usuario con ese código'
-            });
+        // Verificar si el código ya existe (solo si se proporciona)
+        if (codigo && codigo.trim()) {
+            const codeExists = await userModel.studentCodeExists(codigo.trim());
+            if (codeExists) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Ya existe un usuario con ese código'
+                });
+            }
         }
 
         // Validar rol
@@ -154,7 +156,7 @@ export async function createUser(req, res) {
         const userData = {
             nombre: nombre.trim(),
             correo: correo.trim().toLowerCase(),
-            codigo: codigo.trim(),
+            codigo_estudiante: codigo && codigo.trim() ? codigo.trim() : null,
             contrasenaHash,
             rol: userRole_new
         };
