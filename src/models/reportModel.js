@@ -37,12 +37,14 @@ export async function getAllReports(limit = 50, offset = 0) {
             u.correo as usuario_correo,
             c.nombre as categoria_nombre,
             s.nombre as salon_nombre,
-            ub.nombre as ubicacion_nombre
+            ub.nombre as ubicacion_nombre,
+            e.nombre as estado
          FROM reportes r
          LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
          LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
          LEFT JOIN salones s ON r.id_salon = s.id_salon
          LEFT JOIN ubicaciones ub ON s.ubicacion = ub.id_ubicacion
+         LEFT JOIN estados e ON r.id_estado = e.id_estado
          ORDER BY r.fecha_creacion DESC
          LIMIT ? OFFSET ?`,
         [limit, offset]
@@ -58,10 +60,12 @@ export async function getReportsByUser(userId, limit = 50, offset = 0) {
         `SELECT 
             r.*,
             u.nombre as usuario_nombre,
-            c.nombre as categoria_nombre
+            c.nombre as categoria_nombre,
+            e.nombre as estado
          FROM reportes r
          LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
          LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
+         LEFT JOIN estados e ON r.id_estado = e.id_estado
          WHERE r.id_usuario = ?
          ORDER BY r.fecha_creacion DESC
          LIMIT ? OFFSET ?`,
@@ -80,10 +84,12 @@ export async function getReportById(reportId) {
             u.nombre as usuario_nombre,
             u.correo as usuario_correo,
             c.nombre as categoria_nombre,
-            c.descripcion as categoria_descripcion
+            c.descripcion as categoria_descripcion,
+            e.nombre as estado
          FROM reportes r
          LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
          LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
+         LEFT JOIN estados e ON r.id_estado = e.id_estado
          WHERE r.id_reporte = ?`,
         [reportId]
     );

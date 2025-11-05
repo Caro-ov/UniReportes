@@ -104,7 +104,7 @@ $(document).ready(function() {
         if (reportes.length === 0) {
             tbody.append(`
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">
                         No se encontraron reportes que coincidan con los filtros seleccionados.
                     </td>
                 </tr>
@@ -147,15 +147,17 @@ $(document).ready(function() {
                     <td class="usuario">${reporte.usuario_nombre || 'Sin usuario'}</td>
                     <td class="fecha">${fechaFormateada}</td>
                     <td class="acciones">
-                        <button class="btn-accion btn-ver" title="Ver detalles" data-action="ver" data-id="${reporte.id_reporte}">
-                            <span class="material-symbols-outlined">visibility</span>
-                        </button>
-                        <button class="btn-accion btn-editar" title="Editar" data-action="editar" data-id="${reporte.id_reporte}">
-                            <span class="material-symbols-outlined">edit</span>
-                        </button>
-                        <button class="btn-accion btn-eliminar" title="Eliminar" data-action="eliminar" data-id="${reporte.id_reporte}">
-                            <span class="material-symbols-outlined">delete</span>
-                        </button>
+                        <div class="contenedor-acciones">
+                            <button class="btn-accion btn-ver" title="Ver detalles" data-action="ver" data-id="${reporte.id_reporte}">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </button>
+                            <button class="btn-accion btn-editar" title="Editar" data-action="editar" data-id="${reporte.id_reporte}">
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+                            <button class="btn-accion btn-eliminar" title="Eliminar" data-action="eliminar" data-id="${reporte.id_reporte}">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `);
@@ -318,13 +320,25 @@ $(document).ready(function() {
 
     // Funciones de acciones
     function verDetalleReporte(id) {
-        // Redirigir a la página de detalle del reporte
-        window.location.href = `detalle-reporte.html?id=${id.replace('#', '')}`;
+        console.log('👁️ Ver detalles del reporte:', id);
+        // Usar navegación SPA si está disponible
+        if (window.spaNav) {
+            window.spaNav.navigateTo('detalle-reporte', `?id=${id}`);
+        } else {
+            // Fallback a navegación tradicional
+            window.location.href = `detalle-reporte.html?id=${id}`;
+        }
     }
 
     function editarReporte(id) {
-        // Redirigir a la página de edición del reporte
-        window.location.href = `crear-reporte.html?edit=${id.replace('#', '')}`;
+        console.log('✏️ Editar reporte:', id);
+        // Usar navegación SPA si está disponible
+        if (window.spaNav) {
+            window.spaNav.navigateTo('crear-reporte', `?edit=${id}`);
+        } else {
+            // Fallback a navegación tradicional
+            window.location.href = `crear-reporte.html?edit=${id}`;
+        }
     }
 
     function eliminarReporte(id) {
@@ -492,6 +506,25 @@ window.recargarReportes = function() {
         console.error('❌ Función cargarReportes no disponible');
     }
 };
+
+// Función global para manejar explorar reportes desde SPA
+window.manejarExplorarReportes = function() {
+    console.log('🔄 SPA: Recargando datos de Explorar Reportes...');
+    
+    // Pequeño retraso para la navegación SPA
+    setTimeout(() => {
+        if (typeof cargarReportes === 'function') {
+            cargarReportes();
+            cargarCategoriasFiltro();
+            cargarEstadosFiltro();
+        } else {
+            console.error('❌ Funciones no disponibles para SPA');
+        }
+    }, 150);
+};
+
+// Alias para compatibilidad
+window.recargarExplorarReportes = window.manejarExplorarReportes;
 
 // Exportar funciones para uso global si es necesario
 window.ExplorarReportes = {

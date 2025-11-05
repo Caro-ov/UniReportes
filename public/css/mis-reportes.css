@@ -417,6 +417,16 @@ body {
     text-overflow: ellipsis;
 }
 
+.celda-categoria {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 13px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .celda-estado {
     font-size: 14px;
 }
@@ -576,6 +586,10 @@ body {
     .celda-asunto {
         max-width: 200px;
     }
+    
+    .celda-categoria {
+        max-width: 120px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -618,5 +632,9 @@ body {
     
     .celda-asunto {
         max-width: 150px;
+    }
+    
+    .celda-categoria {
+        max-width: 100px;
     }
 }

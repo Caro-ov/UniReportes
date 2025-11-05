@@ -19,236 +19,22 @@
     <link rel="stylesheet" href="css/components.css"/>
     <link rel="stylesheet" href="css/explorar-reportes.css"/>
     
-    <!-- Estilos de emergencia para asegurar que se vean -->
-    <style>
-        /* Estilos de emergencia */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', 'Noto Sans', sans-serif;
-            background-color: #F9FAFB;
-            color: #1F2937;
-            line-height: 1.6;
-        }
-        
-        .contenedor-principal {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        .sidebar {
-            width: 256px;
-            background-color: #F9FAFB;
-            position: fixed;
-            left: 0;
-            top: 0;
-            height: 100vh;
-            z-index: 100;
-            overflow-y: auto;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        .contenido-wrapper {
-            flex: 1;
-            margin-left: 256px;
-            background-color: #F9FAFB;
-            min-height: 100vh;
-            padding-top: 64px;
-        }
-        
-        .header-principal {
-            position: fixed;
-            top: 0;
-            left: 256px;
-            right: 0;
-            height: 64px;
-            background: #FFFFFF;
-            border-bottom: 1px solid #E5E7EB;
-            z-index: 50;
-        }
-        
-        .contenido-principal {
-            padding: 24px;
-        }
-        
-        /* Estilos adicionales para la tabla */
-        .seccion-reportes-recientes {
-            background: #FFFFFF;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            margin-bottom: 24px;
-            overflow: hidden;
-        }
-        
-        .header-seccion {
-            padding: 24px;
-            border-bottom: 1px solid #E5E7EB;
-        }
-        
-        .titulo-seccion {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1F2937;
-            margin-bottom: 20px;
-        }
-        
-        .filtros-reportes {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        
-        .filtro-buscar, .filtro-select {
-            padding: 10px 12px;
-            border: 2px solid #E5E7EB;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #FFFFFF;
-        }
-        
-        .tabla-reportes {
-            width: 100%;
-            border-collapse: collapse;
-            background: #FFFFFF;
-        }
-        
-        .tabla-reportes th {
-            background: #F9FAFB;
-            padding: 12px 16px;
-            text-align: left;
-            font-weight: 600;
-            color: #6B7280;
-            border-bottom: 2px solid #E5E7EB;
-        }
-        
-        .tabla-reportes td {
-            padding: 16px;
-            border-bottom: 1px solid #E5E7EB;
-        }
-        
-        .estado-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .estado-abierto {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-        }
-        
-        .estado-proceso {
-            background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
-        }
-        
-        .estado-resuelto {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-        }
-        
-        /* Animación de carga */
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-    </style>
 </head>
-<body data-page="explore-reports" data-title="UniReportes - Explorar Reportes" data-css="explorar-reportes">
+<body data-page="explorar-reportes" data-title="UniReportes - Explorar Reportes" data-css="explorar-reportes">
     <div class="contenedor-principal">
         <!-- Overlay para móvil -->
         <div class="overlay"></div>
         
         <!-- Sidebar de navegación -->
-        <aside class="sidebar" id="sidebar-principal">
-            <!-- Contenido del sidebar de administrador -->
-            <div class="sidebar-content">
-                <!-- Logo y título -->
-                <div class="header-sidebar">
-                    <span class="material-symbols-outlined logo-icon">admin_panel_settings</span>
-                    <h1 class="logo-titulo">UniReportes Admin</h1>
-                </div>
-                
-                <!-- Navegación principal -->
-                <nav class="navegacion-principal sidebar-nav">
-                    <a href="admin-dashboard.html" class="nav-item" data-page="admin-home">
-                        <span class="material-symbols-outlined">dashboard</span>
-                        <span class="nav-text">Inicio</span>
-                    </a>
-                    <a href="explorar-reportes.html" class="nav-item active" data-page="explore-reports">
-                        <span class="material-symbols-outlined">search</span>
-                        <span class="nav-text">Explorar reportes</span>
-                    </a>
-                    <a href="crear-reporte.html" class="nav-item" data-page="new-report">
-                        <span class="material-symbols-outlined">add_circle</span>
-                        <span class="nav-text">Nuevo reporte</span>
-                    </a>
-                    <a href="crear-usuario.html" class="nav-item" data-page="create-user">
-                        <span class="material-symbols-outlined">person_add</span>
-                        <span class="nav-text">Crear usuario</span>
-                    </a>
-                </nav>
-            </div>
-
-            <!-- Footer del sidebar -->
-            <div class="sidebar-footer">
-                <a href="admin-settings.html" class="nav-item" data-page="admin-settings">
-                    <span class="material-symbols-outlined">settings</span>
-                    <span class="nav-text">Configuración</span>
-                </a>
-            </div>
+        <aside class="sidebar" id="sidebar-container">
+            <!-- El contenido se cargará dinámicamente desde components/sidebar-admin.html -->
         </aside>
 
         <!-- Contenido wrapper -->
         <div class="contenido-wrapper">
             <!-- Header superior -->
-            <header class="header-principal">
-                <!-- Contenido del header -->
-                <div class="header-contenido">
-                    <button class="boton-menu-movil">
-                        <span class="material-symbols-outlined">menu</span>
-                    </button>
-                    <div class="controles-usuario">
-                        <button class="boton-notificaciones notification-btn">
-                            <span class="material-symbols-outlined">notifications</span>
-                        </button>
-                        <div class="perfil-completo">
-                            <div class="usuario-info-header">
-                                <p class="usuario-nombre-header">Juan Pérez</p>
-                                <p class="usuario-rol-header">Administrador</p>
-                            </div>
-                            <div class="dropdown-perfil user-dropdown">
-                                <button class="perfil-usuario" id="dropdownPerfil">
-                                    <div class="avatar-usuario"></div>
-                                </button>
-                                <div class="menu-desplegable" id="menuPerfil">
-                                    <a href="perfil.html" class="opcion-menu">
-                                        <span class="material-symbols-outlined">person</span>
-                                        Mi perfil
-                                    </a>
-                                    <a href="#" class="opcion-menu">
-                                        <span class="material-symbols-outlined">settings</span>
-                                        Configuración
-                                    </a>
-                                    <a href="ayuda.html" class="opcion-menu">
-                                        <span class="material-symbols-outlined">help</span>
-                                        Ayuda
-                                    </a>
-                                    <a href="#" class="opcion-menu salir">
-                                        <span class="material-symbols-outlined">logout</span>
-                                        Cerrar sesión
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <header class="header-principal" id="header-container">
+                <!-- El contenido se cargará dinámicamente desde components/header.html -->
             </header>
 
             <!-- Contenido principal -->
@@ -333,21 +119,12 @@
     </div>
 
     <!-- Scripts -->
+    <!-- Sistema de componentes (debe cargarse primero) -->
+    <script src="js/components.js"></script>
     <script>
-        // Inicializar funcionalidad del header
+        // Inicializar funcionalidad específica de la página
         $(document).ready(function() {
-            // Dropdown del perfil
-            $('#dropdownPerfil').click(function(e) {
-                e.stopPropagation();
-                $('#menuPerfil').toggleClass('mostrar');
-            });
-
-            $(document).click(function() {
-                $('#menuPerfil').removeClass('mostrar');
-            });
-
-            // Marcar elemento activo en el sidebar
-            $('.nav-item[data-page="explore-reports"]').addClass('active');
+            // El marcado del elemento activo se manejará automáticamente por components.js
         });
     </script>
     <!-- Sistema de navegación SPA -->
