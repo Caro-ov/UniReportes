@@ -294,10 +294,56 @@ export async function getTrendsChart(req, res) {
     }
 }
 
+/**
+ * Obtener estadísticas para las tarjetas del admin dashboard
+ */
+export async function getAdminCardStats(req, res) {
+    try {
+        const userRole = req.session.user?.rol;
+
+        if (userRole !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Solo los administradores pueden ver estas estadísticas'
+            });
+        }
+
+        // Obtener estadísticas de reportes
+        const [reportesResults] = await pool.execute(`
+            SELECT 
+                COUNT(*) as total_reportes,
+                SUM(CASE WHEN e.nombre = 'pendiente' THEN 1 ELSE 0 END) as reportes_pendientes,
+                SUM(CASE WHEN e.nombre = 'resuelto' AND MONTH(r.fecha_creacion) = MONTH(CURDATE()) AND YEAR(r.fecha_creacion) = YEAR(CURDATE()) THEN 1 ELSE 0 END) as resueltos_mes
+            FROM reportes r
+            LEFT JOIN estados e ON r.id_estado = e.id_estado
+        `);
+
+        const stats = {
+            total_reportes: parseInt(reportesResults[0].total_reportes) || 0,
+            reportes_pendientes: parseInt(reportesResults[0].reportes_pendientes) || 0,
+            resueltos_mes: parseInt(reportesResults[0].resueltos_mes) || 0
+        };
+
+        console.log('Estadísticas calculadas:', stats);
+
+        res.json({
+            success: true,
+            data: stats
+        });
+    } catch (error) {
+        console.error('Error al obtener estadísticas de tarjetas:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor'
+        });
+    }
+}
+
 export default {
     getDashboardStats,
     getRecentReports,
     getActivitySummary,
     getCategoryStats,
-    getTrendsChart
+    getTrendsChart,
+    getAdminCardStats
 };

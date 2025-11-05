@@ -12,6 +12,8 @@ import userRoutes from './src/routes/userRoutes.js';
 import dashboardRoutes from './src/routes/dashboardRoutes.js';
 import loadingRoutes from './src/routes/loadingRoutes.js'; // Solo para transición login -> dashboard
 import pool from './src/config/db.js';
+import objectRoutes from './src/routes/objectRoutes.js';
+import ubicacionRoutes from './src/routes/ubicacionRoutes.js';
 
 // Configurar variables de entorno (soporta archivos cifrados)
 setupEnv();
@@ -61,12 +63,23 @@ app.use('/components', express.static(path.join(__dirname, 'public', 'components
 // Rutas de autenticación
 app.use('/auth', authRoutes);
 
+// Endpoint de prueba
+app.get('/test', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Servidor funcionando correctamente',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Rutas API
 app.use('/api/reports', reportRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/loading', loadingRoutes); // Solo para transición login -> dashboard
+app.use('/api/objects', objectRoutes);
+app.use('/api/ubicaciones', ubicacionRoutes);
 
 // Rutas de páginas (deben ir al final)
 app.use('/', pageRoutes);
@@ -76,8 +89,9 @@ app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
-app.listen(PORT, async () => {
+const server = app.listen(PORT, async () => {
   console.log(`Servidor iniciado en http://localhost:${PORT}`);
+  console.log(`Proceso PID: ${process.pid}`);
   console.log('🔗 Probando conexión MySQL...');
   
   // Probar conexión a MySQL al levantar
@@ -88,5 +102,21 @@ app.listen(PORT, async () => {
   } catch (err) {
     console.error('❌ Error conectando a MySQL:', err.message);
     console.log('💡 Verifica que MySQL esté corriendo y las credenciales en .env sean correctas');
+    console.log('⚠️ El servidor continuará funcionando sin base de datos');
   }
+  
+  console.log('🌐 Servidor listo para recibir peticiones...');
+});
+
+server.on('error', (err) => {
+  console.error('❌ Error del servidor:', err);
+});
+
+// Capturar errores no manejados
+process.on('uncaughtException', (err) => {
+  console.error('❌ Excepción no capturada:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Promesa rechazada no manejada:', reason);
 });

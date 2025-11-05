@@ -62,57 +62,65 @@
                     </div>
 
                     <div class="tarjeta-formulario">
-                        <form class="formulario-reporte">
-                            <!-- Tipo de problema -->
+                        <form class="formulario-reporte" id="formulario-reporte">
+                            <!-- Categoría -->
                             <div class="campo-formulario">
-                                <label for="problem-type" class="etiqueta-campo">Tipo de problema</label>
-                                <select id="problem-type" name="problem-type" class="select-personalizado">
-                                    <option disabled selected>Selecciona un problema común...</option>
-                                    <option value="aire-danado">Aire acondicionado dañado</option>
-                                    <option value="bano-mal-estado">Baño en mal estado</option>
-                                    <option value="sin-luz">Aula sin luz</option>
-                                    <option value="proyector-falla">Proyector no funciona</option>
-                                    <option value="mobiliario-roto">Mobiliario roto (silla, mesa)</option>
-                                    <option value="falta-limpieza">Falta de limpieza</option>
-                                    <option value="otro">Otro (describe a continuación)</option>
+                                <label for="categoria" class="etiqueta-campo">Categoría <span class="requerido">*</span></label>
+                                <select id="categoria" name="categoria" class="select-personalizado" required>
+                                    <option disabled selected value="">Selecciona una categoría...</option>
                                 </select>
+                                <span class="texto-ayuda">Selecciona primero una categoría para ver los objetos disponibles</span>
+                            </div>
+
+                            <!-- Objeto -->
+                            <div class="campo-formulario">
+                                <label for="objeto" class="etiqueta-campo">Objeto</label>
+                                <select id="objeto" name="objeto" class="select-personalizado" disabled>
+                                    <option disabled selected value="">Primero selecciona una categoría...</option>
+                                </select>
+                                <span class="texto-ayuda">Selecciona primero una categoría para ver los objetos disponibles</span>
+                            </div>
+
+                            <!-- Título del reporte -->
+                            <div class="campo-formulario">
+                                <label for="titulo" class="etiqueta-campo">Título del reporte <span class="requerido">*</span></label>
+                                <div class="campo-con-icono">
+                                    <span class="material-symbols-outlined icono-campo">description</span>
+                                    <input type="text" id="titulo" name="titulo" 
+                                           placeholder="Ej: Aire acondicionado dañado en Aula 203" 
+                                           class="input-con-icono" required/>
+                                </div>
                             </div>
 
                             <!-- Ubicación -->
                             <div class="campo-formulario">
-                                <label for="location" class="etiqueta-campo">Ubicación</label>
+                                <label for="ubicacion" class="etiqueta-campo">Ubicación <span class="requerido">*</span></label>
                                 <div class="campo-con-icono">
-                                    <span class="material-symbols-outlined icono-campo">location_on</span>
-                                    <input type="text" id="location" name="location" 
-                                           placeholder="Ej: Edificio A, Salón 203" 
-                                           class="input-con-icono"/>
+                                    <span class="material-symbols-outlined icono-campo">business</span>
+                                    <select id="ubicacion" name="ubicacion" class="input-con-icono select-personalizado" required>
+                                        <option disabled selected value="">Selecciona una ubicación...</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <!-- Fecha y Hora -->
-                            <div class="campos-fila">
-                                <div class="campo-formulario">
-                                    <label for="date" class="etiqueta-campo">Fecha</label>
-                                    <div class="campo-con-icono">
-                                        <span class="material-symbols-outlined icono-campo">calendar_today</span>
-                                        <input type="date" id="date" name="date" class="input-con-icono"/>
-                                    </div>
+                            <!-- Salón -->
+                            <div class="campo-formulario">
+                                <label for="salon" class="etiqueta-campo">Salón <span class="requerido">*</span></label>
+                                <div class="campo-con-icono">
+                                    <span class="material-symbols-outlined icono-campo">room</span>
+                                    <select id="salon" name="salon" class="input-con-icono select-personalizado" disabled required>
+                                        <option disabled selected value="">Primero selecciona una ubicación...</option>
+                                    </select>
                                 </div>
-                                <div class="campo-formulario">
-                                    <label for="time" class="etiqueta-campo">Hora</label>
-                                    <div class="campo-con-icono">
-                                        <span class="material-symbols-outlined icono-campo">schedule</span>
-                                        <input type="time" id="time" name="time" class="input-con-icono"/>
-                                    </div>
-                                </div>
+                                <span class="texto-ayuda">Selecciona primero una ubicación para ver los salones disponibles</span>
                             </div>
 
                             <!-- Descripción -->
                             <div class="campo-formulario">
-                                <label for="description" class="etiqueta-campo">Descripción (opcional)</label>
-                                <textarea id="description" name="description" rows="4" 
-                                          placeholder="Añade más detalles si es necesario. ¿Qué pasó? ¿Cuándo lo notaste?"
-                                          class="textarea-personalizado"></textarea>
+                                <label for="descripcion" class="etiqueta-campo">Descripción <span class="requerido">*</span></label>
+                                <textarea id="descripcion" name="descripcion" rows="4" 
+                                          placeholder="Añade detalles del problema. ¿Qué pasó? ¿Cuándo lo notaste?"
+                                          class="textarea-personalizado" required></textarea>
                             </div>
 
                             <!-- Subir foto -->
@@ -138,6 +146,7 @@
                             <!-- Botón de envío -->
                             <div class="contenedor-boton-envio">
                                 <button type="submit" class="boton-envio">
+                                    <span class="material-symbols-outlined">send</span>
                                     Enviar Reporte
                                 </button>
                             </div>

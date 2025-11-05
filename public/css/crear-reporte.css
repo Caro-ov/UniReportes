@@ -97,12 +97,16 @@ body {
     margin-bottom: 32px;
 }
 
-.titulo-pagina {
-    font-size: 30px;
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    color: var(--text-primary);
-    margin-bottom: 8px;
+.encabezado-pagina .titulo-pagina,
+body[data-page="crear-reporte"] .titulo-pagina,
+body[data-css="crear-reporte"] .titulo-pagina {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important;
+    color: var(--primary-color) !important;
+    margin-bottom: 8px !important;
+    text-align: left !important;
+    display: block !important;
 }
 
 .descripcion-pagina {

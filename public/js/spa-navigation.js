@@ -431,6 +431,24 @@ class SPANavigation {
                     this.manejarCrearUsuario();
                 }, 200);
             }
+            
+            // Manejar crear-reporte específicamente aquí
+            if (page === 'crear-reporte') {
+                console.log('🎯 SPA: Manejando crear-reporte directamente...');
+                // Dar más tiempo para que el DOM se estabilice
+                setTimeout(() => {
+                    this.manejarCrearReporte();
+                }, 200);
+            }
+            
+            // Manejar explorar-reportes específicamente aquí
+            if (page === 'explorar-reportes') {
+                console.log('🎯 SPA: Manejando explorar-reportes directamente...');
+                // Dar más tiempo para que el DOM se estabilice
+                setTimeout(() => {
+                    this.manejarExplorarReportes();
+                }, 200);
+            }
         }, 50);
     }
     
@@ -770,6 +788,339 @@ class SPANavigation {
     clearCache() {
         this.pageCache.clear();
         console.log('Cache de páginas limpiado');
+    }
+    
+    // Función específica para manejar la página de crear-reporte
+    async manejarCrearReporte() {
+        console.log('🚀 SPA: Iniciando manejo directo de crear-reporte...');
+        
+        try {
+            // Esperar a que el DOM esté disponible
+            const esperarContenido = () => {
+                return new Promise((resolve) => {
+                    const checkearDOM = () => {
+                        const categoria = document.getElementById('categoria');
+                        const objeto = document.getElementById('objeto');
+                        const titulo = document.getElementById('titulo');
+                        
+                        if (categoria && objeto && titulo) {
+                            console.log('✅ SPA: DOM de crear-reporte está listo');
+                            resolve();
+                        } else {
+                            console.log('⏳ SPA: Esperando DOM de crear-reporte...');
+                            setTimeout(checkearDOM, 50);
+                        }
+                    };
+                    checkearDOM();
+                });
+            };
+            
+            await esperarContenido();
+            
+            // Cargar el script específico de crear-reporte
+            setTimeout(() => {
+                this.configurarEventosCrearReporte();
+            }, 100);
+            
+        } catch (error) {
+            console.error('💥 SPA: Error en manejarCrearReporte:', error);
+        }
+    }
+    
+    configurarEventosCrearReporte() {
+        console.log('🔧 SPA: Configurando eventos para Crear Reporte...');
+        
+        try {
+            // Verificar si el script de crear-reporte ya está cargado
+            const scriptExistente = document.querySelector('script[src*="crear-reporte.js"]');
+            if (scriptExistente) {
+                console.log('📜 SPA: Script crear-reporte.js ya existe, reinicializando...');
+                this.inicializarCrearReporte();
+                return;
+            }
+            
+            // Cargar el script de crear-reporte
+            console.log('📦 SPA: Cargando script crear-reporte.js...');
+            const script = document.createElement('script');
+            script.src = '/js/crear-reporte.js';
+            script.async = false;
+            
+            script.onload = () => {
+                console.log('✅ SPA: Script crear-reporte.js cargado exitosamente');
+                setTimeout(() => {
+                    this.inicializarCrearReporte();
+                }, 100);
+            };
+            
+            script.onerror = () => {
+                console.error('❌ SPA: Error cargando script crear-reporte.js');
+                // Intentar con jQuery
+                if (typeof $ !== 'undefined') {
+                    $.getScript('/js/crear-reporte.js')
+                        .done(() => {
+                            console.log('✅ SPA: Script crear-reporte.js cargado con jQuery');
+                            setTimeout(() => {
+                                this.inicializarCrearReporte();
+                            }, 100);
+                        })
+                        .fail(() => {
+                            console.error('❌ SPA: Error cargando crear-reporte.js con jQuery');
+                        });
+                }
+            };
+            
+            document.head.appendChild(script);
+            
+        } catch (error) {
+            console.error('💥 SPA: Error en configurarEventosCrearReporte:', error);
+        }
+    }
+    
+    inicializarCrearReporte() {
+        console.log('🎬 SPA: Inicializando CrearReporte...');
+        
+        try {
+            // Verificar que jQuery esté disponible
+            if (typeof $ === 'undefined') {
+                console.error('❌ SPA: jQuery no está disponible para CrearReporte');
+                return;
+            }
+            
+            // Si la función global está disponible, usarla
+            if (typeof window.inicializarCrearReporte === 'function') {
+                console.log('✅ SPA: Usando función inicializarCrearReporte global');
+                window.inicializarCrearReporte();
+                return;
+            }
+            
+            // Si no está disponible, cargar categorías y ubicaciones directamente
+            console.log('📦 SPA: Función global no disponible, cargando datos directamente...');
+            this.cargarCategoriasDirecta();
+            this.cargarUbicacionesDirecta();
+            this.configurarEventosFormulario();
+            
+        } catch (error) {
+            console.error('💥 SPA: Error en inicializarCrearReporte:', error);
+        }
+    }
+    
+    async cargarCategoriasDirecta() {
+        console.log('🔄 SPA: Cargando categorías directamente...');
+        try {
+            const res = await fetch('/api/categories');
+            const json = await res.json();
+            if (res.ok && json.success) {
+                const categorias = json.data || [];
+                const $sel = $('#categoria');
+                $sel.html('<option disabled selected value="">Selecciona una categoría...</option>');
+                categorias.forEach(cat => {
+                    $sel.append(`<option value="${cat.id_categoria}">${cat.nombre}</option>`);
+                });
+                console.log('✅ SPA: Categorías cargadas exitosamente');
+                
+                // Configurar evento de cambio para cargar objetos
+                $sel.off('change.spa').on('change.spa', (e) => {
+                    const categoriaId = e.target.value;
+                    if (categoriaId) {
+                        this.cargarObjetosDirecta(categoriaId);
+                    }
+                });
+            } else {
+                console.error('❌ SPA: Error al cargar categorías', json);
+            }
+        } catch (err) {
+            console.error('❌ SPA: Error cargando categorías', err);
+        }
+    }
+    
+    async cargarObjetosDirecta(categoriaId) {
+        console.log('🔄 SPA: Cargando objetos para categoría:', categoriaId);
+        const $sel = $('#objeto');
+        $sel.prop('disabled', true).html('<option>Cargando...</option>');
+        try {
+            const res = await fetch(`/api/objects/categoria/${categoriaId}`);
+            const json = await res.json();
+            if (res.ok && json.success) {
+                const objetos = json.data || [];
+                if (objetos.length === 0) {
+                    $sel.html('<option disabled selected value="">No hay objetos para esta categoría</option>');
+                    $sel.prop('disabled', true);
+                } else {
+                    $sel.html('<option disabled selected value="">Selecciona un objeto (opcional)</option>');
+                    objetos.forEach(o => $sel.append(`<option value="${o.id_objeto}">${o.nombre}</option>`));
+                    $sel.prop('disabled', false);
+                }
+            } else {
+                console.error('❌ SPA: Error al cargar objetos', json);
+                $sel.html('<option disabled selected value="">Error al cargar objetos</option>');
+                $sel.prop('disabled', true);
+            }
+        } catch (err) {
+            console.error('❌ SPA: Error cargando objetos', err);
+            $sel.html('<option disabled selected value="">Error al conectar</option>');
+            $sel.prop('disabled', true);
+        }
+    }
+    
+    async cargarUbicacionesDirecta() {
+        console.log('� SPA: Cargando ubicaciones directamente...');
+        try {
+            const res = await fetch('/api/ubicaciones');
+            const json = await res.json();
+            if (res.ok && json.success) {
+                const ubicaciones = json.data || [];
+                const $sel = $('#ubicacion');
+                $sel.html('<option disabled selected value="">Selecciona una ubicación...</option>');
+                ubicaciones.forEach(ubicacion => {
+                    $sel.append(`<option value="${ubicacion.id_ubicacion}">${ubicacion.nombre}</option>`);
+                });
+                console.log('✅ SPA: Ubicaciones cargadas exitosamente');
+                
+                // Configurar evento de cambio para cargar salones
+                $sel.off('change.spa').on('change.spa', (e) => {
+                    const idUbicacion = e.target.value;
+                    if (idUbicacion) {
+                        this.cargarSalonesDirecta(idUbicacion);
+                    }
+                });
+            } else {
+                console.error('❌ SPA: Error al cargar ubicaciones', json);
+            }
+        } catch (err) {
+            console.error('❌ SPA: Error cargando ubicaciones', err);
+        }
+    }
+
+    async cargarSalonesDirecta(idUbicacion) {
+        console.log('🔄 SPA: Cargando salones para ubicación ID:', idUbicacion);
+        const $salon = $('#salon');
+        $salon.prop('disabled', true).html('<option>Cargando salones...</option>');
+        
+        try {
+            const res = await fetch(`/api/ubicaciones/${idUbicacion}/salones`);
+            const json = await res.json();
+            if (res.ok && json.success) {
+                const salones = json.data || [];
+                if (salones.length === 0) {
+                    $salon.html('<option disabled selected value="">No hay salones registrados para esta ubicación</option>');
+                    $salon.prop('disabled', true);
+                } else {
+                    $salon.html('<option disabled selected value="">Selecciona un salón...</option>');
+                    salones.forEach(salon => {
+                        $salon.append(`<option value="${salon.id_salon}">${salon.nombre}</option>`);
+                    });
+                    $salon.prop('disabled', false);
+                }
+            } else {
+                console.error('❌ SPA: Error al cargar salones', json);
+                $salon.html('<option disabled selected value="">Error al cargar salones</option>');
+                $salon.prop('disabled', true);
+            }
+        } catch (err) {
+            console.error('❌ SPA: Error cargando salones', err);
+            $salon.html('<option disabled selected value="">Error al conectar</option>');
+            $salon.prop('disabled', true);
+        }
+    }
+    
+    configurarEventosFormulario() {
+        console.log('🔧 SPA: Configurando eventos del formulario...');
+        
+        // Los eventos de cambio ya se configuran en las funciones de carga
+        // Aquí se pueden agregar otros eventos si es necesario
+        console.log('✅ SPA: Eventos del formulario configurados');
+    }
+    
+    // Función específica para manejar la página de explorar-reportes
+    async manejarExplorarReportes() {
+        console.log('🚀 SPA: Iniciando manejo directo de explorar-reportes...');
+        
+        try {
+            // Esperar a que el DOM esté disponible
+            const esperarContenido = () => {
+                return new Promise((resolve) => {
+                    const checkearDOM = () => {
+                        const tabla = document.getElementById('tabla-reportes-body');
+                        const filtros = document.querySelector('.filtro-buscar');
+                        
+                        if (tabla && filtros) {
+                            console.log('✅ SPA: DOM de explorar-reportes está listo');
+                            resolve();
+                        } else {
+                            console.log('⏳ SPA: Esperando DOM de explorar-reportes...');
+                            setTimeout(checkearDOM, 50);
+                        }
+                    };
+                    checkearDOM();
+                });
+            };
+            
+            await esperarContenido();
+            
+            console.log('🔄 SPA: Llamando cargarReportes desde ExplorarReportes...');
+            
+            // Intentar ejecutar la función cargarReportes directamente
+            setTimeout(() => {
+                try {
+                    // Si la función está disponible globalmente
+                    if (typeof cargarReportes === 'function') {
+                        console.log('📞 SPA: Ejecutando cargarReportes directamente');
+                        cargarReportes();
+                    }
+                    else if (window.recargarReportes) {
+                        console.log('📞 SPA: Ejecutando window.recargarReportes()');
+                        window.recargarReportes();
+                    } 
+                    // Si la función está en el contexto de ExplorarReportes
+                    else if (window.ExplorarReportes && window.ExplorarReportes.cargarReportes) {
+                        console.log('📞 SPA: Ejecutando ExplorarReportes.cargarReportes()');
+                        window.ExplorarReportes.cargarReportes();
+                    }
+                    // Fallback: cargar el script y ejecutar
+                    else {
+                        console.log('📦 SPA: Cargando script explorar-reportes.js...');
+                        this.cargarScriptExplorarReportes();
+                    }
+                } catch (error) {
+                    console.error('❌ SPA: Error ejecutando cargarReportes:', error);
+                }
+            }, 100);
+            
+        } catch (error) {
+            console.error('💥 SPA: Error en manejarExplorarReportes:', error);
+        }
+    }
+    
+    cargarScriptExplorarReportes() {
+        console.log('📦 SPA: Cargando script explorar-reportes.js...');
+        
+        // Verificar si el script ya está cargado
+        const scriptExistente = document.querySelector('script[src*="explorar-reportes.js"]');
+        if (scriptExistente) {
+            console.log('📜 SPA: Script explorar-reportes.js ya existe, reejecutando...');
+            // Forzar recarga de reportes
+            setTimeout(() => {
+                if (window.recargarReportes) {
+                    window.recargarReportes();
+                }
+            }, 100);
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = '/js/explorar-reportes.js';
+        script.async = false;
+        
+        script.onload = () => {
+            console.log('✅ SPA: Script explorar-reportes.js cargado exitosamente');
+            // El script se ejecutará automáticamente y llamará cargarReportes()
+        };
+        
+        script.onerror = () => {
+            console.error('❌ SPA: Error cargando script explorar-reportes.js');
+        };
+        
+        document.head.appendChild(script);
     }
     
     // Función para limpiar estilos problemáticos del body

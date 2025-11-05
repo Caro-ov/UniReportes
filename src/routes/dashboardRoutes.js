@@ -22,4 +22,7 @@ router.get('/category-stats', dashboardController.getCategoryStats);
 // GET /api/dashboard/trends - Obtener gráfico de tendencias (admin)
 router.get('/trends', dashboardController.getTrendsChart);
 
+// GET /api/dashboard/admin-cards - Obtener estadísticas para tarjetas del admin dashboard
+router.get('/admin-cards', dashboardController.getAdminCardStats);
+
 export default router;

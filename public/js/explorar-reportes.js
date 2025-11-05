@@ -1,70 +1,103 @@
+// Función global para recargar datos
+window.recargarReportes = function() {
+    console.log('🔄 MANUAL: Recargando reportes...');
+    if (typeof cargarReportes === 'function') {
+        cargarReportes();
+    } else {
+        console.error('❌ Función cargarReportes no disponible');
+    }
+};
+
+// Hacer funciones y variables accesibles globalmente
+let cargarReportes, renderizarTabla, actualizarContadores;
+let reportesFiltrados = [];
+let todosLosReportes = [];
+
 // Sistema de gestión de explorar reportes
 $(document).ready(function() {
+    console.log('🚀 Explorar Reportes - Script cargado');
     
-    // Datos de reportes (simulados)
-    const reportesData = [
-        {
-            id: '#12345',
-            categoria: 'electrico',
-            estado: 'abierto',
-            usuario: 'Carlos López',
-            fecha: '2024-07-26',
-            responsable: 'Sin asignar'
-        },
-        {
-            id: '#12346',
-            categoria: 'fontaneria',
-            estado: 'en-proceso',
-            usuario: 'Ana García',
-            fecha: '2024-07-25',
-            responsable: 'Juan Pérez'
-        },
-        {
-            id: '#12347',
-            categoria: 'estructural',
-            estado: 'resuelto',
-            usuario: 'Sofía Martínez',
-            fecha: '2024-07-24',
-            responsable: 'Pedro Ramírez'
-        },
-        {
-            id: '#12348',
-            categoria: 'climatizacion',
-            estado: 'abierto',
-            usuario: 'Diego Fernández',
-            fecha: '2024-07-23',
-            responsable: 'Sin asignar'
-        },
-        {
-            id: '#12349',
-            categoria: 'seguridad',
-            estado: 'en-proceso',
-            usuario: 'Laura Sánchez',
-            fecha: '2024-07-22',
-            responsable: 'María Gómez'
-        },
-        {
-            id: '#12350',
-            categoria: 'electrico',
-            estado: 'resuelto',
-            usuario: 'Roberto Silva',
-            fecha: '2024-07-21',
-            responsable: 'Carmen Torres'
-        },
-        {
-            id: '#12351',
-            categoria: 'fontaneria',
-            estado: 'abierto',
-            usuario: 'Elena Rodriguez',
-            fecha: '2024-07-20',
-            responsable: 'Sin asignar'
-        }
-    ];
+    // Las variables ya están declaradas globalmente arriba
+    
+    // Cargar filtros dinámicos al inicializar
+    cargarCategoriasFiltro();
+    cargarEstadosFiltro();
 
-    let reportesFiltrados = [...reportesData];
+    // Cargar reportes desde la API
+    cargarReportes = async function() {
+        try {
+            console.log('🔄 Cargando reportes desde la API...');
+            console.log('🌐 URL: /api/reports');
+            
+            // Mostrar indicador de carga
+            const tbody = $('#tabla-reportes-body');
+            tbody.html(`
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span>
+                        Cargando reportes...
+                    </td>
+                </tr>
+            `);
+            
+            const response = await fetch('/api/reports', {
+                method: 'GET',
+                credentials: 'include', // Incluir cookies de sesión
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            console.log('📡 Respuesta de API:', {
+                status: response.status,
+                statusText: response.statusText,
+                headers: Object.fromEntries(response.headers.entries())
+            });
+            
+            const data = await response.json();
+            console.log('📊 Datos recibidos:', data);
+            
+            if (response.ok && data.success) {
+                todosLosReportes = data.data || [];
+                reportesFiltrados = [...todosLosReportes];
+                console.log('✅ Reportes cargados exitosamente:', todosLosReportes.length);
+                console.log('📋 Primer reporte (ejemplo):', todosLosReportes[0]);
+                renderizarTabla(reportesFiltrados);
+                actualizarContadores();
+            } else {
+                console.error('❌ Error al cargar reportes:', {
+                    status: response.status,
+                    message: data.message,
+                    data: data
+                });
+                mostrarError('Error al cargar los reportes: ' + (data.message || 'Error desconocido'));
+            }
+        } catch (error) {
+            console.error('❌ Error de conexión:', error);
+            mostrarError('Error de conexión. Por favor, verifica tu conexión a internet.');
+        }
+    }
+
+    function mostrarError(mensaje) {
+        console.error('🚨 ERROR:', mensaje);
+        const tbody = $('#tabla-reportes-body');
+        tbody.html(`
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 40px; color: #dc2626; background-color: #fef2f2;">
+                    <span class="material-symbols-outlined" style="font-size: 48px; display: block; margin-bottom: 16px;">error</span>
+                    <strong style="display: block; margin-bottom: 8px;">Error al cargar reportes</strong>
+                    <span style="color: #7f1d1d; font-size: 14px;">${mensaje}</span>
+                    <br><br>
+                    <button onclick="location.reload()" style="background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                        Recargar página
+                    </button>
+                </td>
+            </tr>
+        `);
+    }
 
     // Función para renderizar la tabla de reportes
-    function renderizarTabla(reportes) {
+    renderizarTabla = function(reportes) {
         const tbody = $('#tabla-reportes-body');
         tbody.empty();
 
@@ -80,42 +113,47 @@ $(document).ready(function() {
         }
 
         reportes.forEach(reporte => {
+            // Mapear estados de la base de datos a clases CSS
             const estadoClass = {
-                'abierto': 'estado-abierto',
-                'en-proceso': 'estado-proceso',
-                'resuelto': 'estado-resuelto'
-            }[reporte.estado];
+                'pendiente': 'estado-abierto',
+                'en_progreso': 'estado-proceso', 
+                'resuelto': 'estado-resuelto',
+                'cerrado': 'estado-resuelto'
+            }[reporte.estado] || 'estado-abierto';
 
             const estadoTexto = {
-                'abierto': 'Abierto',
-                'en-proceso': 'En Proceso',
-                'resuelto': 'Resuelto'
-            }[reporte.estado];
+                'pendiente': 'Pendiente',
+                'en_progreso': 'En Proceso',
+                'resuelto': 'Resuelto',
+                'cerrado': 'Cerrado'
+            }[reporte.estado] || 'Pendiente';
 
-            const categoriaTexto = {
-                'electrico': 'Eléctrico',
-                'fontaneria': 'Fontanería',
-                'estructural': 'Estructural',
-                'climatizacion': 'Climatización',
-                'seguridad': 'Seguridad'
-            }[reporte.categoria];
+            // Formatear fecha
+            const fecha = new Date(reporte.fecha_creacion || reporte.fecha_reporte);
+            const fechaFormateada = fecha.toLocaleDateString('es-ES');
+
+            // Crear ubicación completa
+            const ubicacion = reporte.ubicacion_nombre && reporte.salon_nombre 
+                ? `${reporte.ubicacion_nombre} - ${reporte.salon_nombre}`
+                : 'Sin ubicación';
 
             tbody.append(`
-                <tr data-reporte-id="${reporte.id}">
-                    <td class="id-reporte">${reporte.id}</td>
-                    <td class="categoria">${categoriaTexto}</td>
+                <tr data-reporte-id="${reporte.id_reporte}">
+                    <td class="id-reporte">#${reporte.id_reporte}</td>
+                    <td class="titulo">${reporte.titulo || 'Sin título'}</td>
+                    <td class="categoria">${reporte.categoria_nombre || 'Sin categoría'}</td>
                     <td><span class="estado-badge ${estadoClass}">${estadoTexto}</span></td>
-                    <td>${reporte.usuario}</td>
-                    <td>${reporte.fecha}</td>
-                    <td>${reporte.responsable}</td>
+                    <td class="ubicacion">${ubicacion}</td>
+                    <td class="usuario">${reporte.usuario_nombre || 'Sin usuario'}</td>
+                    <td class="fecha">${fechaFormateada}</td>
                     <td class="acciones">
-                        <button class="btn-accion btn-ver" title="Ver detalles" data-action="ver" data-id="${reporte.id}">
+                        <button class="btn-accion btn-ver" title="Ver detalles" data-action="ver" data-id="${reporte.id_reporte}">
                             <span class="material-symbols-outlined">visibility</span>
                         </button>
-                        <button class="btn-accion btn-editar" title="Editar" data-action="editar" data-id="${reporte.id}">
+                        <button class="btn-accion btn-editar" title="Editar" data-action="editar" data-id="${reporte.id_reporte}">
                             <span class="material-symbols-outlined">edit</span>
                         </button>
-                        <button class="btn-accion btn-eliminar" title="Eliminar" data-action="eliminar" data-id="${reporte.id}">
+                        <button class="btn-accion btn-eliminar" title="Eliminar" data-action="eliminar" data-id="${reporte.id_reporte}">
                             <span class="material-symbols-outlined">delete</span>
                         </button>
                     </td>
@@ -124,6 +162,74 @@ $(document).ready(function() {
         });
     }
 
+    // ===========================
+    // FUNCIONES DE FILTROS DINÁMICOS
+    // ===========================
+    
+    // Función para cargar categorías en el filtro
+    async function cargarCategoriasFiltro() {
+        try {
+            console.log('🔄 Cargando categorías para filtro...');
+            
+            const response = await fetch('/api/categories', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    const select = $('#filtro-categoria');
+                    select.html('<option value="">Todas</option>');
+                    
+                    data.data.forEach(categoria => {
+                        select.append(`<option value="${categoria.id_categoria}">${categoria.nombre}</option>`);
+                    });
+                    
+                    console.log('✅ Categorías cargadas en filtro:', data.data.length);
+                } else {
+                    console.error('❌ Error en respuesta de categorías:', data.message);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error al cargar categorías:', error);
+        }
+    }
+    
+    // Función para cargar estados en el filtro
+    async function cargarEstadosFiltro() {
+        try {
+            console.log('🔄 Cargando estados para filtro...');
+            
+            const response = await fetch('/api/categories/states', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    const select = $('#filtro-estado');
+                    select.html('<option value="">Todos</option>');
+                    
+                    data.data.forEach(estado => {
+                        select.append(`<option value="${estado.nombre}">${estado.nombre.charAt(0).toUpperCase() + estado.nombre.slice(1)}</option>`);
+                    });
+                    
+                    console.log('✅ Estados cargados en filtro:', data.data.length);
+                } else {
+                    console.error('❌ Error en respuesta de estados:', data.message);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error al cargar estados:', error);
+        }
+    }
+
+    // ===========================
+    // FUNCIONES DE FILTRADO
+    // ===========================
+
     // Función para aplicar filtros
     function aplicarFiltros() {
         const busqueda = $('.filtro-buscar').val().toLowerCase();
@@ -131,18 +237,21 @@ $(document).ready(function() {
         const estadoFiltro = $('#filtro-estado').val();
         const fechaFiltro = $('#filtro-fecha').val();
 
-        reportesFiltrados = reportesData.filter(reporte => {
+        reportesFiltrados = todosLosReportes.filter(reporte => {
             const coincideBusqueda = !busqueda || 
-                reporte.id.toLowerCase().includes(busqueda) ||
-                reporte.usuario.toLowerCase().includes(busqueda) ||
-                reporte.responsable.toLowerCase().includes(busqueda);
+                reporte.id_reporte.toString().includes(busqueda) ||
+                (reporte.titulo && reporte.titulo.toLowerCase().includes(busqueda)) ||
+                (reporte.usuario_nombre && reporte.usuario_nombre.toLowerCase().includes(busqueda)) ||
+                (reporte.categoria_nombre && reporte.categoria_nombre.toLowerCase().includes(busqueda)) ||
+                (reporte.ubicacion_nombre && reporte.ubicacion_nombre.toLowerCase().includes(busqueda)) ||
+                (reporte.salon_nombre && reporte.salon_nombre.toLowerCase().includes(busqueda));
 
-            const coincideCategoria = !categoriaFiltro || reporte.categoria === categoriaFiltro;
+            const coincideCategoria = !categoriaFiltro || reporte.id_categoria == categoriaFiltro;
             const coincideEstado = !estadoFiltro || reporte.estado === estadoFiltro;
             
             let coincideFecha = true;
             if (fechaFiltro) {
-                const fechaReporte = new Date(reporte.fecha);
+                const fechaReporte = new Date(reporte.fecha_creacion || reporte.fecha_reporte);
                 const hoy = new Date();
                 
                 switch(fechaFiltro) {
@@ -164,7 +273,7 @@ $(document).ready(function() {
         });
 
         renderizarTabla(reportesFiltrados);
-        actualizarGraficos();
+        actualizarContadores();
     }
 
     // Función para actualizar gráficos
@@ -309,6 +418,42 @@ $(document).ready(function() {
         });
     }, 300);
 
+    // Función para actualizar contadores
+    actualizarContadores = function() {
+        const totalReportes = reportesFiltrados.length;
+        const pendientes = reportesFiltrados.filter(r => r.estado === 'pendiente').length;
+        const enProceso = reportesFiltrados.filter(r => r.estado === 'en_progreso').length;
+        const resueltos = reportesFiltrados.filter(r => r.estado === 'resuelto' || r.estado === 'cerrado').length;
+
+        // Actualizar contadores en la interfaz (si existen)
+        $('#total-reportes').text(totalReportes);
+        $('#reportes-pendientes').text(pendientes);
+        $('#reportes-proceso').text(enProceso);
+        $('#reportes-resueltos').text(resueltos);
+    }
+
+    // Configurar eventos
+    $('.filtro-buscar').on('input', aplicarFiltros);
+    $('#filtro-categoria, #filtro-estado, #filtro-fecha').on('change', aplicarFiltros);
+    
+    // Configurar navegación para el botón "Nuevo reporte"
+    $(document).on('click', 'a[data-page="new-report"]', function(e) {
+        e.preventDefault();
+        console.log('🔗 Navegando a crear reporte...');
+        
+        // Si hay navegación SPA disponible, usarla
+        if (window.spaNavigation && window.spaNavigation.navigate) {
+            window.spaNavigation.navigate('crear-reporte.html');
+        } else {
+            // Fallback a navegación normal
+            window.location.href = 'crear-reporte.html';
+        }
+    });
+
+    // Cargar reportes al inicializar
+    console.log('📅 Iniciando carga de reportes...');
+    cargarReportes();
+
     // Gestión responsive del sidebar
     function handleResize() {
         if ($(window).width() <= 768) {
@@ -322,11 +467,37 @@ $(document).ready(function() {
     handleResize();
 });
 
+// Función global para debug
+window.testAPI = async function() {
+    console.log('🧪 TEST: Probando API manualmente...');
+    try {
+        const response = await fetch('/api/reports', {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        console.log('🧪 TEST: Respuesta:', response.status, data);
+        return data;
+    } catch (error) {
+        console.error('🧪 TEST: Error:', error);
+        return error;
+    }
+};
+
+// Función global para recargar datos
+window.recargarReportes = function() {
+    console.log('🔄 MANUAL: Recargando reportes...');
+    if (typeof cargarReportes === 'function') {
+        cargarReportes();
+    } else {
+        console.error('❌ Función cargarReportes no disponible');
+    }
+};
+
 // Exportar funciones para uso global si es necesario
 window.ExplorarReportes = {
     actualizarTabla: function(nuevosReportes) {
-        reportesData.length = 0;
-        reportesData.push(...nuevosReportes);
+        todosLosReportes.length = 0;
+        todosLosReportes.push(...nuevosReportes);
         aplicarFiltros();
     }
 };

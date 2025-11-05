@@ -1,4 +1,5 @@
 import * as categoryModel from '../models/categoryModel.js';
+import pool from '../config/db.js';
 
 /**
  * Obtener todas las categorías (API)
@@ -283,11 +284,36 @@ export async function getCategoriesStats(req, res) {
     }
 }
 
+/**
+ * Obtener todos los estados (API)
+ */
+export async function getAllStates(req, res) {
+    try {
+        const [states] = await pool.execute(`
+            SELECT id_estado, nombre, orden 
+            FROM estados 
+            ORDER BY orden ASC
+        `);
+
+        res.json({
+            success: true,
+            data: states
+        });
+    } catch (error) {
+        console.error('Error al obtener estados:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor'
+        });
+    }
+}
+
 export default {
     getAllCategories,
     getCategoryById,
     createCategory,
     updateCategory,
     deleteCategory,
-    getCategoriesStats
+    getCategoriesStats,
+    getAllStates
 };

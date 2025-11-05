@@ -152,6 +152,12 @@
             background: rgba(16, 185, 129, 0.1);
             color: #10b981;
         }
+        
+        /* Animación de carga */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body data-page="explore-reports" data-title="UniReportes - Explorar Reportes" data-css="explorar-reportes">
@@ -303,198 +309,21 @@
                                 <thead>
                                     <tr>
                                         <th>ID</th>
+                                        <th>Título</th>
                                         <th>Categoría</th>
                                         <th>Estado</th>
+                                        <th>Ubicación</th>
                                         <th>Usuario</th>
                                         <th>Fecha</th>
-                                        <th>Responsable</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-reportes-body">
-                                    <tr>
-                                        <td class="id-reporte">#12345</td>
-                                        <td class="categoria">Eléctrico</td>
-                                        <td><span class="estado-badge estado-abierto">Abierto</span></td>
-                                        <td>Carlos López</td>
-                                        <td>2024-07-26</td>
-                                        <td>Sin asignar</td>
-                                        <td class="acciones">
-                                            <button class="btn-accion btn-ver" title="Ver detalles">
-                                                <span class="material-symbols-outlined">visibility</span>
-                                            </button>
-                                            <button class="btn-accion btn-editar" title="Editar">
-                                                <span class="material-symbols-outlined">edit</span>
-                                            </button>
-                                            <button class="btn-accion btn-eliminar" title="Eliminar">
-                                                <span class="material-symbols-outlined">delete</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="id-reporte">#12346</td>
-                                        <td class="categoria">Fontanería</td>
-                                        <td><span class="estado-badge estado-proceso">En Proceso</span></td>
-                                        <td>Ana García</td>
-                                        <td>2024-07-25</td>
-                                        <td>Juan Pérez</td>
-                                        <td class="acciones">
-                                            <button class="btn-accion btn-ver" title="Ver detalles">
-                                                <span class="material-symbols-outlined">visibility</span>
-                                            </button>
-                                            <button class="btn-accion btn-editar" title="Editar">
-                                                <span class="material-symbols-outlined">edit</span>
-                                            </button>
-                                            <button class="btn-accion btn-eliminar" title="Eliminar">
-                                                <span class="material-symbols-outlined">delete</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="id-reporte">#12347</td>
-                                        <td class="categoria">Estructural</td>
-                                        <td><span class="estado-badge estado-resuelto">Resuelto</span></td>
-                                        <td>Sofía Martínez</td>
-                                        <td>2024-07-24</td>
-                                        <td>Pedro Ramírez</td>
-                                        <td class="acciones">
-                                            <button class="btn-accion btn-ver" title="Ver detalles">
-                                                <span class="material-symbols-outlined">visibility</span>
-                                            </button>
-                                            <button class="btn-accion btn-editar" title="Editar">
-                                                <span class="material-symbols-outlined">edit</span>
-                                            </button>
-                                            <button class="btn-accion btn-eliminar" title="Eliminar">
-                                                <span class="material-symbols-outlined">delete</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="id-reporte">#12348</td>
-                                        <td class="categoria">Climatización</td>
-                                        <td><span class="estado-badge estado-abierto">Abierto</span></td>
-                                        <td>Diego Fernández</td>
-                                        <td>2024-07-23</td>
-                                        <td>Sin asignar</td>
-                                        <td class="acciones">
-                                            <button class="btn-accion btn-ver" title="Ver detalles">
-                                                <span class="material-symbols-outlined">visibility</span>
-                                            </button>
-                                            <button class="btn-accion btn-editar" title="Editar">
-                                                <span class="material-symbols-outlined">edit</span>
-                                            </button>
-                                            <button class="btn-accion btn-eliminar" title="Eliminar">
-                                                <span class="material-symbols-outlined">delete</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="id-reporte">#12349</td>
-                                        <td class="categoria">Seguridad</td>
-                                        <td><span class="estado-badge estado-proceso">En Proceso</span></td>
-                                        <td>Laura Sánchez</td>
-                                        <td>2024-07-22</td>
-                                        <td>María Gómez</td>
-                                        <td class="acciones">
-                                            <button class="btn-accion btn-ver" title="Ver detalles">
-                                                <span class="material-symbols-outlined">visibility</span>
-                                            </button>
-                                            <button class="btn-accion btn-editar" title="Editar">
-                                                <span class="material-symbols-outlined">edit</span>
-                                            </button>
-                                            <button class="btn-accion btn-eliminar" title="Eliminar">
-                                                <span class="material-symbols-outlined">delete</span>
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    <!-- Los reportes se cargarán dinámicamente desde la API -->
                                 </tbody>
                             </table>
                         </div>
                     </section>
-
-                    <!-- Sección de análisis y notificaciones -->
-                    <div class="seccion-inferior">
-                        <!-- Análisis de reportes -->
-                        <section class="seccion-analisis">
-                            <h3 class="titulo-seccion">Análisis de Reportes</h3>
-                            
-                            <div class="analisis-container">
-                                <!-- Distribución por categoría -->
-                                <div class="chart-container">
-                                    <h4>Distribución por Categoría</h4>
-                                    <div class="chart-barras">
-                                        <div class="barra-item">
-                                            <span class="barra-label">Eléctrico</span>
-                                            <div class="barra">
-                                                <div class="barra-fill" data-categoria="electrico" style="width: 80%;"></div>
-                                            </div>
-                                        </div>
-                                        <div class="barra-item">
-                                            <span class="barra-label">Fontanería</span>
-                                            <div class="barra">
-                                                <div class="barra-fill" data-categoria="fontaneria" style="width: 60%;"></div>
-                                            </div>
-                                        </div>
-                                        <div class="barra-item">
-                                            <span class="barra-label">Estructural</span>
-                                            <div class="barra">
-                                                <div class="barra-fill" data-categoria="estructural" style="width: 40%;"></div>
-                                            </div>
-                                        </div>
-                                        <div class="barra-item">
-                                            <span class="barra-label">Climatización</span>
-                                            <div class="barra">
-                                                <div class="barra-fill" data-categoria="climatizacion" style="width: 30%;"></div>
-                                            </div>
-                                        </div>
-                                        <div class="barra-item">
-                                            <span class="barra-label">Seguridad</span>
-                                            <div class="barra">
-                                                <div class="barra-fill" data-categoria="seguridad" style="width: 20%;"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Evolución de reportes -->
-                                <div class="chart-container">
-                                    <h4>Evolución de Reportes</h4>
-                                    <div class="chart-lineas">
-                                        <div class="linea-grafico">
-                                            <svg viewBox="0 0 300 100" class="svg-chart">
-                                                <polyline points="0,80 50,60 100,70 150,40 200,50 250,30 300,20" 
-                                                         class="chart-line" fill="none" stroke="#1173d4" stroke-width="2"/>
-                                                <circle cx="0" cy="80" r="3" fill="#1173d4"/>
-                                                <circle cx="50" cy="60" r="3" fill="#1173d4"/>
-                                                <circle cx="100" cy="70" r="3" fill="#1173d4"/>
-                                                <circle cx="150" cy="40" r="3" fill="#1173d4"/>
-                                                <circle cx="200" cy="50" r="3" fill="#1173d4"/>
-                                                <circle cx="250" cy="30" r="3" fill="#1173d4"/>
-                                                <circle cx="300" cy="20" r="3" fill="#1173d4"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-
-                        <!-- Notificaciones urgentes -->
-                        <section class="seccion-notificaciones">
-                            <h3 class="titulo-seccion">Notificaciones Urgentes</h3>
-                            
-                            <div class="notificaciones-lista">
-                                <div class="notificacion-item urgente">
-                                    <div class="notificacion-icon">
-                                        <span class="material-symbols-outlined">error</span>
-                                    </div>
-                                    <div class="notificacion-content">
-                                        <h5>Reporte #12345 - Eléctrico</h5>
-                                        <p>Fallo eléctrico en el edificio principal. Requiere atención inmediata.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
                 </div>
             </main>
         </div>

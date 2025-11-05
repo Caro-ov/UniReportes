@@ -4,11 +4,14 @@ import * as categoryController from '../controllers/categoryController.js';
 
 const router = Router();
 
-// Todas las rutas requieren autenticación
-router.use(requireAuth);
-
-// GET /api/categories - Obtener todas las categorías
+// GET /api/categories - Obtener todas las categorías (acceso público para el formulario)
 router.get('/', categoryController.getAllCategories);
+
+// GET /api/categories/states - Obtener todos los estados (acceso público)
+router.get('/states', categoryController.getAllStates);
+
+// Todas las demás rutas requieren autenticación
+router.use(requireAuth);
 
 // GET /api/categories/stats - Obtener estadísticas (solo admin)
 router.get('/stats', categoryController.getCategoriesStats);

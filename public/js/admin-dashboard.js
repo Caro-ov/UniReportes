@@ -6,6 +6,82 @@ $(document).ready(function() {
     
     console.log('Panel de Administración JavaScript inicializado');
     
+    // Cargar estadísticas del dashboard al iniciar
+    cargarEstadisticasAdmin();
+    
+    // ===========================
+    // FUNCIONES DE ESTADÍSTICAS
+    // ===========================
+    
+    /**
+     * Cargar estadísticas reales para las tarjetas del dashboard
+     */
+    function cargarEstadisticasAdmin() {
+        console.log('Cargando estadísticas del admin dashboard...');
+        
+        // Mostrar indicadores de carga
+        $('#total-reportes, #reportes-pendientes, #resueltos-mes').text('...');
+        
+        $.ajax({
+            url: '/api/dashboard/admin-cards',
+            method: 'GET',
+            xhrFields: {
+                withCredentials: true
+            },
+            success: function(response) {
+                console.log('Respuesta completa del servidor:', response);
+                
+                if (response.success && response.data) {
+                    const stats = response.data;
+                    console.log('Datos de estadísticas:', stats);
+                    
+                    // Actualizar las tarjetas directamente sin animación
+                    console.log('Actualizando total-reportes con:', stats.total_reportes);
+                    $('#total-reportes').text(stats.total_reportes || 0);
+                    console.log('Actualizando reportes-pendientes con:', stats.reportes_pendientes);
+                    $('#reportes-pendientes').text(stats.reportes_pendientes || 0);
+                    console.log('Actualizando resueltos-mes con:', stats.resueltos_mes);
+                    $('#resueltos-mes').text(stats.resueltos_mes || 0);
+                    
+                    // Verificar que los valores se mantienen después de 2 segundos
+                    setTimeout(() => {
+                        console.log('Verificando valores después de 2 segundos:');
+                        console.log('total-reportes:', $('#total-reportes').text());
+                        console.log('reportes-pendientes:', $('#reportes-pendientes').text());
+                        console.log('resueltos-mes:', $('#resueltos-mes').text());
+                    }, 2000);
+                    
+                    console.log('Estadísticas actualizadas en las tarjetas');
+                } else {
+                    console.error('Error en respuesta de estadísticas:', response.message);
+                    mostrarErrorEstadisticas();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error completo:', {xhr, status, error});
+                console.error('Status HTTP:', xhr.status);
+                console.error('Texto de respuesta:', xhr.responseText);
+                
+                // Si es error 401, intentar de nuevo en 2 segundos
+                if (xhr.status === 401) {
+                    console.log('Error de autenticación, reintentando en 2 segundos...');
+                    setTimeout(cargarEstadisticasAdmin, 2000);
+                    return;
+                }
+                
+                mostrarErrorEstadisticas();
+            }
+        });
+    }
+    
+    /**
+     * Mostrar error en las estadísticas
+     */
+    function mostrarErrorEstadisticas() {
+        $('#total-reportes, #reportes-pendientes, #resueltos-mes').text('Error');
+        mostrarToast('Error al cargar estadísticas', 'error');
+    }
+    
     // ===========================
     // INTERACCIONES DEL PANEL
     // ===========================
@@ -176,32 +252,6 @@ $(document).ready(function() {
     
     // Actualizar estadísticas cada 5 minutos (opcional)
     // setInterval(actualizarEstadisticas, 300000);
-    
-    // ===========================
-    // EFECTOS VISUALES ADICIONALES
-    // ===========================
-    
-    // Añadir efectos de transición suaves a los números
-    $('.numero-estadistica').each(function() {
-        $(this).css('transition', 'transform 0.3s ease');
-    });
-    
-    // Efecto de contador para los números (opcional)
-    $('.numero-estadistica').each(function() {
-        const $numero = $(this);
-        const valorFinal = parseInt($numero.text());
-        let contador = 0;
-        const incremento = Math.ceil(valorFinal / 20);
-        
-        const interval = setInterval(() => {
-            contador += incremento;
-            if (contador >= valorFinal) {
-                contador = valorFinal;
-                clearInterval(interval);
-            }
-            $numero.text(contador);
-        }, 50);
-    });
     
     console.log('Panel de Administración completamente cargado');
 });

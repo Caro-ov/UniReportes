@@ -18,6 +18,11 @@ router.get('/login.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
+// Página de prueba temporal
+router.get('/test-api.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'test-api.html'));
+});
+
 // Páginas protegidas (requieren sesión)
 const protectedPages = [
   'pantalla-carga.html', // Solo para transición login -> dashboard

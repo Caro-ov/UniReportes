@@ -7,16 +7,16 @@ export async function createReport(reportData) {
     const {
         titulo,
         descripcion,
-        ubicacion,
+        id_salon,
         id_categoria,
         id_usuario,
         id_objeto = null
     } = reportData;
 
     const [result] = await pool.execute(
-        `INSERT INTO reportes (titulo, descripcion, ubicacion, id_categoria, id_usuario, id_objeto, fecha_reporte) 
+        `INSERT INTO reportes (titulo, descripcion, id_salon, id_categoria, id_usuario, id_objeto, fecha_reporte) 
          VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-        [titulo, descripcion, ubicacion, id_categoria, id_usuario, id_objeto]
+        [titulo, descripcion, id_salon, id_categoria, id_usuario, id_objeto]
     );
 
     return result.insertId;
@@ -31,10 +31,14 @@ export async function getAllReports(limit = 50, offset = 0) {
             r.*,
             u.nombre as usuario_nombre,
             u.correo as usuario_correo,
-            c.nombre as categoria_nombre
+            c.nombre as categoria_nombre,
+            s.nombre as salon_nombre,
+            ub.nombre as ubicacion_nombre
          FROM reportes r
          LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
          LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
+         LEFT JOIN salones s ON r.id_salon = s.id_salon
+         LEFT JOIN ubicaciones ub ON s.ubicacion = ub.id_ubicacion
          ORDER BY r.fecha_creacion DESC
          LIMIT ? OFFSET ?`,
         [limit, offset]

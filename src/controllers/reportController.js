@@ -6,11 +6,18 @@ import * as categoryModel from '../models/categoryModel.js';
  */
 export async function getAllReports(req, res) {
     try {
+        console.log('🔍 getAllReports: Iniciando...');
+        console.log('👤 Usuario sesión:', req.session?.user?.id, req.session?.user?.correo);
+        
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
         const offset = (page - 1) * limit;
 
+        console.log('📄 Paginación:', { page, limit, offset });
+
         const reports = await reportModel.getAllReports(limit, offset);
+        console.log('📊 Reportes obtenidos del modelo:', reports.length);
+        console.log('🔍 Primer reporte (ejemplo):', reports[0]);
         
         res.json({
             success: true,
@@ -22,7 +29,7 @@ export async function getAllReports(req, res) {
             }
         });
     } catch (error) {
-        console.error('Error al obtener reportes:', error);
+        console.error('❌ Error al obtener reportes:', error);
         res.status(500).json({
             success: false,
             message: 'Error interno del servidor'
@@ -114,13 +121,13 @@ export async function createReport(req, res) {
             });
         }
 
-        const { titulo, descripcion, ubicacion, id_categoria } = req.body;
+        const { titulo, descripcion, id_salon, id_categoria } = req.body;
 
         // Validar campos requeridos
-        if (!titulo || !descripcion || !ubicacion) {
+        if (!titulo || !descripcion || !id_salon) {
             return res.status(400).json({
                 success: false,
-                message: 'Título, descripción y ubicación son requeridos'
+                message: 'Título, descripción y salón son requeridos'
             });
         }
 
@@ -138,7 +145,7 @@ export async function createReport(req, res) {
         const reportData = {
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
-            ubicacion: ubicacion.trim(),
+            id_salon: parseInt(id_salon),
             id_categoria: id_categoria || null,
             id_usuario: userId
         };

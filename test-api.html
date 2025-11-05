@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <title>Test API - UniReportes</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Test API UniReportes</h1>
+    <div id="result"></div>
+    
+    <script>
+        $(document).ready(function() {
+            console.log('🧪 Probando API...');
+            
+            // Probar API de reportes
+            fetch('/api/reports')
+                .then(response => {
+                    console.log('📡 Respuesta:', response.status, response.statusText);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📊 Datos:', data);
+                    $('#result').html('<pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    $('#result').html('<p style="color: red;">Error: ' + error.message + '</p>');
+                });
+        });
+    </script>
+</body>
+</html>
