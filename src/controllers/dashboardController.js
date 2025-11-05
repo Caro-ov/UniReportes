@@ -339,11 +339,64 @@ export async function getAdminCardStats(req, res) {
     }
 }
 
+/**
+ * Obtener estadísticas del usuario actual (API específica para mis-reportes)
+ */
+export async function getMyStats(req, res) {
+    try {
+        const userId = req.session.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Usuario no autenticado'
+            });
+        }
+
+        // Obtener estadísticas de reportes del usuario
+        const [connection] = await pool.execute(`
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN e.nombre = 'pendiente' THEN 1 ELSE 0 END) as enviados,
+                SUM(CASE WHEN e.nombre = 'en revision' THEN 1 ELSE 0 END) as revision,
+                SUM(CASE WHEN e.nombre = 'en proceso' THEN 1 ELSE 0 END) as proceso,
+                SUM(CASE WHEN e.nombre = 'resuelto' OR e.nombre = 'cerrado' THEN 1 ELSE 0 END) as resueltos
+            FROM reportes r
+            LEFT JOIN estados e ON r.id_estado = e.id_estado
+            WHERE r.id_usuario = ?
+        `, [userId]);
+
+        const stats = connection[0] || {};
+
+        const result = {
+            total: parseInt(stats.total) || 0,
+            enviados: parseInt(stats.enviados) || 0,
+            revision: parseInt(stats.revision) || 0,
+            proceso: parseInt(stats.proceso) || 0,
+            resueltos: parseInt(stats.resueltos) || 0
+        };
+
+        console.log('Estadísticas del usuario', userId, ':', result);
+
+        res.json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        console.error('Error al obtener estadísticas del usuario:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor'
+        });
+    }
+}
+
 export default {
     getDashboardStats,
     getRecentReports,
     getActivitySummary,
     getCategoryStats,
     getTrendsChart,
-    getAdminCardStats
+    getAdminCardStats,
+    getMyStats
 };

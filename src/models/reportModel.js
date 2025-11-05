@@ -10,13 +10,17 @@ export async function createReport(reportData) {
         id_salon,
         id_categoria,
         id_usuario,
-        id_objeto = null
+        id_objeto = null,
+        fecha_reporte = null
     } = reportData;
+
+    // Si se proporciona fecha_reporte, usarla; de lo contrario, usar NOW()
+    const fechaParaInsertar = fecha_reporte || new Date();
 
     const [result] = await pool.execute(
         `INSERT INTO reportes (titulo, descripcion, id_salon, id_categoria, id_usuario, id_objeto, fecha_reporte) 
-         VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-        [titulo, descripcion, id_salon, id_categoria, id_usuario, id_objeto]
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [titulo, descripcion, id_salon, id_categoria, id_usuario, id_objeto, fechaParaInsertar]
     );
 
     return result.insertId;

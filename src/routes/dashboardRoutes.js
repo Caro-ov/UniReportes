@@ -10,6 +10,9 @@ router.use(requireAuth);
 // GET /api/dashboard/stats - Obtener estadísticas del dashboard
 router.get('/stats', dashboardController.getDashboardStats);
 
+// GET /api/dashboard/my-stats - Obtener estadísticas del usuario actual
+router.get('/my-stats', dashboardController.getMyStats);
+
 // GET /api/dashboard/recent-reports - Obtener reportes recientes
 router.get('/recent-reports', dashboardController.getRecentReports);
 

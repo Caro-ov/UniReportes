@@ -44,6 +44,34 @@ function inicializarCrearReporte() {
         // Inicializar elementos
         cargarCategorias();
         cargarUbicaciones();
+        establecerFechaHoraActual();
+
+    // ===========================
+    // CONFIGURACIÓN DE FECHA Y HORA
+    // ===========================
+    
+    function establecerFechaHoraActual() {
+        console.log('📅 Estableciendo fecha y hora actual...');
+        const ahora = new Date();
+        
+        // Formatear fecha para input type="date" (YYYY-MM-DD)
+        const fechaFormateada = ahora.toISOString().split('T')[0];
+        
+        // Formatear hora para input type="time" (HH:MM)
+        const horaFormateada = ahora.toTimeString().slice(0, 5);
+        
+        // Establecer valores por defecto
+        $('#fecha-reporte').val(fechaFormateada);
+        $('#hora-reporte').val(horaFormateada);
+        
+        // Establecer fecha máxima como hoy
+        $('#fecha-reporte').attr('max', fechaFormateada);
+        
+        console.log('📅 Fecha y hora establecidas:', {
+            fecha: fechaFormateada,
+            hora: horaFormateada
+        });
+    }
 
     // ===========================
     // CARGA DE CATEGORÍAS / OBJETOS / EDIFICIOS
@@ -153,6 +181,86 @@ function inicializarCrearReporte() {
         }
     }
 
+    // ===========================
+    // ADVERTENCIA DE URGENCIA
+    // ===========================
+    
+    function mostrarAdvertenciaUrgencia() {
+        console.log('⚠️ Mostrando advertencia de urgencia...');
+        
+        // Crear el modal de advertencia
+        const modalHtml = `
+            <div id="modal-urgencia" class="modal-overlay" style="display: none;">
+                <div class="modal-contenido modal-advertencia">
+                    <div class="modal-header">
+                        <span class="material-symbols-outlined icono-advertencia">warning</span>
+                        <h3>⚠️ Advertencia - Categoría Urgencia</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>¿Está seguro de que este reporte es realmente urgente?</strong></p>
+                        <p>La categoría de urgencia está reservada para situaciones que requieren atención inmediata, como:</p>
+                        <ul>
+                            <li>Riesgos de seguridad inmediatos</li>
+                            <li>Fallas de equipos críticos</li>
+                            <li>Emergencias que afectan la operación normal</li>
+                            <li>Situaciones que pueden causar daños o lesiones</li>
+                        </ul>
+                        <p>Si su reporte no requiere atención inmediata, por favor seleccione otra categoría más apropiada.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secundario" onclick="window.cancelarUrgencia()">
+                            Cambiar categoría
+                        </button>
+                        <button type="button" class="btn-principal" onclick="window.confirmarUrgencia()">
+                            Sí, es urgente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remover modal existente si existe
+        $('#modal-urgencia').remove();
+        
+        // Agregar el modal al DOM
+        $('body').append(modalHtml);
+        
+        // Mostrar el modal
+        $('#modal-urgencia').fadeIn(300);
+        
+        console.log('🔍 Modal agregado al DOM:', $('#modal-urgencia').length);
+    }
+    
+    function cerrarModalUrgencia() {
+        console.log('🔄 Cerrando modal de urgencia...');
+        $('#modal-urgencia').fadeOut(300, function() {
+            $(this).remove();
+        });
+    }
+    
+    function resetearCategoria() {
+        console.log('🔄 Reseteando categoría y objetos...');
+        $('#categoria').val('');
+        $('#objeto').prop('disabled', true).html('<option disabled selected value="">Primero selecciona una categoría...</option>');
+    }
+    
+    // Funciones globales para los botones del modal
+    window.cancelarUrgencia = function() {
+        console.log('✅ Función global cancelarUrgencia ejecutada');
+        resetearCategoria();
+        cerrarModalUrgencia();
+    };
+    
+    window.confirmarUrgencia = function() {
+        console.log('✅ Función global confirmarUrgencia ejecutada');
+        // Agregar efecto visual de confirmación
+        $('#categoria').addClass('categoria-urgencia-confirmada');
+        setTimeout(() => {
+            $('#categoria').removeClass('categoria-urgencia-confirmada');
+        }, 2000);
+        cerrarModalUrgencia();
+    };
+
         // ===========================
         // VALIDACIONES
         // ===========================
@@ -162,6 +270,12 @@ function inicializarCrearReporte() {
     $('#categoria').on('change', function() { 
         const cat = $(this).val(); 
         console.log('Categoría seleccionada:', cat);
+        
+        // Verificar si es categoría de urgencia (ID 6)
+        if (cat == '6') {
+            mostrarAdvertenciaUrgencia();
+        }
+        
         if (cat) cargarObjetos(cat); 
     });
     
@@ -249,9 +363,11 @@ function inicializarCrearReporte() {
             const ubicacion = $('#ubicacion').val();
             const salon = $('#salon').val();
             const descripcion = $('#descripcion').val().trim();
+            const fechaReporte = $('#fecha-reporte').val();
+            const horaReporte = $('#hora-reporte').val();
             
             console.log('📊 Valores del formulario:', {
-                categoria, titulo, ubicacion, salon, descripcion
+                categoria, titulo, ubicacion, salon, descripcion, fechaReporte, horaReporte
             });
             
             if (!categoria) { 
@@ -274,6 +390,27 @@ function inicializarCrearReporte() {
                 mostrarError('salon','El salón es obligatorio'); 
                 esValido = false; 
             } 
+            if (!fechaReporte) { 
+                console.log('❌ Fecha del reporte vacía');
+                mostrarError('fecha-reporte','La fecha del reporte es obligatoria'); 
+                esValido = false; 
+            } else {
+                // Validar que la fecha no sea en el futuro
+                const fechaSeleccionada = new Date(fechaReporte);
+                const hoy = new Date();
+                hoy.setHours(23, 59, 59, 999); // Hasta el final del día actual
+                
+                if (fechaSeleccionada > hoy) {
+                    console.log('❌ Fecha del reporte en el futuro');
+                    mostrarError('fecha-reporte','La fecha del reporte no puede ser en el futuro'); 
+                    esValido = false; 
+                }
+            }
+            if (!horaReporte) { 
+                console.log('❌ Hora del reporte vacía');
+                mostrarError('hora-reporte','La hora del reporte es obligatoria'); 
+                esValido = false; 
+            }
             if (!descripcion || descripcion.length < 10) { 
                 console.log('❌ Descripción inválida:', descripcion);
                 mostrarError('descripcion','La descripción es obligatoria (mínimo 10 caracteres)'); 
@@ -289,12 +426,18 @@ function inicializarCrearReporte() {
             const $botonEnvio = $('.boton-envio');
             $botonEnvio.prop('disabled', true).addClass('cargando').html('<span class="material-symbols-outlined">sync</span> Enviando...');
 
+            // Combinar fecha y hora en una sola fecha
+            const fechaReporte = $('#fecha-reporte').val();
+            const horaReporte = $('#hora-reporte').val();
+            const fechaCompleta = `${fechaReporte} ${horaReporte}`;
+            
             const payload = { 
                 titulo: $('#titulo').val().trim(), 
                 descripcion: $('#descripcion').val().trim(), 
                 id_salon: parseInt($('#salon').val()), 
                 id_categoria: parseInt($('#categoria').val()) || null, 
-                id_objeto: $('#objeto').val() ? parseInt($('#objeto').val()) : null 
+                id_objeto: $('#objeto').val() ? parseInt($('#objeto').val()) : null,
+                fecha_reporte: fechaCompleta
             };
 
             console.log('📦 Payload a enviar:', payload);

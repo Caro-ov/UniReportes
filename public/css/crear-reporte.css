@@ -961,3 +961,195 @@ body[data-css="crear-reporte"] .titulo-pagina {
     transform: translate(-50%, -50%) scale(1);
     transition: transform 0.3s ease;
 }
+
+/* ===========================
+   MODAL DE ADVERTENCIA DE URGENCIA
+   =========================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(2px);
+}
+
+.modal-contenido {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.modal-advertencia {
+    border-left: 4px solid var(--warning-color);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: #fef3cd;
+}
+
+.modal-header .icono-advertencia {
+    color: var(--warning-color);
+    font-size: 24px;
+}
+
+.modal-header h3 {
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-body {
+    padding: 20px 24px;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.modal-body p {
+    margin-bottom: 16px;
+}
+
+.modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+.modal-body strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.modal-body ul {
+    margin: 12px 0;
+    padding-left: 20px;
+}
+
+.modal-body li {
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.btn-principal, .btn-secundario {
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+    outline: none;
+}
+
+.btn-principal:focus,
+.btn-secundario:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.btn-principal {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+.btn-principal:hover {
+    background-color: #d97706;
+    transform: translateY(-1px);
+}
+
+.btn-secundario {
+    background-color: white;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secundario:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
+/* Animación del modal */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Responsive para el modal */
+@media (max-width: 768px) {
+    .modal-contenido {
+        margin: 20px;
+        width: calc(100% - 40px);
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .btn-principal,
+    .btn-secundario {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Efecto visual para categoría de urgencia confirmada */
+.categoria-urgencia-confirmada {
+    border-color: var(--warning-color) !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1) !important;
+    background-color: #fef3cd !important;
+    animation: pulsoUrgencia 0.5s ease-in-out;
+}
+
+@keyframes pulsoUrgencia {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}

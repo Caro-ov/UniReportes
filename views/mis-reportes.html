@@ -40,7 +40,7 @@
     }
     </script>
 </head>
-<body data-page="my-reports" data-title="UniReportes - Mis Reportes" data-css="mis-reportes">
+<body data-page="mis-reportes" data-title="UniReportes - Mis Reportes" data-css="mis-reportes">
     <div class="contenedor-principal">
         <!-- Overlay para móvil -->
         <div class="overlay" onclick="toggleSidebar()"></div>
@@ -70,46 +70,46 @@
 
                 <!-- Tarjetas de estadísticas -->
                 <div class="estadisticas-rapidas">
-                    <div class="tarjeta-estadistica">
+                    <div class="tarjeta-estadistica card-stats">
                         <div class="contenido-estadistica">
-                            <h4>Total Reportes</h4>
-                            <span class="numero-estadistica" id="total-reportes">16</span>
+                            <h4 class="stat-label">Total Reportes</h4>
+                            <span class="numero-estadistica stat-number" id="total-reportes">0</span>
                         </div>
                         <div class="icono-estadistica">
                             <span class="material-symbols-outlined">assignment</span>
                         </div>
                     </div>
-                    <div class="tarjeta-estadistica">
+                    <div class="tarjeta-estadistica card-stats">
                         <div class="contenido-estadistica">
-                            <h4>Reportes Enviados</h4>
-                            <span class="numero-estadistica" id="reportes-enviados">2</span>
+                            <h4 class="stat-label">Reportes Enviados</h4>
+                            <span class="numero-estadistica stat-number" id="reportes-enviados">0</span>
                         </div>
                         <div class="icono-estadistica">
                             <span class="material-symbols-outlined">send</span>
                         </div>
                     </div>
-                    <div class="tarjeta-estadistica">
+                    <div class="tarjeta-estadistica card-stats">
                         <div class="contenido-estadistica">
-                            <h4>En Revisión</h4>
-                            <span class="numero-estadistica" id="reportes-revision">3</span>
+                            <h4 class="stat-label">En Revisión</h4>
+                            <span class="numero-estadistica stat-number" id="reportes-revision">0</span>
                         </div>
                         <div class="icono-estadistica">
                             <span class="material-symbols-outlined">visibility</span>
                         </div>
                     </div>
-                    <div class="tarjeta-estadistica">
+                    <div class="tarjeta-estadistica card-stats">
                         <div class="contenido-estadistica">
-                            <h4>En Proceso</h4>
-                            <span class="numero-estadistica" id="reportes-proceso">4</span>
+                            <h4 class="stat-label">En Proceso</h4>
+                            <span class="numero-estadistica stat-number" id="reportes-proceso">0</span>
                         </div>
                         <div class="icono-estadistica">
                             <span class="material-symbols-outlined">sync</span>
                         </div>
                     </div>
-                    <div class="tarjeta-estadistica">
+                    <div class="tarjeta-estadistica card-stats">
                         <div class="contenido-estadistica">
-                            <h4>Resueltos</h4>
-                            <span class="numero-estadistica" id="reportes-resueltos">7</span>
+                            <h4 class="stat-label">Resueltos</h4>
+                            <span class="numero-estadistica stat-number" id="reportes-resueltos">0</span>
                         </div>
                         <div class="icono-estadistica">
                             <span class="material-symbols-outlined">check_circle</span>
@@ -143,11 +143,7 @@
                             <div class="filtro-estado">
                                 <label for="filtroEstado" class="etiqueta-filtro">Estado</label>
                                 <select id="filtroEstado" class="select-filtro">
-                                    <option value="">Todos</option>
-                                    <option value="enviado">Enviado</option>
-                                    <option value="revisado">Revisado</option>
-                                    <option value="proceso">En proceso</option>
-                                    <option value="resuelto">Resuelto</option>
+                                    <!-- Las opciones se cargarán dinámicamente -->
                                 </select>
                             </div>
                             
@@ -181,91 +177,8 @@
                                     <th class="columna-acciones">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody class="tabla-cuerpo">
-                                <tr class="fila-reporte">
-                                    <td class="celda-id">#12350</td>
-                                    <td class="celda-asunto">Conexión de internet en la sala de profesores</td>
-                                    <td class="celda-estado">
-                                        <span class="estado-badge estado-revisado">
-                                            <span class="material-symbols-outlined">visibility</span>
-                                            <span>Revisado</span>
-                                        </span>
-                                    </td>
-                                    <td class="celda-fecha">2024-07-27</td>
-                                    <td class="celda-acciones">
-                                        <a href="#" class="enlace-accion">Ver</a>
-                                    </td>
-                                </tr>
-                                <tr class="fila-reporte">
-                                    <td class="celda-id">#12345</td>
-                                    <td class="celda-asunto">Falla en el sistema de iluminación del aula 201</td>
-                                    <td class="celda-estado">
-                                        <span class="estado-badge estado-enviado">
-                                            <span class="material-symbols-outlined">send</span>
-                                            <span>Enviado</span>
-                                        </span>
-                                    </td>
-                                    <td class="celda-fecha">2024-07-26</td>
-                                    <td class="celda-acciones">
-                                        <a href="#" class="enlace-accion">Ver</a>
-                                    </td>
-                                </tr>
-                                <tr class="fila-reporte">
-                                    <td class="celda-id">#12346</td>
-                                    <td class="celda-asunto">Problema con el proyector en el auditorio principal</td>
-                                    <td class="celda-estado">
-                                        <span class="estado-badge estado-resuelto">
-                                            <span class="material-symbols-outlined">check_circle</span>
-                                            <span>Resuelto</span>
-                                        </span>
-                                    </td>
-                                    <td class="celda-fecha">2024-07-25</td>
-                                    <td class="celda-acciones">
-                                        <a href="#" class="enlace-accion">Ver</a>
-                                    </td>
-                                </tr>
-                                <tr class="fila-reporte">
-                                    <td class="celda-id">#12347</td>
-                                    <td class="celda-asunto">Daño en el mobiliario del laboratorio de química</td>
-                                    <td class="celda-estado">
-                                        <span class="estado-badge estado-proceso">
-                                            <span class="material-symbols-outlined">sync</span>
-                                            <span>En proceso</span>
-                                        </span>
-                                    </td>
-                                    <td class="celda-fecha">2024-07-24</td>
-                                    <td class="celda-acciones">
-                                        <a href="#" class="enlace-accion">Ver</a>
-                                    </td>
-                                </tr>
-                                <tr class="fila-reporte">
-                                    <td class="celda-id">#12348</td>
-                                    <td class="celda-asunto">Fuga de agua en los baños del primer piso</td>
-                                    <td class="celda-estado">
-                                        <span class="estado-badge estado-enviado">
-                                            <span class="material-symbols-outlined">send</span>
-                                            <span>Enviado</span>
-                                        </span>
-                                    </td>
-                                    <td class="celda-fecha">2024-07-23</td>
-                                    <td class="celda-acciones">
-                                        <a href="#" class="enlace-accion">Ver</a>
-                                    </td>
-                                </tr>
-                                <tr class="fila-reporte">
-                                    <td class="celda-id">#12349</td>
-                                    <td class="celda-asunto">Problema con el aire acondicionado en la biblioteca</td>
-                                    <td class="celda-estado">
-                                        <span class="estado-badge estado-resuelto">
-                                            <span class="material-symbols-outlined">check_circle</span>
-                                            <span>Resuelto</span>
-                                        </span>
-                                    </td>
-                                    <td class="celda-fecha">2024-07-22</td>
-                                    <td class="celda-acciones">
-                                        <a href="#" class="enlace-accion">Ver</a>
-                                    </td>
-                                </tr>
+                            <tbody class="tabla-cuerpo" id="tabla-reportes">
+                                <!-- Los reportes se cargarán dinámicamente aquí -->
                             </tbody>
                         </table>
                     </div>

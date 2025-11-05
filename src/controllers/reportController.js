@@ -121,7 +121,7 @@ export async function createReport(req, res) {
             });
         }
 
-        const { titulo, descripcion, id_salon, id_categoria } = req.body;
+        const { titulo, descripcion, id_salon, id_categoria, fecha_reporte } = req.body;
 
         // Validar campos requeridos
         if (!titulo || !descripcion || !id_salon) {
@@ -147,7 +147,8 @@ export async function createReport(req, res) {
             descripcion: descripcion.trim(),
             id_salon: parseInt(id_salon),
             id_categoria: id_categoria || null,
-            id_usuario: userId
+            id_usuario: userId,
+            fecha_reporte: fecha_reporte || null
         };
 
         const reportId = await reportModel.createReport(reportData);

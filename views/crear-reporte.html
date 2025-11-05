@@ -115,6 +115,28 @@
                                 <span class="texto-ayuda">Selecciona primero una ubicación para ver los salones disponibles</span>
                             </div>
 
+                            <!-- Fecha del reporte -->
+                            <div class="campo-formulario">
+                                <label for="fecha-reporte" class="etiqueta-campo">Fecha del reporte <span class="requerido">*</span></label>
+                                <div class="campo-con-icono">
+                                    <span class="material-symbols-outlined icono-campo">calendar_today</span>
+                                    <input type="date" id="fecha-reporte" name="fecha-reporte" 
+                                           class="input-con-icono" required max="9999-12-31"/>
+                                </div>
+                                <span class="texto-ayuda">¿Cuándo ocurrió el problema?</span>
+                            </div>
+
+                            <!-- Hora del reporte -->
+                            <div class="campo-formulario">
+                                <label for="hora-reporte" class="etiqueta-campo">Hora del reporte <span class="requerido">*</span></label>
+                                <div class="campo-con-icono">
+                                    <span class="material-symbols-outlined icono-campo">schedule</span>
+                                    <input type="time" id="hora-reporte" name="hora-reporte" 
+                                           class="input-con-icono" required/>
+                                </div>
+                                <span class="texto-ayuda">¿A qué hora aproximadamente?</span>
+                            </div>
+
                             <!-- Descripción -->
                             <div class="campo-formulario">
                                 <label for="descripcion" class="etiqueta-campo">Descripción <span class="requerido">*</span></label>

@@ -63,6 +63,12 @@ class SPANavigation {
                 css: 'mis-reportes',
                 contentSelector: '.contenido-principal'
             },
+            'detalle-reporte': {
+                url: '/detalle-reporte.html',
+                title: 'Detalle del Reporte',
+                css: 'detalle-reporte',
+                contentSelector: '.contenido-principal'
+            },
             'perfil': {
                 url: '/perfil.html',
                 title: 'Mi Perfil',
@@ -116,6 +122,7 @@ class SPANavigation {
         if (path.includes('admin-settings.html')) return 'admin-settings';
         if (path.includes('dashboard.html')) return 'dashboard';
         if (path.includes('mis-reportes.html')) return 'mis-reportes';
+        if (path.includes('detalle-reporte.html')) return 'detalle-reporte';
         if (path.includes('perfil.html')) return 'perfil';
         if (path.includes('ayuda.html')) return 'ayuda';
         
@@ -447,6 +454,24 @@ class SPANavigation {
                 // Dar más tiempo para que el DOM se estabilice
                 setTimeout(() => {
                     this.manejarExplorarReportes();
+                }, 200);
+            }
+            
+            // Manejar mis-reportes específicamente aquí
+            if (page === 'mis-reportes') {
+                console.log('🎯 SPA: Manejando mis-reportes directamente...');
+                // Dar más tiempo para que el DOM se estabilice
+                setTimeout(() => {
+                    this.manejarMisReportes();
+                }, 200);
+            }
+            
+            // Manejar detalle-reporte específicamente aquí
+            if (page === 'detalle-reporte') {
+                console.log('🎯 SPA: Manejando detalle-reporte directamente...');
+                // Dar más tiempo para que el DOM se estabilice
+                setTimeout(() => {
+                    this.manejarDetalleReporte(params);
                 }, 200);
             }
         }, 50);
@@ -1123,7 +1148,84 @@ class SPANavigation {
         document.head.appendChild(script);
     }
     
-    // Función para limpiar estilos problemáticos del body
+    // Función específica para manejar la página de mis-reportes
+    async manejarMisReportes() {
+        console.log('🚀 SPA: Iniciando manejo directo de mis-reportes...');
+        
+        try {
+            // Esperar a que el contenido esté completamente cargado
+            const esperarContenido = () => {
+                return new Promise((resolve) => {
+                    const verificarElementos = () => {
+                        const tabla = document.getElementById('tabla-reportes');
+                        const tarjetas = document.querySelectorAll('.card-stats');
+                        const filtros = document.getElementById('filtro-estado');
+                        
+                        if (tabla && tarjetas.length > 0) {
+                            console.log('✅ SPA: Elementos de mis-reportes encontrados, procediendo con inicialización');
+                            resolve();
+                        } else {
+                            console.log('⏳ SPA: Esperando elementos de mis-reportes...');
+                            setTimeout(verificarElementos, 50);
+                        }
+                    };
+                    verificarElementos();
+                });
+            };
+            
+            await esperarContenido();
+            
+            // Llamar a la función de manejo específica de mis-reportes
+            setTimeout(() => {
+                if (window.manejarMisReportes) {
+                    console.log('📞 SPA: Ejecutando window.manejarMisReportes()');
+                    window.manejarMisReportes();
+                } else {
+                    console.log('❌ SPA: Función manejarMisReportes no encontrada, cargando script...');
+                    this.cargarScriptMisReportes();
+                }
+            }, 100);
+            
+        } catch (error) {
+            console.error('💥 SPA: Error en manejarMisReportes:', error);
+        }
+    }
+    
+    cargarScriptMisReportes() {
+        console.log('📦 SPA: Cargando script mis-reportes.js...');
+        
+        // Verificar si el script ya está cargado
+        const scriptExistente = document.querySelector('script[src*="mis-reportes.js"]');
+        if (scriptExistente) {
+            console.log('📜 SPA: Script mis-reportes.js ya existe, reejecutando...');
+            if (window.manejarMisReportes) {
+                window.manejarMisReportes();
+            }
+            return;
+        }
+        
+        // Crear y cargar el script
+        const script = document.createElement('script');
+        script.src = '/js/mis-reportes.js';
+        script.onload = () => {
+            console.log('✅ SPA: Script mis-reportes.js cargado exitosamente');
+            // Ejecutar la función después de cargar
+            setTimeout(() => {
+                if (window.manejarMisReportes) {
+                    console.log('📞 SPA: Ejecutando window.manejarMisReportes() después de cargar script');
+                    window.manejarMisReportes();
+                } else {
+                    console.error('❌ SPA: Función manejarMisReportes no disponible después de cargar script');
+                }
+            }, 100);
+        };
+        script.onerror = () => {
+            console.error('❌ SPA: Error cargando script mis-reportes.js');
+        };
+        
+        document.head.appendChild(script);
+    }
+
     cleanupBodyStyles() {
         console.log('🧹 Limpiando estilos problemáticos del body...');
         
@@ -1146,6 +1248,90 @@ class SPANavigation {
         $('.modal-overlay').remove();
         
         console.log('✅ Estilos del body limpiados');
+    }
+    
+    // Función específica para manejar la página de detalle-reporte
+    async manejarDetalleReporte(params = '') {
+        console.log('🚀 SPA: Iniciando manejo directo de detalle-reporte...', params);
+        
+        try {
+            // Extraer el ID del reporte de los parámetros
+            const urlParams = new URLSearchParams(params);
+            const reportId = urlParams.get('id');
+            
+            if (!reportId) {
+                console.error('❌ No se encontró ID del reporte en los parámetros');
+                return;
+            }
+            
+            console.log('📋 ID del reporte:', reportId);
+            
+            // Esperar a que el contenido esté completamente cargado
+            const esperarContenido = () => {
+                return new Promise((resolve) => {
+                    const verificarElementos = () => {
+                        const contenidoPrincipal = document.querySelector('.contenido-principal');
+                        if (contenidoPrincipal) {
+                            console.log('✅ SPA: Elementos de detalle-reporte encontrados, procediendo con inicialización');
+                            resolve();
+                        } else {
+                            console.log('⏳ SPA: Esperando elementos de detalle-reporte...');
+                            setTimeout(verificarElementos, 100);
+                        }
+                    };
+                    verificarElementos();
+                });
+            };
+            
+            await esperarContenido();
+            
+            // Llamar a la función de manejo específica de detalle-reporte
+            if (window.manejarDetalleReporte) {
+                console.log('📞 SPA: Ejecutando window.manejarDetalleReporte()');
+                window.manejarDetalleReporte(reportId);
+            } else {
+                console.log('❌ SPA: Función manejarDetalleReporte no encontrada, cargando script...');
+                await this.cargarScriptDetalleReporte(reportId);
+            }
+        } catch (error) {
+            console.error('💥 SPA: Error en manejarDetalleReporte:', error);
+        }
+    }
+    
+    // Función para cargar el script de detalle-reporte
+    async cargarScriptDetalleReporte(reportId) {
+        console.log('📦 SPA: Cargando script detalle-reporte.js...');
+        
+        // Verificar si el script ya existe
+        const scriptExistente = document.querySelector('script[src*="detalle-reporte.js"]');
+        if (scriptExistente && window.manejarDetalleReporte) {
+            console.log('📜 SPA: Script detalle-reporte.js ya existe, reejecutando...');
+            if (window.manejarDetalleReporte) {
+                window.manejarDetalleReporte(reportId);
+            }
+            return;
+        }
+        
+        // Crear y cargar el script
+        const script = document.createElement('script');
+        script.src = '/js/detalle-reporte.js';
+        script.onload = () => {
+            console.log('✅ SPA: Script detalle-reporte.js cargado exitosamente');
+            // Ejecutar la función después de cargar
+            setTimeout(() => {
+                if (window.manejarDetalleReporte) {
+                    console.log('📞 SPA: Ejecutando window.manejarDetalleReporte() después de cargar script');
+                    window.manejarDetalleReporte(reportId);
+                } else {
+                    console.error('❌ SPA: Función manejarDetalleReporte no disponible después de cargar script');
+                }
+            }, 100);
+        };
+        script.onerror = () => {
+            console.error('❌ SPA: Error cargando script detalle-reporte.js');
+        };
+        
+        document.head.appendChild(script);
     }
 }
 
