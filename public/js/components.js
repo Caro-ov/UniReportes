@@ -98,53 +98,58 @@ $(document).ready(function() {
 
     // Función para inicializar la funcionalidad del sidebar
     function initializeSidebarFunctionality() {
-        // Funcionalidad para cerrar sidebar en móvil
-        $('.overlay').on('click', function() {
+        // Funcionalidad para cerrar sidebar en móvil con event delegation
+        $(document).off('click.overlay').on('click.overlay', '.overlay', function() {
+            toggleSidebar();
+        });
+
+        // Manejar botón de menú móvil con event delegation
+        $(document).off('click.menuMovil').on('click.menuMovil', '.boton-menu-movil', function() {
             toggleSidebar();
         });
     }
 
     // Función para inicializar la funcionalidad del header
     function initializeHeaderFunctionality() {
-        // Manejar dropdown del usuario
-        $('.user-dropdown, .dropdown-perfil').on('click', function(e) {
+        // Manejar dropdown del usuario con event delegation
+        $(document).off('click.header').on('click.header', '.user-dropdown, .dropdown-perfil', function(e) {
             e.stopPropagation();
             $(this).toggleClass('open');
             $('.menu-desplegable', this).toggleClass('mostrar');
         });
 
         // Cerrar dropdown al hacer clic fuera
-        $(document).on('click', function() {
+        $(document).off('click.headerClose').on('click.headerClose', function() {
             $('.user-dropdown, .dropdown-perfil').removeClass('open');
             $('.menu-desplegable').removeClass('mostrar');
         });
 
-        // Manejar notificaciones
-        $('.notification-btn, .boton-notificaciones').on('click', function(e) {
+        // Manejar notificaciones con event delegation
+        $(document).off('click.notifications').on('click.notifications', '.notification-btn, .boton-notificaciones', function(e) {
             e.stopPropagation();
             console.log('Notificaciones clicked');
             // Aquí se puede agregar funcionalidad de notificaciones
             mostrarToast('Notificaciones', 'info');
         });
 
-        // Manejar logout
-        $('.logout-btn, .cerrar-sesion').on('click', function(e) {
+        // Manejar logout con event delegation
+        $(document).off('click.logout').on('click.logout', '.logout-btn, .cerrar-sesion', function(e) {
             e.preventDefault();
             mostrarModalLogout();
         });
 
-        // Funcionalidad del modal de logout
-        $('#btn-cancelar-logout').on('click', function() {
+        // Funcionalidad del modal de logout con event delegation
+        $(document).off('click.modalCancel').on('click.modalCancel', '#btn-cancelar-logout', function() {
             ocultarModalLogout();
         });
 
-        $('#btn-confirmar-logout').on('click', function() {
+        $(document).off('click.modalConfirm').on('click.modalConfirm', '#btn-confirmar-logout', function() {
             ocultarModalLogout();
             procesarLogout();
         });
 
-        // Cerrar modal al hacer clic fuera de él
-        $('#modal-logout').on('click', function(e) {
+        // Cerrar modal al hacer clic fuera de él con event delegation
+        $(document).off('click.modalClose').on('click.modalClose', '#modal-logout', function(e) {
             if (e.target === this) {
                 ocultarModalLogout();
             }
@@ -155,11 +160,6 @@ $(document).ready(function() {
             if (e.key === 'Escape' && $('#modal-logout').hasClass('mostrar')) {
                 ocultarModalLogout();
             }
-        });
-
-        // Manejar botón de menú móvil
-        $('.boton-menu-movil').on('click', function() {
-            toggleSidebar();
         });
     }
 

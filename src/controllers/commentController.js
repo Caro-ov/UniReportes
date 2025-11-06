@@ -49,7 +49,7 @@ const commentController = {
         try {
             const { reportId } = req.params;
             const { comentario } = req.body;
-            const userId = req.session.userId;
+            const userId = req.session.user?.id;
             
             console.log(`📝 commentController: Creando comentario en reporte ${reportId} por usuario ${userId}`);
             
@@ -60,29 +60,27 @@ const commentController = {
                     message: 'ID de reporte requerido'
                 });
             }
-            
+
             if (!comentario || comentario.trim().length === 0) {
                 return res.status(400).json({
                     success: false,
                     message: 'El comentario no puede estar vacío'
                 });
             }
-            
+
             if (comentario.trim().length < 10) {
                 return res.status(400).json({
                     success: false,
                     message: 'El comentario debe tener al menos 10 caracteres'
                 });
             }
-            
+
             if (!userId) {
                 return res.status(401).json({
                     success: false,
                     message: 'Debes estar autenticado para comentar'
                 });
-            }
-            
-            // Crear el comentario
+            }            // Crear el comentario
             const commentData = {
                 id_reporte: reportId,
                 id_usuario: userId,
@@ -131,7 +129,7 @@ const commentController = {
     async delete(req, res) {
         try {
             const { commentId } = req.params;
-            const userId = req.session.userId;
+            const userId = req.session.user?.id;
             
             console.log(`🗑️ commentController: Eliminando comentario ${commentId} por usuario ${userId}`);
             

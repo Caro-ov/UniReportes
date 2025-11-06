@@ -236,31 +236,41 @@ $(document).ready(function() {
             if (archivo.isImage) {
                 contenidoArchivo = `
                     <div class="archivo-item imagen-item" data-archivo-id="${archivo.id_archivo}">
-                        <div class="archivo-icono">
+                        <div class="archivo-icono imagen">
                             <span class="material-symbols-outlined">image</span>
                         </div>
                         <div class="archivo-info">
                             <div class="archivo-nombre">${escapeHtml(archivo.filename)}</div>
                             <div class="archivo-meta">Imagen • ${formatearTamaño(archivo.tamano)} • Subido hace 2 horas</div>
                         </div>
-                        <button class="btn-ver-archivo" onclick="verArchivo('${archivo.fileUrl}', '${archivo.filename}', 'imagen')">
-                            <span class="material-symbols-outlined">visibility</span>
-                        </button>
+                        <div class="archivo-acciones">
+                            <button class="btn-ver-archivo" onclick="verArchivo('${archivo.fileUrl}', '${archivo.filename}', 'imagen')" title="Ver imagen">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </button>
+                            <button class="btn-descargar-archivo" onclick="descargarArchivo('${archivo.fileUrl}', '${archivo.filename}')" title="Descargar">
+                                <span class="material-symbols-outlined">download</span>
+                            </button>
+                        </div>
                     </div>
                 `;
             } else if (archivo.isVideo) {
                 contenidoArchivo = `
                     <div class="archivo-item video-item" data-archivo-id="${archivo.id_archivo}">
                         <div class="archivo-icono video">
-                            <span class="material-symbols-outlined">play_arrow</span>
+                            <span class="material-symbols-outlined">videocam</span>
                         </div>
                         <div class="archivo-info">
                             <div class="archivo-nombre">${escapeHtml(archivo.filename)}</div>
                             <div class="archivo-meta">Video • ${formatearTamaño(archivo.tamano)} • Subido hace 1 hora</div>
                         </div>
-                        <button class="btn-ver-archivo video" onclick="verArchivo('${archivo.fileUrl}', '${archivo.filename}', 'video')">
-                            <span class="material-symbols-outlined">play_arrow</span>
-                        </button>
+                        <div class="archivo-acciones">
+                            <button class="btn-ver-archivo video" onclick="verArchivo('${archivo.fileUrl}', '${archivo.filename}', 'video')" title="Reproducir video">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                            </button>
+                            <button class="btn-descargar-archivo" onclick="descargarArchivo('${archivo.fileUrl}', '${archivo.filename}')" title="Descargar">
+                                <span class="material-symbols-outlined">download</span>
+                            </button>
+                        </div>
                     </div>
                 `;
             }
@@ -269,13 +279,6 @@ $(document).ready(function() {
                 archivosGrid.append(contenidoArchivo);
             }
         });
-        
-        // Cambiar el título de la sección
-        if (archivos.some(a => a.isVideo)) {
-            $('.archivos-section .section-titulo').text('Archivos adjuntos');
-        } else {
-            $('.archivos-section .section-titulo').text('Fotos');
-        }
         
         archivosSection.show();
     }
@@ -506,6 +509,22 @@ $(document).ready(function() {
             // Para videos, abrir en nueva pestaña
             window.open(url, '_blank');
         }
+    };
+
+    // Función global para descargar archivos
+    window.descargarArchivo = function(url, filename) {
+        console.log(`⬇️ Descargando archivo: ${filename}`);
+        
+        // Crear enlace temporal para descarga
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.style.display = 'none';
+        
+        // Agregar al DOM, hacer clic y remover
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
     
     // Función para obtener el ID del reporte desde la URL
