@@ -64,8 +64,8 @@ const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
     limits: {
-        fileSize: 50 * 1024 * 1024, // 50MB máximo
-        files: 1 // Solo un archivo por reporte
+        fileSize: 50 * 1024 * 1024, // 50MB máximo por archivo
+        files: 5 // Máximo 5 archivos por reporte
     }
 });
 
@@ -81,7 +81,7 @@ export const handleMulterError = (error, req, res, next) => {
             case 'LIMIT_FILE_COUNT':
                 return res.status(400).json({
                     success: false,
-                    message: 'Solo se permite un archivo por reporte.'
+                    message: 'Máximo 5 archivos por reporte.'
                 });
             case 'LIMIT_UNEXPECTED_FILE':
                 return res.status(400).json({
@@ -103,7 +103,8 @@ export const handleMulterError = (error, req, res, next) => {
     next();
 };
 
-// Exportar middleware configurado
+// Exportar middlewares configurados
 export const uploadSingle = upload.single('archivo');
+export const uploadMultiple = upload.array('archivos', 5); // Máximo 5 archivos con nombre 'archivos'
 
 export default upload;

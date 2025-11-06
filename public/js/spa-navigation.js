@@ -158,7 +158,20 @@ class SPANavigation {
         });
     }
     
-    async navigateTo(page, pushState = true) {
+    async navigateTo(page, paramsOrPushState = true, pushState = true) {
+        // Manejar diferentes tipos de llamadas
+        let urlParams = '';
+        let shouldPushState = true;
+        
+        if (typeof paramsOrPushState === 'string') {
+            // Llamada con parámetros: navigateTo('page', '?id=123', true/false)
+            urlParams = paramsOrPushState;
+            shouldPushState = pushState;
+        } else if (typeof paramsOrPushState === 'boolean') {
+            // Llamada tradicional: navigateTo('page', true/false)
+            shouldPushState = paramsOrPushState;
+        }
+        
         if (this.isLoading || page === this.currentPage) return;
         
         const config = this.pageConfig[page];
@@ -167,7 +180,7 @@ class SPANavigation {
             return;
         }
         
-        console.log('🧭 SPA: Navegando a página:', page);
+        console.log('🧭 SPA: Navegando a página:', page, 'con parámetros:', urlParams);
         this.isLoading = true;
         
         try {
@@ -183,6 +196,12 @@ class SPANavigation {
             if (content) {
                 console.log('📄 SPA: Contenido cargado para:', page);
                 
+                // Cargar CSS específico ANTES de actualizar contenido para evitar flash
+                await this.loadPageCSS(config.css);
+                
+                // Asegurar que los CSS esenciales estén cargados
+                this.ensureEssentialCSS();
+                
                 // Actualizar contenido principal
                 this.updateMainContent(content, config, page);
                 
@@ -190,18 +209,13 @@ class SPANavigation {
                 this.currentPage = page;
                 
                 // Actualizar URL y título
-                this.updateBrowserState(page, config, pushState);
+                this.updateBrowserState(page, config, shouldPushState, urlParams);
                 
                 // Actualizar navegación activa
                 this.updateActiveNavigation(page);
                 
-                // Cargar CSS específico y esperar a que se cargue
-                await this.loadPageCSS(config.css);
-                
-                // Asegurar que los CSS esenciales estén cargados
-                this.ensureEssentialCSS();
-                
-                console.log('🎯 SPA: CSS cargado, contenido actualizado');
+                // Disparar evento de cambio de página con parámetros
+                this.triggerPageChangeEvent(page, urlParams);
             }
             
         } catch (error) {
@@ -305,16 +319,17 @@ class SPANavigation {
         }
     }
     
-    updateBrowserState(page, config, pushState) {
-        const url = config.url;
+    updateBrowserState(page, config, pushState, urlParams = '') {
+        const baseUrl = config.url;
+        const fullUrl = baseUrl + urlParams;
         const title = `UniReportes - ${config.title}`;
         
         // Actualizar título de la página
         document.title = title;
         
         // Actualizar URL si es necesario
-        if (pushState && window.location.pathname !== url) {
-            history.pushState({ page }, title, url);
+        if (pushState && window.location.pathname + window.location.search !== fullUrl) {
+            history.pushState({ page, params: urlParams }, title, fullUrl);
         }
     }
     
@@ -410,8 +425,8 @@ class SPANavigation {
         // Aquí podrías mostrar un toast o modal de error
     }
     
-    triggerPageChangeEvent(page) {
-        console.log('🚀 SPA: Disparando evento spaPageChange para página:', page);
+    triggerPageChangeEvent(page, urlParams = '') {
+        console.log('🚀 SPA: Disparando evento spaPageChange para página:', page, 'con parámetros:', urlParams);
         
         // Pequeño delay para asegurar que el DOM esté completamente actualizado
         setTimeout(() => {
@@ -471,6 +486,8 @@ class SPANavigation {
                 console.log('🎯 SPA: Manejando detalle-reporte directamente...');
                 // Dar más tiempo para que el DOM se estabilice
                 setTimeout(() => {
+                    // Usar parámetros pasados o los de la URL actual
+                    const params = urlParams || window.location.search;
                     this.manejarDetalleReporte(params);
                 }, 200);
             }

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/authMiddleware.js';
-import { uploadSingle, handleMulterError } from '../middleware/uploadMiddleware.js';
+import { uploadSingle, uploadMultiple, handleMulterError } from '../middleware/uploadMiddleware.js';
 import * as reportController from '../controllers/reportController.js';
 
 const router = Router();
@@ -23,8 +23,11 @@ router.get('/stats', reportController.getReportsStats);
 // GET /api/reports/:id - Obtener un reporte específico
 router.get('/:id', reportController.getReportById);
 
-// POST /api/reports - Crear un nuevo reporte (con archivo opcional)
-router.post('/', uploadSingle, handleMulterError, reportController.createReport);
+// GET /api/reports/:id/historial - Obtener historial de cambios de un reporte
+router.get('/:id/historial', reportController.getReportHistorial);
+
+// POST /api/reports - Crear un nuevo reporte (con múltiples archivos opcionales)
+router.post('/', uploadMultiple, handleMulterError, reportController.createReport);
 
 // PUT /api/reports/:id - Actualizar un reporte
 router.put('/:id', reportController.updateReport);

@@ -1,6 +1,7 @@
 import * as reportModel from '../models/reportModel.js';
 import * as categoryModel from '../models/categoryModel.js';
 import * as fileModel from '../models/fileModel.js';
+import * as historialModel from '../models/historialModel.js';
 import path from 'path';
 
 /**
@@ -155,40 +156,49 @@ export async function createReport(req, res) {
 
         const reportId = await reportModel.createReport(reportData);
 
-        // Manejar archivo si se subió uno
-        if (req.file) {
-            console.log('📁 Archivo recibido:', req.file);
+        // Manejar archivos si se subieron
+        let archivosGuardados = [];
+        if (req.files && req.files.length > 0) {
+            console.log(`📁 ${req.files.length} archivos recibidos:`, req.files.map(f => f.originalname));
             
-            try {
-                const fileData = {
-                    id_reporte: reportId,
-                    url: req.file.path.replace(/\\/g, '/'), // Normalizar path para BD
-                    tipo: req.file.mimetype
-                };
+            for (const file of req.files) {
+                try {
+                    const fileData = {
+                        id_reporte: reportId,
+                        url: file.path.replace(/\\/g, '/'), // Normalizar path para BD
+                        tipo: file.mimetype
+                    };
 
-                const fileId = await fileModel.createFile(fileData);
-                console.log('✅ Archivo guardado en BD con ID:', fileId);
-                
+                    const fileId = await fileModel.createFile(fileData);
+                    console.log(`✅ Archivo ${file.originalname} guardado en BD con ID:`, fileId);
+                    
+                    archivosGuardados.push({
+                        id: fileId,
+                        nombre: file.originalname,
+                        tipo: file.mimetype,
+                        url: file.path.replace(/\\/g, '/')
+                    });
+                } catch (fileError) {
+                    console.error(`❌ Error guardando archivo ${file.originalname} en BD:`, fileError);
+                    // Continúa con el siguiente archivo si hay error
+                }
+            }
+            
+            if (archivosGuardados.length > 0) {
                 res.status(201).json({
                     success: true,
-                    message: 'Reporte creado exitosamente con archivo',
+                    message: `Reporte creado exitosamente con ${archivosGuardados.length} archivo(s)`,
                     data: { 
                         id: reportId,
-                        archivo: {
-                            id: fileId,
-                            tipo: req.file.mimetype,
-                            url: req.file.path.replace(/\\/g, '/')
-                        }
+                        archivos: archivosGuardados
                     }
                 });
-            } catch (fileError) {
-                console.error('❌ Error guardando archivo en BD:', fileError);
-                // El reporte ya se creó, solo fallo el archivo
+            } else {
                 res.status(201).json({
                     success: true,
-                    message: 'Reporte creado pero hubo un error con el archivo',
+                    message: 'Reporte creado pero hubo errores con los archivos',
                     data: { id: reportId },
-                    warning: 'El archivo no pudo ser procesado'
+                    warning: 'Los archivos no pudieron ser procesados'
                 });
             }
         } else {
@@ -448,6 +458,55 @@ export async function getReportsStats(req, res) {
     }
 }
 
+/**
+ * Obtener historial de cambios de un reporte (API)
+ */
+export async function getReportHistorial(req, res) {
+    try {
+        const reportId = parseInt(req.params.id);
+        const userId = req.session.user?.id;
+        const userRole = req.session.user?.rol;
+
+        if (!reportId) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID de reporte inválido'
+            });
+        }
+
+        // Verificar que el reporte existe
+        const report = await reportModel.getReportById(reportId);
+        if (!report) {
+            return res.status(404).json({
+                success: false,
+                message: 'Reporte no encontrado'
+            });
+        }
+
+        // Verificar permisos: solo el propietario o admin pueden ver el historial
+        if (report.id_usuario !== userId && userRole !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'No tienes permisos para ver el historial de este reporte'
+            });
+        }
+
+        const historial = await historialModel.getHistorialByReportId(reportId);
+
+        res.json({
+            success: true,
+            data: historial
+        });
+
+    } catch (error) {
+        console.error('Error obteniendo historial del reporte:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor'
+        });
+    }
+}
+
 export default {
     getAllReports,
     getUserReports,
@@ -457,5 +516,6 @@ export default {
     updateReportStatus,
     deleteReport,
     searchReports,
-    getReportsStats
+    getReportsStats,
+    getReportHistorial
 };

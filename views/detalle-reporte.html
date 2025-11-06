@@ -1,9 +1,51 @@
 <!DOCTYPE html>
 <html lang="es">
-<head id="head-container">
-    <!-- Head common será cargado aquí -->
+<head>
+    <!-- Head común para todas las páginas -->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UniReportes</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- Precarga de CSS comunes para reducir retrasos -->
+    <link rel="preload" href="css/dashboard.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+    <link rel="preload" href="css/admin-dashboard.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+    <link rel="preload" href="css/crear-reporte.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+    <link rel="preload" href="css/perfil.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+    <link rel="preload" href="css/mis-reportes.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+    <link rel="preload" href="css/detalle-reporte.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+    <!-- CSS Base - Cargado estáticamente para evitar retrasos -->
+    <link rel="stylesheet" href="css/components.css"/>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Script de seguridad para prevenir navegación hacia atrás después del logout -->
+    <script>
+    // Prevenir navegación hacia atrás en páginas protegidas
+    if (window.location.pathname !== '/login.html' && 
+        window.location.pathname !== '/' && 
+        !window.location.pathname.includes('index.html')) {
+        
+        // Verificar si hay marcador de logout en sessionStorage
+        if (sessionStorage.getItem('logout_flag')) {
+            sessionStorage.removeItem('logout_flag');
+            window.location.replace('/login.html');
+        }
+        
+        // Listener para prevenir navegación hacia atrás
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted || sessionStorage.getItem('logout_flag')) {
+                sessionStorage.removeItem('logout_flag');
+                window.location.replace('/login.html');
+            }
+        });
+    }
+    </script>
 </head>
-<body data-page="my-reports" data-title="UniReportes - Detalles del Reporte" data-css="detalle-reporte">
+<body data-page="mis-reportes" data-title="UniReportes - Detalles del Reporte" data-css="detalle-reporte">
     <div class="contenedor-principal">
         <!-- Overlay para móvil -->
         <div class="overlay" onclick="toggleSidebar()"></div>
@@ -26,9 +68,9 @@
                 <!-- Breadcrumb -->
                 <div class="breadcrumb-container">
                     <nav class="breadcrumb">
-                        <a href="mis-reportes.html" class="breadcrumb-link">Reportes</a>
+                        <a href="#" class="breadcrumb-link" data-spa-nav="mis-reportes">Reportes</a>
                         <span class="breadcrumb-separator">/</span>
-                        <span class="breadcrumb-current">Reporte #1234</span>
+                        <span class="breadcrumb-current">Cargando...</span>
                     </nav>
                 </div>
 
@@ -37,12 +79,12 @@
                     <!-- Header del reporte -->
                     <div class="reporte-header">
                         <div class="header-info">
-                            <h2 class="titulo-reporte">Fuga en el laboratorio de química</h2>
+                            <h2 class="titulo-reporte">Cargando...</h2>
                             <div class="estado-container">
-                                <span class="estado estado-en-proceso">En proceso</span>
+                                <span class="estado estado-enviado">Cargando...</span>
                             </div>
                         </div>
-                        <p class="numero-reporte">Reporte #1234</p>
+                        <p class="numero-reporte">Reporte #---</p>
                     </div>
 
                     <!-- Contenido del reporte -->
@@ -51,30 +93,16 @@
                         <div class="detalles-section">
                             <h3 class="section-titulo">Detalles del reporte</h3>
                             <div class="detalles-grid">
-                                <div class="detalle-item">
-                                    <p class="detalle-label">Ubicación</p>
-                                    <p class="detalle-valor">Laboratorio de Química, Edificio de Ciencias</p>
-                                </div>
-                                <div class="detalle-item">
-                                    <p class="detalle-label">Fecha de envío</p>
-                                    <p class="detalle-valor">15 de mayo de 2024, 10:00 AM</p>
-                                </div>
-                                <div class="detalle-item">
-                                    <p class="detalle-label">Descripción</p>
-                                    <p class="detalle-valor descripcion-texto">
-                                        Se ha detectado una fuga de agua en el laboratorio de química. El agua está goteando del techo cerca de la estación de trabajo número 3. Por favor, envíen a alguien para que lo revise lo antes posible.
-                                    </p>
-                                </div>
+                                <!-- Los detalles se cargarán dinámicamente -->
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Fotos del reporte -->
-                        <div class="fotos-section">
-                            <h3 class="section-titulo">Fotos</h3>
-                            <div class="fotos-grid">
-                                <div class="foto-placeholder"></div>
-                                <div class="foto-placeholder"></div>
-                            </div>
+                    <!-- Archivos adjuntos - Sección independiente -->
+                    <div class="archivos-section">
+                        <h3 class="section-titulo">Archivos adjuntos</h3>
+                        <div class="archivos-grid">
+                            <!-- Los archivos se cargarán dinámicamente -->
                         </div>
                     </div>
 
@@ -82,33 +110,7 @@
                     <div class="historial-section">
                         <h3 class="section-titulo">Historial de cambios</h3>
                         <div class="timeline">
-                            <div class="timeline-item">
-                                <div class="timeline-icon">
-                                    <span class="material-symbols-outlined">send</span>
-                                </div>
-                                <div class="timeline-content">
-                                    <p class="timeline-titulo">Reporte enviado</p>
-                                    <p class="timeline-fecha">15 de mayo de 2024, 10:00 AM</p>
-                                </div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="timeline-icon">
-                                    <span class="material-symbols-outlined">hourglass_top</span>
-                                </div>
-                                <div class="timeline-content">
-                                    <p class="timeline-titulo">Reporte en proceso</p>
-                                    <p class="timeline-fecha">15 de mayo de 2024, 11:30 AM</p>
-                                </div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="timeline-icon">
-                                    <span class="material-symbols-outlined">person</span>
-                                </div>
-                                <div class="timeline-content">
-                                    <p class="timeline-titulo">Técnico asignado</p>
-                                    <p class="timeline-fecha">15 de mayo de 2024, 12:00 PM</p>
-                                </div>
-                            </div>
+                            <!-- El historial se cargará dinámicamente -->
                         </div>
                     </div>
 
@@ -116,15 +118,35 @@
                     <div class="comentarios-section">
                         <h3 class="section-titulo">Comentarios</h3>
                         <div class="comentarios-lista">
-                            <div class="comentario-item">
-                                <div class="comentario-avatar"></div>
-                                <div class="comentario-contenido">
-                                    <div class="comentario-header">
-                                        <p class="comentario-autor">Carlos Mendoza</p>
-                                        <p class="comentario-fecha">15 de mayo de 2024, 12:00 PM</p>
+                            <!-- Los comentarios se cargarán dinámicamente -->
+                        </div>
+                        
+                        <!-- Formulario para añadir comentario -->
+                        <div class="agregar-comentario">
+                            <div class="comentario-form">
+                                <div class="form-header">
+                                    <div class="usuario-avatar">
+                                        <span class="material-symbols-outlined">person</span>
                                     </div>
-                                    <div class="comentario-mensaje">
-                                        <p>Hemos asignado a un técnico para que revise la fuga. Estará en el laboratorio en aproximadamente una hora.</p>
+                                    <div class="usuario-info">
+                                        <span class="usuario-nombre">Cargando...</span>
+                                        <span class="usuario-rol">Cargando...</span>
+                                    </div>
+                                </div>
+                                <div class="form-contenido">
+                                    <textarea 
+                                        id="nuevo-comentario" 
+                                        placeholder="Escribe un comentario sobre el reporte..."
+                                        rows="3"
+                                    ></textarea>
+                                    <div class="form-acciones">
+                                        <button type="button" class="btn-cancelar" onclick="limpiarComentario()">
+                                            Cancelar
+                                        </button>
+                                        <button type="button" class="btn-enviar" onclick="enviarComentario()">
+                                            <span class="material-symbols-outlined">send</span>
+                                            Enviar
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -132,7 +154,7 @@
                     </div>
 
                     <!-- Añadir comentario -->
-                    <div class="agregar-comentario-section">
+                    <div class="agregar-comentario-section" style="display: none;">
                         <h3 class="section-titulo">Añadir comentario</h3>
                         <div class="comentario-form">
                             <div class="form-avatar"></div>
@@ -155,29 +177,8 @@
     </div>
 
     <script>
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const overlay = document.querySelector('.overlay');
-            const body = document.body;
-            
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-            body.classList.toggle('sidebar-open');
-        }
-
-        // Cerrar sidebar al hacer clic en el overlay
-        document.querySelector('.overlay').addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            const overlay = document.querySelector('.overlay');
-            const body = document.body;
-            
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-            body.classList.remove('sidebar-open');
-        });
-
-        // Manejar clic en el botón del menú
-        document.querySelector('.menu-toggle').addEventListener('click', toggleSidebar);
+        // La funcionalidad del sidebar móvil se maneja en components.js
+        // No duplicar código aquí
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Sistema de componentes -->

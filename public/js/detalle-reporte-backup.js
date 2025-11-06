@@ -5,21 +5,6 @@ $(document).ready(function() {
     let reporteActual = null;
 
     // ===========================
-    // FUNCIONES UTILITARIAS
-    // ===========================
-    
-    // Función para formatear el tamaño de archivos
-    function formatearTamaño(bytes) {
-        if (!bytes) return '0 B';
-        
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-    }
-
-    // ===========================
     // DROPDOWN DEL PERFIL
     // ===========================
     
@@ -72,10 +57,6 @@ $(document).ready(function() {
                 await mostrarDetalleReporte(data.data);
                 await cargarArchivosReporte(reportId);
                 await cargarHistorialReporte(reportId);
-                await cargarComentariosReporte(reportId);
-                
-                // Cargar datos del usuario en el formulario
-                cargarDatosUsuarioEnFormulario();
             } else {
                 throw new Error('Estructura de respuesta incorrecta');
             }
@@ -220,15 +201,15 @@ $(document).ready(function() {
     
     // Función para mostrar archivos
     function mostrarArchivos(archivos) {
-        const archivosSection = $('.archivos-section');
+        const fotosSection = $('.fotos-section');
         
         if (!archivos || archivos.length === 0) {
-            archivosSection.hide();
+            fotosSection.hide();
             return;
         }
         
-        const archivosGrid = $('.archivos-grid');
-        archivosGrid.empty();
+        const fotosGrid = $('.fotos-grid');
+        fotosGrid.empty();
         
         archivos.forEach(archivo => {
             let contenidoArchivo;
@@ -236,48 +217,40 @@ $(document).ready(function() {
             if (archivo.isImage) {
                 contenidoArchivo = `
                     <div class="archivo-item imagen-item" data-archivo-id="${archivo.id_archivo}">
-                        <div class="archivo-icono">
-                            <span class="material-symbols-outlined">image</span>
+                        <img src="${archivo.fileUrl}" alt="Imagen del reporte" class="archivo-imagen" loading="lazy">
+                        <div class="archivo-overlay">
+                            <button class="btn-ver-archivo" onclick="verArchivo('${archivo.fileUrl}', '${archivo.filename}', 'imagen')">
+                                <span class="material-symbols-outlined">zoom_in</span>
+                            </button>
                         </div>
-                        <div class="archivo-info">
-                            <div class="archivo-nombre">${escapeHtml(archivo.filename)}</div>
-                            <div class="archivo-meta">Imagen • ${formatearTamaño(archivo.tamano)} • Subido hace 2 horas</div>
-                        </div>
-                        <button class="btn-ver-archivo" onclick="verArchivo('${archivo.fileUrl}', '${archivo.filename}', 'imagen')">
-                            <span class="material-symbols-outlined">visibility</span>
-                        </button>
+                        <p class="archivo-nombre">${escapeHtml(archivo.filename)}</p>
                     </div>
                 `;
             } else if (archivo.isVideo) {
                 contenidoArchivo = `
                     <div class="archivo-item video-item" data-archivo-id="${archivo.id_archivo}">
-                        <div class="archivo-icono video">
-                            <span class="material-symbols-outlined">play_arrow</span>
-                        </div>
-                        <div class="archivo-info">
-                            <div class="archivo-nombre">${escapeHtml(archivo.filename)}</div>
-                            <div class="archivo-meta">Video • ${formatearTamaño(archivo.tamano)} • Subido hace 1 hora</div>
-                        </div>
-                        <button class="btn-ver-archivo video" onclick="verArchivo('${archivo.fileUrl}', '${archivo.filename}', 'video')">
-                            <span class="material-symbols-outlined">play_arrow</span>
-                        </button>
+                        <video class="archivo-video" controls preload="metadata">
+                            <source src="${archivo.fileUrl}" type="${archivo.tipo}">
+                            Tu navegador no soporta la reproducción de video.
+                        </video>
+                        <p class="archivo-nombre">${escapeHtml(archivo.filename)}</p>
                     </div>
                 `;
             }
             
             if (contenidoArchivo) {
-                archivosGrid.append(contenidoArchivo);
+                fotosGrid.append(contenidoArchivo);
             }
         });
         
         // Cambiar el título de la sección
         if (archivos.some(a => a.isVideo)) {
-            $('.archivos-section .section-titulo').text('Archivos adjuntos');
+            $('.fotos-section .section-titulo').text('Archivos adjuntos');
         } else {
-            $('.archivos-section .section-titulo').text('Fotos');
+            $('.fotos-section .section-titulo').text('Fotos');
         }
         
-        archivosSection.show();
+        fotosSection.show();
     }
     
     // Función para cargar historial de cambios
@@ -525,7 +498,6 @@ $(document).ready(function() {
         cargarDetalleReporte(reportId);
     } else {
         console.log('⚠️ No se encontró ID de reporte en la URL');
-        mostrarCarga(false); // Asegurar que se oculte el indicador de carga
         mostrarError('No se especificó un ID de reporte válido');
     }
     
@@ -542,11 +514,6 @@ $(document).ready(function() {
         } else {
             mostrarError('No se especificó un ID de reporte válido');
         }
-        
-        // Asegurar que se carguen los datos del usuario en el formulario después de un pequeño delay
-        setTimeout(() => {
-            cargarDatosUsuarioEnFormulario();
-        }, 100);
     };
     
     // Alias para compatibilidad
@@ -772,14 +739,9 @@ $(document).ready(function() {
             return;
         }
         
-        // Obtener ID del reporte actual
-        const reportId = obtenerIdReporte();
-        if (!reportId) {
-            alert('Error: No se pudo identificar el reporte actual.');
-            return;
-        }
-        
-        console.log(`📤 Enviando comentario al reporte ${reportId}:`, texto);
+        // Obtener datos del usuario actual
+        const usuario = await obtenerUsuarioActual();
+        console.log('📤 Enviando comentario como:', usuario);
         
         // Deshabilitar botón mientras se envía
         const btnEnviar = document.querySelector('.btn-enviar');
@@ -788,169 +750,65 @@ $(document).ready(function() {
             btnEnviar.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Enviando...';
         }
         
-        try {
-            const response = await fetch(`/api/comments/report/${reportId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    comentario: texto
-                })
-            });
+        // Simular delay de envío
+        setTimeout(() => {
+            // Determinar estilos según el rol
+            const esAdmin = usuario.rol === 'admin';
+            const estilos = esAdmin ? {
+                borderColor: '#10b981',
+                background: '#ecfdf5',
+                avatarBg: '#d1fae5',
+                avatarColor: '#10b981',
+                rolBg: '#10b981',
+                icono: 'admin_panel_settings'
+            } : {
+                borderColor: '#3b82f6',
+                background: '#eff6ff',
+                avatarBg: '#dbeafe',
+                avatarColor: '#3b82f6',
+                rolBg: '#3b82f6',
+                icono: 'person'
+            };
             
-            const data = await response.json();
+            // Agregar el nuevo comentario a la lista
+            const contenedorComentarios = $('.comentarios-lista');
+            const nuevoComentario = `
+                <div class="comentario-item" style="border-left-color: ${estilos.borderColor}; background: ${estilos.background};">
+                    <div class="comentario-avatar" style="background: ${estilos.avatarBg}; color: ${estilos.avatarColor};">
+                        <span class="material-symbols-outlined">${estilos.icono}</span>
+                    </div>
+                    <div class="comentario-contenido">
+                        <div class="comentario-header">
+                            <span class="comentario-autor">${escapeHtml(usuario.nombre)}</span>
+                            <span class="comentario-rol" style="background: ${estilos.rolBg};">${usuario.rolDisplay}</span>
+                            <span class="comentario-fecha">Ahora</span>
+                        </div>
+                        <p class="comentario-texto">${escapeHtml(texto)}</p>
+                    </div>
+                </div>
+            `;
+            contenedorComentarios.append(nuevoComentario);
             
-            if (response.ok && data.success) {
-                console.log('✅ Comentario enviado exitosamente:', data);
-                
-                // Limpiar formulario
-                textarea.value = '';
-                
-                // Recargar comentarios para mostrar el nuevo
-                await cargarComentariosReporte(reportId);
-                
-                // Scroll hacia el último comentario
-                setTimeout(() => {
-                    const contenedorComentarios = $('.comentarios-lista');
-                    const ultimoComentario = contenedorComentarios.children().last()[0];
-                    if (ultimoComentario) {
-                        ultimoComentario.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }, 100);
-                
-            } else {
-                throw new Error(data.message || 'Error enviando comentario');
-            }
+            // Limpiar formulario
+            textarea.value = '';
             
-        } catch (error) {
-            console.error('❌ Error enviando comentario:', error);
-            alert('Error enviando comentario: ' + error.message);
-        } finally {
             // Restaurar botón
             if (btnEnviar) {
                 btnEnviar.disabled = false;
                 btnEnviar.innerHTML = '<span class="material-symbols-outlined">send</span> Enviar';
             }
-        }
+            
+            // Scroll hacia el nuevo comentario
+            const ultimoComentario = contenedorComentarios.children().last()[0];
+            if (ultimoComentario) {
+                ultimoComentario.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            // Mostrar notificación de éxito
+            console.log('✅ Comentario enviado exitosamente');
+            
+        }, 1500);
     };
-    
-    // Función para cargar comentarios del reporte
-    async function cargarComentariosReporte(reportId) {
-        try {
-            console.log(`💬 Cargando comentarios del reporte ${reportId}...`);
-            
-            const response = await fetch(`/api/comments/report/${reportId}`, {
-                credentials: 'include'
-            });
-            
-            if (!response.ok) {
-                if (response.status === 404) {
-                    console.log('ℹ️ No se encontraron comentarios para este reporte');
-                    mostrarComentarios([]);
-                    return;
-                }
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-            
-            const data = await response.json();
-            console.log('💬 Comentarios recibidos:', data);
-            
-            if (data.success) {
-                mostrarComentarios(data.data || []);
-            } else {
-                throw new Error(data.message || 'Error obteniendo comentarios');
-            }
-            
-        } catch (error) {
-            console.error('❌ Error cargando comentarios:', error);
-            mostrarComentarios([]);
-        }
-    }
-    
-    // Función para mostrar comentarios en la interfaz
-    function mostrarComentarios(comentarios) {
-        console.log(`💬 Mostrando ${comentarios.length} comentarios...`);
-        
-        const contenedorComentarios = $('.comentarios-lista');
-        if (contenedorComentarios.length === 0) {
-            console.log('❌ No se encontró contenedor de comentarios');
-            return;
-        }
-        
-        // Si no hay comentarios, mostrar mensaje
-        if (comentarios.length === 0) {
-            contenedorComentarios.html(`
-                <div class="sin-comentarios">
-                    <span class="material-symbols-outlined">chat_bubble_outline</span>
-                    <p>No hay comentarios aún. ¡Sé el primero en comentar!</p>
-                </div>
-            `);
-            return;
-        }
-        
-        // Generar HTML para cada comentario
-        const comentariosHTML = comentarios.map(comentario => {
-            const esAdmin = comentario.autor.rol === 'admin';
-            const rolDisplay = esAdmin ? 'Administrador' : 'Monitor';
-            const claseRol = esAdmin ? 'admin' : '';
-            const fechaFormateada = formatearFechaComentario(comentario.fecha);
-            
-            return `
-                <div class="comentario-item ${claseRol}">
-                    <div class="comentario-avatar ${claseRol}">
-                        <span class="material-symbols-outlined">${esAdmin ? 'admin_panel_settings' : 'person'}</span>
-                    </div>
-                    <div class="comentario-contenido">
-                        <div class="comentario-header">
-                            <span class="comentario-autor">${escapeHtml(comentario.autor.nombre)}</span>
-                            <span class="comentario-rol ${claseRol}">${rolDisplay}</span>
-                            <span class="comentario-fecha">${fechaFormateada}</span>
-                        </div>
-                        <p class="comentario-texto">${escapeHtml(comentario.texto)}</p>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-        contenedorComentarios.html(comentariosHTML);
-    }
-    
-    // Función para formatear fecha de comentarios
-    function formatearFechaComentario(fecha) {
-        if (!fecha) return 'Sin fecha';
-        
-        const fechaComentario = new Date(fecha);
-        const ahora = new Date();
-        const diferencia = ahora - fechaComentario;
-        
-        // Menos de 1 minuto
-        if (diferencia < 60000) {
-            return 'Ahora';
-        }
-        
-        // Menos de 1 hora
-        if (diferencia < 3600000) {
-            const minutos = Math.floor(diferencia / 60000);
-            return `Hace ${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`;
-        }
-        
-        // Menos de 24 horas
-        if (diferencia < 86400000) {
-            const horas = Math.floor(diferencia / 3600000);
-            return `Hace ${horas} ${horas === 1 ? 'hora' : 'horas'}`;
-        }
-        
-        // Más de 24 horas - mostrar fecha completa
-        return fechaComentario.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
     
     // Función para cargar datos del usuario en el formulario de comentarios
     async function cargarDatosUsuarioEnFormulario() {

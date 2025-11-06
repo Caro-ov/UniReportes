@@ -1187,3 +1187,169 @@ body[data-css="crear-reporte"] .titulo-pagina {
         transform: scale(1);
     }
 }
+
+/* ===========================
+   ESTILOS PARA MÚLTIPLES ARCHIVOS
+   =========================== */
+
+.archivos-previsualizacion {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.archivo-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.archivo-preview:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.archivo-thumbnail {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.image-thumbnail {
+    background-color: #dbeafe;
+    color: var(--primary-color);
+}
+
+.video-thumbnail {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.archivo-icono {
+    font-size: 24px !important;
+}
+
+.archivo-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.archivo-nombre {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0 0 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.archivo-detalles {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.btn-eliminar-archivo {
+    padding: 6px;
+    border: none;
+    background-color: transparent;
+    color: var(--text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-eliminar-archivo:hover {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+.btn-eliminar-archivo .material-symbols-outlined {
+    font-size: 18px !important;
+}
+
+.agregar-mas-archivos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.agregar-mas-archivos:hover {
+    border-color: var(--primary-color);
+}
+
+.btn-agregar-archivo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid var(--primary-color);
+    background-color: transparent;
+    color: var(--primary-color);
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-agregar-archivo:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-agregar-archivo .material-symbols-outlined {
+    font-size: 18px !important;
+}
+
+.limite-info {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.limite-alcanzado {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 8px 0 0 0;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Responsive para múltiples archivos */
+@media (max-width: 768px) {
+    .archivo-preview {
+        padding: 10px;
+    }
+    
+    .archivo-thumbnail {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .archivo-icono {
+        font-size: 20px !important;
+    }
+    
+    .agregar-mas-archivos {
+        padding: 12px;
+    }
+}
