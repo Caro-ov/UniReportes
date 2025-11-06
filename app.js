@@ -14,6 +14,7 @@ import loadingRoutes from './src/routes/loadingRoutes.js'; // Solo para transici
 import pool from './src/config/db.js';
 import objectRoutes from './src/routes/objectRoutes.js';
 import ubicacionRoutes from './src/routes/ubicacionRoutes.js';
+import fileRoutes from './src/routes/fileRoutes.js';
 
 // Configurar variables de entorno (soporta archivos cifrados)
 setupEnv();
@@ -80,6 +81,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/loading', loadingRoutes); // Solo para transición login -> dashboard
 app.use('/api/objects', objectRoutes);
 app.use('/api/ubicaciones', ubicacionRoutes);
+app.use('/api/files', fileRoutes);
 
 // Rutas de páginas (deben ir al final)
 app.use('/', pageRoutes);

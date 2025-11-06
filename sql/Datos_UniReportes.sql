@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 05-11-2025 a las 01:25:17
+-- Tiempo de generación: 06-11-2025 a las 15:21:13
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -119,6 +119,29 @@ INSERT INTO `estados` (`id_estado`, `nombre`, `orden`, `fecha_creacion`) VALUES
 (2, 'revisado', 2, '2025-11-04 19:19:35'),
 (3, 'en proceso', 3, '2025-11-04 19:19:35'),
 (4, 'resuelto', 4, '2025-11-04 19:19:35');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `historial_cambios`
+--
+
+CREATE TABLE `historial_cambios` (
+  `id_historial` int(11) NOT NULL,
+  `id_reporte` int(11) NOT NULL,
+  `tipo` varchar(30) NOT NULL,
+  `id_estado_anterior` int(11) DEFAULT NULL,
+  `id_estado_nuevo` int(11) DEFAULT NULL,
+  `id_usuario_actor` int(11) DEFAULT NULL,
+  `id_usuario_asignado` int(11) DEFAULT NULL,
+  `id_dependencia_asignada` int(11) DEFAULT NULL,
+  `descripcion` text DEFAULT NULL,
+  `campo` varchar(50) DEFAULT NULL,
+  `valor_anterior` text DEFAULT NULL,
+  `valor_nuevo` text DEFAULT NULL,
+  `cambios_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`cambios_json`)),
+  `fecha` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -241,7 +264,11 @@ INSERT INTO `reportes` (`id_reporte`, `id_objeto`, `id_usuario`, `id_categoria`,
 (2, 39, 2, 2, 'Mouse dañado en sala de cómputo', 'El mouse del equipo #7 no funciona; probado en otro puerto sin respuesta.', 65, '2025-11-04 16:25:10', 1, '2025-11-04 16:25:10'),
 (3, NULL, 1, 1, 'Prueba de Reporte', 'Este es un reporte de prueba', 1, '2025-11-04 18:00:25', 1, '2025-11-04 18:00:25'),
 (4, NULL, 1, 2, 'Segundo Reporte de Prueba', 'Este es otro reporte para verificar que funciona', 2, '2025-11-04 18:07:54', 1, '2025-11-04 18:07:54'),
-(5, NULL, 1, 2, 'Pantalla rota', 'pantalla 10 rota', 66, '2025-11-04 18:36:51', 1, '2025-11-04 18:36:51');
+(5, NULL, 1, 2, 'Pantalla rota', 'pantalla 10 rota', 66, '2025-11-04 18:36:51', 1, '2025-11-04 18:36:51'),
+(6, NULL, 3, 1, 'Luces dañadas', 'Varias luces parecen quemadas porque no prenden', 48, '2025-11-04 19:52:48', 1, '2025-11-04 19:52:48'),
+(7, NULL, 6, 1, 'el ascensor no sirve', 'el ascensor dejo de servir', 36, '2025-11-01 09:04:00', 1, '2025-11-05 09:05:41'),
+(8, NULL, 1, 4, 'limpieza', 'sssssssssssssss', 65, '2025-11-05 09:22:00', 1, '2025-11-05 09:23:07'),
+(9, NULL, 3, 1, 'Luces dañadas', 'Prueba de guardado de imagen', 66, '2025-10-25 18:21:00', 1, '2025-11-05 18:18:02');
 
 -- --------------------------------------------------------
 
@@ -418,7 +445,6 @@ INSERT INTO `usuarios` (`id_usuario`, `nombre`, `correo`, `contrasena`, `fecha_c
 (1, 'Administrador Principal', 'admin@uni.local', '$2a$10$cgAbG4rzgNyxzaRvrViXhuxu8o22VSuV6cMfv6GIVxPuWxd91hVwO', '2025-10-10 18:53:12', 'admin', '2024000001'),
 (2, 'Rubén González', 'ruben@gmail.com', '$2y$10$IUUEy4I5pZsYvk8JegVdYOENgG97F6CTvEYcauubU2wjcJIxB4tEO', '2025-10-10 20:05:22', 'admin', '2019214026'),
 (3, 'Adriana María', 'adriana@gmail.com', '$2a$10$QKpX8RYhbLs0xLVjfR0Sg..zurdv8upVikbiUXj0bvYb27t0aJC4G', '2025-10-11 11:25:45', 'monitor', '2014214026'),
-(4, 'Jorge Silva', 'jorge@gmail.com', '$2y$10$xrLV1mVlJKj.OEAKcE7Lsuvon3OQ1tKi3aZxfq3zvUXbz89I7Ewda', '2025-10-11 11:52:49', 'monitor', '2018156789'),
 (6, 'yineth avila', 'yine@gmail.com', '$2a$10$P8IO8U7LIlHakG8VisV.wOirU1reccvmELMWNRehp7bMwS/xJ5CBW', '2025-10-31 15:02:05', 'monitor', '2020235281');
 
 --
@@ -489,6 +515,19 @@ ALTER TABLE `dependencias`
 ALTER TABLE `estados`
   ADD PRIMARY KEY (`id_estado`),
   ADD UNIQUE KEY `uq_estados_nombre` (`nombre`);
+
+--
+-- Indices de la tabla `historial_cambios`
+--
+ALTER TABLE `historial_cambios`
+  ADD PRIMARY KEY (`id_historial`),
+  ADD KEY `idx_hist_reporte_fecha` (`id_reporte`,`fecha`),
+  ADD KEY `idx_hist_reporte_tipo` (`id_reporte`,`tipo`),
+  ADD KEY `hist_fk_estado_old` (`id_estado_anterior`),
+  ADD KEY `hist_fk_estado_new` (`id_estado_nuevo`),
+  ADD KEY `hist_fk_usuario_actor` (`id_usuario_actor`),
+  ADD KEY `hist_fk_usuario_asig` (`id_usuario_asignado`),
+  ADD KEY `hist_fk_dep_asig` (`id_dependencia_asignada`);
 
 --
 -- Indices de la tabla `objetos`
@@ -565,6 +604,12 @@ ALTER TABLE `estados`
   MODIFY `id_estado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT de la tabla `historial_cambios`
+--
+ALTER TABLE `historial_cambios`
+  MODIFY `id_historial` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `objetos`
 --
 ALTER TABLE `objetos`
@@ -574,7 +619,7 @@ ALTER TABLE `objetos`
 -- AUTO_INCREMENT de la tabla `reportes`
 --
 ALTER TABLE `reportes`
-  MODIFY `id_reporte` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_reporte` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `salones`
@@ -616,6 +661,17 @@ ALTER TABLE `categorias`
 ALTER TABLE `comentarios`
   ADD CONSTRAINT `comentarios_ibfk_1` FOREIGN KEY (`id_reporte`) REFERENCES `reportes` (`id_reporte`) ON DELETE CASCADE,
   ADD CONSTRAINT `comentarios_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `historial_cambios`
+--
+ALTER TABLE `historial_cambios`
+  ADD CONSTRAINT `hist_fk_dep_asig` FOREIGN KEY (`id_dependencia_asignada`) REFERENCES `dependencias` (`id_dependencia`) ON DELETE SET NULL,
+  ADD CONSTRAINT `hist_fk_estado_new` FOREIGN KEY (`id_estado_nuevo`) REFERENCES `estados` (`id_estado`),
+  ADD CONSTRAINT `hist_fk_estado_old` FOREIGN KEY (`id_estado_anterior`) REFERENCES `estados` (`id_estado`),
+  ADD CONSTRAINT `hist_fk_reporte` FOREIGN KEY (`id_reporte`) REFERENCES `reportes` (`id_reporte`) ON DELETE CASCADE,
+  ADD CONSTRAINT `hist_fk_usuario_actor` FOREIGN KEY (`id_usuario_actor`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL,
+  ADD CONSTRAINT `hist_fk_usuario_asig` FOREIGN KEY (`id_usuario_asignado`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `objetos`

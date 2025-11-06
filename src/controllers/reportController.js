@@ -1,5 +1,7 @@
 import * as reportModel from '../models/reportModel.js';
 import * as categoryModel from '../models/categoryModel.js';
+import * as fileModel from '../models/fileModel.js';
+import path from 'path';
 
 /**
  * Obtener todos los reportes (API)
@@ -153,11 +155,49 @@ export async function createReport(req, res) {
 
         const reportId = await reportModel.createReport(reportData);
 
-        res.status(201).json({
-            success: true,
-            message: 'Reporte creado exitosamente',
-            data: { id: reportId }
-        });
+        // Manejar archivo si se subió uno
+        if (req.file) {
+            console.log('📁 Archivo recibido:', req.file);
+            
+            try {
+                const fileData = {
+                    id_reporte: reportId,
+                    url: req.file.path.replace(/\\/g, '/'), // Normalizar path para BD
+                    tipo: req.file.mimetype
+                };
+
+                const fileId = await fileModel.createFile(fileData);
+                console.log('✅ Archivo guardado en BD con ID:', fileId);
+                
+                res.status(201).json({
+                    success: true,
+                    message: 'Reporte creado exitosamente con archivo',
+                    data: { 
+                        id: reportId,
+                        archivo: {
+                            id: fileId,
+                            tipo: req.file.mimetype,
+                            url: req.file.path.replace(/\\/g, '/')
+                        }
+                    }
+                });
+            } catch (fileError) {
+                console.error('❌ Error guardando archivo en BD:', fileError);
+                // El reporte ya se creó, solo fallo el archivo
+                res.status(201).json({
+                    success: true,
+                    message: 'Reporte creado pero hubo un error con el archivo',
+                    data: { id: reportId },
+                    warning: 'El archivo no pudo ser procesado'
+                });
+            }
+        } else {
+            res.status(201).json({
+                success: true,
+                message: 'Reporte creado exitosamente',
+                data: { id: reportId }
+            });
+        }
     } catch (error) {
         console.error('Error al crear reporte:', error);
         res.status(500).json({

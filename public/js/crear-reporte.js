@@ -431,23 +431,34 @@ function inicializarCrearReporte() {
             const horaReporte = $('#hora-reporte').val();
             const fechaCompleta = `${fechaReporte} ${horaReporte}`;
             
-            const payload = { 
-                titulo: $('#titulo').val().trim(), 
-                descripcion: $('#descripcion').val().trim(), 
-                id_salon: parseInt($('#salon').val()), 
-                id_categoria: parseInt($('#categoria').val()) || null, 
-                id_objeto: $('#objeto').val() ? parseInt($('#objeto').val()) : null,
-                fecha_reporte: fechaCompleta
-            };
+            // Crear FormData para soportar archivos
+            const formData = new FormData();
+            formData.append('titulo', $('#titulo').val().trim());
+            formData.append('descripcion', $('#descripcion').val().trim());
+            formData.append('id_salon', parseInt($('#salon').val()));
+            
+            const categoriaVal = parseInt($('#categoria').val()) || null;
+            if (categoriaVal) formData.append('id_categoria', categoriaVal);
+            
+            const objetoVal = $('#objeto').val() ? parseInt($('#objeto').val()) : null;
+            if (objetoVal) formData.append('id_objeto', objetoVal);
+            
+            formData.append('fecha_reporte', fechaCompleta);
 
-            console.log('📦 Payload a enviar:', payload);
+            // Agregar archivo si existe
+            if (archivoSeleccionado) {
+                formData.append('archivo', archivoSeleccionado);
+                console.log('� Archivo incluido en FormData:', archivoSeleccionado.name);
+            }
+
+            console.log('📦 FormData preparado con archivo:', !!archivoSeleccionado);
 
             try {
                 const resp = await fetch('/api/reports', { 
                     method: 'POST', 
                     credentials: 'include', // Incluir cookies de sesión
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(payload) 
+                    // NO especificar Content-Type para FormData (el navegador lo hace automáticamente)
+                    body: formData 
                 });
                 
                 console.log('📡 Respuesta del servidor:', resp.status, resp.statusText);

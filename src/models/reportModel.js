@@ -1,4 +1,25 @@
 import pool from '../config/db.js';
+import path from 'path';
+
+/**
+ * Función auxiliar para procesar información de archivos
+ */
+function parseArchivosInfo(archivosInfo) {
+    if (!archivosInfo) return [];
+    
+    return archivosInfo.split(';;').map(info => {
+        const [id_archivo, tipo, url] = info.split('|');
+        return {
+            id_archivo: parseInt(id_archivo),
+            tipo,
+            url,
+            filename: path.basename(url),
+            isImage: tipo.startsWith('image/'),
+            isVideo: tipo.startsWith('video/'),
+            fileUrl: `/api/files/${path.basename(url)}`
+        };
+    });
+}
 
 /**
  * Crear un nuevo reporte
@@ -38,18 +59,31 @@ export async function getAllReports(limit = 50, offset = 0) {
             c.nombre as categoria_nombre,
             s.nombre as salon_nombre,
             ub.nombre as ubicacion_nombre,
-            e.nombre as estado
+            e.nombre as estado,
+            COUNT(a.id_archivo) as total_archivos,
+            GROUP_CONCAT(
+                CONCAT(a.id_archivo, '|', a.tipo, '|', a.url) 
+                SEPARATOR ';;'
+            ) as archivos_info
          FROM reportes r
          LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
          LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
          LEFT JOIN salones s ON r.id_salon = s.id_salon
          LEFT JOIN ubicaciones ub ON s.ubicacion = ub.id_ubicacion
          LEFT JOIN estados e ON r.id_estado = e.id_estado
+         LEFT JOIN archivos a ON r.id_reporte = a.id_reporte
+         GROUP BY r.id_reporte
          ORDER BY r.fecha_creacion DESC
          LIMIT ? OFFSET ?`,
         [limit, offset]
     );
-    return rows;
+    
+    // Procesar archivos para cada reporte
+    return rows.map(row => ({
+        ...row,
+        archivos: parseArchivosInfo(row.archivos_info),
+        total_archivos: parseInt(row.total_archivos) || 0
+    }));
 }
 
 /**
@@ -61,17 +95,31 @@ export async function getReportsByUser(userId, limit = 50, offset = 0) {
             r.*,
             u.nombre as usuario_nombre,
             c.nombre as categoria_nombre,
-            e.nombre as estado
+            s.nombre as salon_nombre,
+            e.nombre as estado,
+            COUNT(a.id_archivo) as total_archivos,
+            GROUP_CONCAT(
+                CONCAT(a.id_archivo, '|', a.tipo, '|', a.url) 
+                SEPARATOR ';;'
+            ) as archivos_info
          FROM reportes r
          LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
          LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
+         LEFT JOIN salones s ON r.id_salon = s.id_salon
          LEFT JOIN estados e ON r.id_estado = e.id_estado
+         LEFT JOIN archivos a ON r.id_reporte = a.id_reporte
          WHERE r.id_usuario = ?
+         GROUP BY r.id_reporte
          ORDER BY r.fecha_creacion DESC
          LIMIT ? OFFSET ?`,
         [userId, limit, offset]
     );
-    return rows;
+    
+    return rows.map(row => ({
+        ...row,
+        archivos: parseArchivosInfo(row.archivos_info),
+        total_archivos: parseInt(row.total_archivos) || 0
+    }));
 }
 
 /**
@@ -85,15 +133,34 @@ export async function getReportById(reportId) {
             u.correo as usuario_correo,
             c.nombre as categoria_nombre,
             c.descripcion as categoria_descripcion,
-            e.nombre as estado
+            s.nombre as salon_nombre,
+            ub.nombre as ubicacion_nombre,
+            e.nombre as estado,
+            COUNT(a.id_archivo) as total_archivos,
+            GROUP_CONCAT(
+                CONCAT(a.id_archivo, '|', a.tipo, '|', a.url) 
+                SEPARATOR ';;'
+            ) as archivos_info
          FROM reportes r
          LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
          LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
+         LEFT JOIN salones s ON r.id_salon = s.id_salon
+         LEFT JOIN ubicaciones ub ON s.ubicacion = ub.id_ubicacion
          LEFT JOIN estados e ON r.id_estado = e.id_estado
-         WHERE r.id_reporte = ?`,
+         LEFT JOIN archivos a ON r.id_reporte = a.id_reporte
+         WHERE r.id_reporte = ?
+         GROUP BY r.id_reporte`,
         [reportId]
     );
-    return rows[0] || null;
+    
+    if (rows.length === 0) return null;
+    
+    const report = rows[0];
+    return {
+        ...report,
+        archivos: parseArchivosInfo(report.archivos_info),
+        total_archivos: parseInt(report.total_archivos) || 0
+    };
 }
 
 /**

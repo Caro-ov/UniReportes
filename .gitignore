@@ -12,6 +12,10 @@ node_modules/
 # Environment templates (incluir en repositorio)
 # .env.example
 
+# Uploaded files (archivos subidos por usuarios)
+uploads/
+!uploads/.gitkeep
+
 # Logs
 logs
 *.log
