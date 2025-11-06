@@ -610,6 +610,25 @@ body[data-css="crear-reporte"] .titulo-pagina {
     transform: translateY(-2px);
 }
 
+.boton-principal {
+    background-color: var(--primary-color);
+    color: white;
+    border: 1px solid var(--primary-color);
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all var(--transition-duration) ease;
+    cursor: pointer;
+}
+
+.boton-principal:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
 /* Diálogo de confirmación */
 .overlay-dialogo {
     position: fixed;
@@ -744,6 +763,13 @@ body[data-css="crear-reporte"] .titulo-pagina {
     
     .acciones-exito {
         flex-direction: column;
+    }
+    
+    .boton-principal,
+    .boton-secundario {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
     }
     
     .acciones-dialogo {
@@ -986,8 +1012,7 @@ body[data-css="crear-reporte"] .titulo-pagina {
     box-shadow: var(--shadow-lg);
     max-width: 500px;
     width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
+    max-height: fit-content;
     animation: modalSlideIn 0.3s ease-out;
 }
 
@@ -1114,6 +1139,7 @@ body[data-css="crear-reporte"] .titulo-pagina {
     .modal-contenido {
         margin: 20px;
         width: calc(100% - 40px);
+        max-height: 95vh; /* Solo para pantallas muy pequeñas */
     }
     
     .modal-header,
@@ -1131,6 +1157,14 @@ body[data-css="crear-reporte"] .titulo-pagina {
     .btn-secundario {
         width: 100%;
         justify-content: center;
+    }
+}
+
+/* Para pantallas muy pequeñas, añadir scroll solo si es absolutamente necesario */
+@media (max-height: 600px) {
+    .modal-contenido {
+        max-height: 90vh;
+        overflow-y: auto;
     }
 }
 
