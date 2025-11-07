@@ -15,8 +15,14 @@ $(document).ready(function() {
         $('.menu-desplegable').removeClass('mostrar');
     });
 
-    // Prevenir que el menú se cierre al hacer clic dentro
+    // Prevenir que el menú se cierre al hacer clic dentro, pero permitir
+    // que acciones globales como "Cerrar sesión" propaguen para que el
+    // handler delegado en `components.js` las reciba.
     $('.menu-desplegable').click(function(e) {
+        // Si el click es sobre el enlace de logout, permitir propagación
+        if ($(e.target).closest('.logout-btn, .cerrar-sesion').length) {
+            return; // dejar que el evento suba al document para que el handler global lo atienda
+        }
         e.stopPropagation();
     });
     

@@ -4,7 +4,7 @@
     <!-- Head común para todas las páginas -->
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>UniReportes</title>
+    <title>UniReportes - Detalle del Reporte (Admin)</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico"/>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
@@ -45,7 +45,7 @@
     }
     </script>
 </head>
-<body data-page="mis-reportes" data-title="UniReportes - Detalles del Reporte" data-css="detalle-reporte">
+<body data-page="detalle-reporte-admin" data-title="UniReportes - Detalle del Reporte (Admin)" data-css="detalle-reporte">
     <div class="contenedor-principal">
         <!-- Overlay para móvil -->
         <div class="overlay" onclick="toggleSidebar()"></div>
@@ -68,7 +68,8 @@
                 <!-- Breadcrumb -->
                 <div class="breadcrumb-container">
                     <nav class="breadcrumb">
-                        <a href="#" class="breadcrumb-link" data-spa-nav="mis-reportes">Reportes</a>
+                        <!-- Para admin, regresar a explorar-reportes (listado global) -->
+                        <a href="#" class="breadcrumb-link" data-spa-nav="explorar-reportes">Reportes</a>
                         <span class="breadcrumb-separator">/</span>
                         <span class="breadcrumb-current">Cargando...</span>
                     </nav>
@@ -184,6 +185,6 @@
     <!-- Sistema de componentes -->
     <script src="js/components.js"></script>
     <script src="js/detalle-reporte-common.js"></script>
-    <script src="js/detalle-reporte.js"></script>
+    <script src="js/detalle-reporte-admin.js"></script>
 </body>
 </html>

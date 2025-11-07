@@ -10,8 +10,8 @@ $(document).ready(function() {
         $('.menu-desplegable').removeClass('mostrar');
     });
 
-    // Prevenir que el menú se cierre al hacer clic dentro
+    // Evitar detener la propagación aquí para no bloquear los handlers globales (p.ej. logout)
     $('.menu-desplegable').click(function(e) {
-        e.stopPropagation();
+        // Intencionalmente no se llama a e.stopPropagation() para permitir delegación global
     });
 });

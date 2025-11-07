@@ -274,6 +274,34 @@ body {
     gap: 16px;
 }
 
+/* Acciones - Botones estilo explorar-reportes */
+.celda-acciones .btn-accion {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    padding: 0;
+}
+
+.celda-acciones .btn-ver {
+    background: #f0f9ff;
+    color: #0ea5e9;
+    border: 1px solid #e0f2fe;
+}
+
+.celda-acciones .btn-ver:hover {
+    background: #0ea5e9;
+    color: white;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+
 .filtro-categoria,
 .filtro-estado,
 .filtro-fecha {

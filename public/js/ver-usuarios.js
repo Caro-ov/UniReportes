@@ -212,7 +212,7 @@ window.VerUsuarios = (function() {
         $(document).off('click.verusuarios', '[id^="btn-exportar"]');
         $(document).on('click.verusuarios', '[id^="btn-exportar"]', function(e) {
             e.preventDefault();
-            e.stopPropagation();
+            // No detener propagación para mantener compatibilidad con handlers globales
             console.log('🖱️ Click detectado en botón exportar');
             exportarUsuarios();
         });

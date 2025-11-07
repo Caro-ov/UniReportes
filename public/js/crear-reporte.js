@@ -30,7 +30,8 @@ function inicializarCrearReporte() {
     });
     
     $('.menu-desplegable').off('click.crearReporte').on('click.crearReporte', function(e) { 
-        e.stopPropagation(); 
+        // Intencionalmente no se llama a e.stopPropagation() para permitir que handlers globales
+        // (por ejemplo el de logout) reciban el evento.
     });
     
     // ===========================

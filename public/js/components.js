@@ -42,6 +42,8 @@ $(document).ready(function() {
                 console.log('Datos del usuario obtenidos:', response);
                 const userRole = response.success && response.data ? response.data.rol : null;
                 console.log('Rol del usuario:', userRole);
+                // Exponer rol globalmente para que otras partes del cliente puedan decidir rutas
+                try { window.currentUserRole = userRole; } catch(e) { console.warn('No se pudo exponer currentUserRole globalmente', e); }
                 
                 // Determinar qué sidebar cargar según el rol del usuario
                 const sidebarPath = userRole === 'admin' ? 'components/sidebar-admin.html' : 'components/sidebar.html';
@@ -246,6 +248,8 @@ $(document).ready(function() {
                     // Actualizar rol del usuario con formato amigable
                     const rolDisplay = user.rol === 'admin' ? 'Administrador' : 'Monitor';
                     $('.usuario-rol-header').text(rolDisplay);
+                    // También asegurar que el rol esté disponible globalmente
+                    try { window.currentUserRole = user.rol; } catch(e) { console.warn('No se pudo exponer currentUserRole desde el header', e); }
                 } else {
                     console.warn('No se pudieron obtener los datos del usuario para el header');
                 }

@@ -22,21 +22,23 @@ $(document).ready(function() {
     // ===========================
     // DROPDOWN DEL PERFIL
     // ===========================
-    
-    // Toggle del menú desplegable
-    $('.avatar-usuario').click(function(e) {
+    // ===== Dropdown del perfil (usar delegación y namespace para evitar conflictos con components.js)
+    // Delegar el toggle del avatar en el documento y usar namespace para permitir limpieza segura
+    $(document).off('click.detalleAvatar').on('click.detalleAvatar', '.avatar-usuario', function(e) {
         e.stopPropagation();
         $('.menu-desplegable').toggleClass('mostrar');
     });
 
-    // Cerrar menú al hacer clic fuera
-    $(document).click(function() {
+    // Cerrar menú al hacer clic fuera (namespaced)
+    $(document).off('click.detalleDoc').on('click.detalleDoc', function() {
         $('.menu-desplegable').removeClass('mostrar');
     });
 
-    // Prevenir que el menú se cierre al hacer clic dentro
-    $('.menu-desplegable').click(function(e) {
-        e.stopPropagation();
+    // No detener la propagación dentro del menú para permitir que los handlers globales
+    // (por ejemplo el de logout en components.js) reciban el evento delegado.
+    $(document).off('click.detalleMenu').on('click.detalleMenu', '.menu-desplegable', function(e) {
+        // Intencionalmente NO se llama a e.stopPropagation() aquí.
+        // Se puede usar para manejo específico interno si se necesita más adelante.
     });
 
     // ===========================

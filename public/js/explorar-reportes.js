@@ -151,12 +151,6 @@ $(document).ready(function() {
                             <button class="btn-accion btn-ver" title="Ver detalles" data-action="ver" data-id="${reporte.id_reporte}">
                                 <span class="material-symbols-outlined">visibility</span>
                             </button>
-                            <button class="btn-accion btn-editar" title="Editar" data-action="editar" data-id="${reporte.id_reporte}">
-                                <span class="material-symbols-outlined">edit</span>
-                            </button>
-                            <button class="btn-accion btn-eliminar" title="Eliminar" data-action="eliminar" data-id="${reporte.id_reporte}">
-                                <span class="material-symbols-outlined">delete</span>
-                            </button>
                         </div>
                     </td>
                 </tr>
@@ -319,13 +313,36 @@ $(document).ready(function() {
     });
 
     // Funciones de acciones
-    function verDetalleReporte(id) {
+    async function verDetalleReporte(id) {
         console.log('👁️ Ver detalles del reporte:', id);
-        // Usar navegación SPA si está disponible
-        if (window.spaNav) {
-            window.spaNav.navigateTo('detalle-reporte', `?id=${id}`);
-        } else {
-            // Fallback a navegación tradicional
+        try {
+            // Obtener rol si no está aún disponible
+            if (typeof window.currentUserRole === 'undefined' || window.currentUserRole === null) {
+                try {
+                    const resp = await fetch('/api/users/profile', { credentials: 'include' });
+                    if (resp.ok) {
+                        const profile = await resp.json();
+                        window.currentUserRole = profile && profile.data ? profile.data.rol : null;
+                    }
+                } catch (e) {
+                    console.warn('No se pudo obtener perfil al navegar a detalle:', e);
+                }
+            }
+
+            const isAdmin = (typeof window.currentUserRole !== 'undefined') ? window.currentUserRole === 'admin' : false;
+            const targetPage = isAdmin === true ? 'detalle-reporte-admin' : 'detalle-reporte';
+
+            if (window.spaNav && typeof window.spaNav.navigateTo === 'function') {
+                window.spaNav.navigateTo(targetPage, `?id=${id}`);
+            } else if (window.spaNavigation && typeof window.spaNavigation.navigate === 'function') {
+                window.spaNavigation.navigate(targetPage + '.html' + `?id=${id}`);
+            } else {
+                const fallbackUrl = (targetPage === 'detalle-reporte-admin') ? `detalle-reporte-admin.html?id=${id}` : `detalle-reporte.html?id=${id}`;
+                window.location.href = fallbackUrl;
+            }
+        } catch (err) {
+            console.error('Error navegando a detalle:', err);
+            // Intento de fallback simple
             window.location.href = `detalle-reporte.html?id=${id}`;
         }
     }

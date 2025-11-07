@@ -69,6 +69,12 @@ class SPANavigation {
                 css: 'detalle-reporte',
                 contentSelector: '.contenido-principal'
             },
+            'detalle-reporte-admin': {
+                url: '/detalle-reporte-admin.html',
+                title: 'Detalle del Reporte (Admin)',
+                css: 'detalle-reporte',
+                contentSelector: '.contenido-principal'
+            },
             'perfil': {
                 url: '/perfil.html',
                 title: 'Mi Perfil',
@@ -122,7 +128,8 @@ class SPANavigation {
         if (path.includes('admin-settings.html')) return 'admin-settings';
         if (path.includes('dashboard.html')) return 'dashboard';
         if (path.includes('mis-reportes.html')) return 'mis-reportes';
-        if (path.includes('detalle-reporte.html')) return 'detalle-reporte';
+    if (path.includes('detalle-reporte.html')) return 'detalle-reporte';
+    if (path.includes('detalle-reporte-admin.html')) return 'detalle-reporte-admin';
         if (path.includes('perfil.html')) return 'perfil';
         if (path.includes('ayuda.html')) return 'ayuda';
         
@@ -481,14 +488,48 @@ class SPANavigation {
                 }, 200);
             }
             
-            // Manejar detalle-reporte específicamente aquí
-            if (page === 'detalle-reporte') {
-                console.log('🎯 SPA: Manejando detalle-reporte directamente...');
+            // Manejar detalle-reporte (estándar y admin) específicamente aquí
+            if (page === 'detalle-reporte' || page === 'detalle-reporte-admin') {
+                console.log('🎯 SPA: Manejando detalle-reporte directamente...', page);
                 // Dar más tiempo para que el DOM se estabilice
                 setTimeout(() => {
                     // Usar parámetros pasados o los de la URL actual
                     const params = urlParams || window.location.search;
-                    this.manejarDetalleReporte(params);
+                    // Si es la vista admin, invocar el handler admin si existe
+                    if (page === 'detalle-reporte-admin') {
+                        if (typeof window.manejarDetalleReporteAdmin === 'function') {
+                            try { window.manejarDetalleReporteAdmin(params); }
+                            catch (err) { console.warn('Error al invocar manejarDetalleReporteAdmin', err); }
+                        } else {
+                            // Intentar cargar el script admin si el handler no está disponible
+                            console.log('📦 SPA: manejarDetalleReporteAdmin no encontrado, cargando script admin...');
+                            this.cargarScriptDetalleReporteAdmin(params);
+                        }
+                    } else if (typeof window.manejarDetalleReporte === 'function') {
+                        try {
+                            // Si params es una query string, extraer el id antes de invocar el handler
+                            let reportIdToPass = params;
+                            try {
+                                if (typeof params === 'string' && params.includes('id=')) {
+                                    const tmp = new URLSearchParams(params.startsWith('?') ? params : ('?' + params));
+                                    const extracted = tmp.get('id');
+                                    if (extracted) reportIdToPass = extracted;
+                                }
+                            } catch (e) {
+                                console.warn('No se pudo parsear params para detalle-reporte:', e);
+                            }
+                            window.manejarDetalleReporte(reportIdToPass);
+                        } catch (err) { console.warn('Error al invocar manejarDetalleReporte', err); }
+                    } else {
+                        // Si no existe el handler global, delegar al método interno de SPA
+                        // que se encargará de cargar el script correspondiente (detalle-reporte.js)
+                        try {
+                            console.log('📦 SPA: manejarDetalleReporte no encontrado globalmente, delegando a this.manejarDetalleReporte()');
+                            this.manejarDetalleReporte(params);
+                        } catch (err) {
+                            console.warn('No se encontró un handler de detalle-reporte compatible y no se pudo delegar a SPA:', err);
+                        }
+                    }
                 }, 200);
             }
         }, 50);
@@ -1349,6 +1390,83 @@ class SPANavigation {
         };
         
         document.head.appendChild(script);
+    }
+
+    // Función para cargar el script de detalle-reporte-admin (admin)
+    async cargarScriptDetalleReporteAdmin(params = '') {
+        console.log('📦 SPA: Cargando script detalle-reporte-admin.js...');
+
+        // Extraer posible reportId de params
+        let reportId = null;
+        try {
+            const urlParams = new URLSearchParams(params);
+            reportId = urlParams.get('id');
+        } catch (e) {
+            // params podría ser algo distinto; intentar parsear como search
+            try {
+                const p = params && params.indexOf('?') === 0 ? params : ('?' + params);
+                const urlParams2 = new URLSearchParams(p);
+                reportId = urlParams2.get('id');
+            } catch (err) {
+                console.warn('No se pudo extraer id de params en cargarScriptDetalleReporteAdmin', err);
+            }
+        }
+
+        // Verificar si el script ya existe
+        const scriptExistente = document.querySelector('script[src*="detalle-reporte-admin.js"]');
+        if (scriptExistente && typeof window.manejarDetalleReporteAdmin === 'function') {
+            console.log('📜 SPA: Script detalle-reporte-admin.js ya existe, reejecutando handler...');
+            if (window.manejarDetalleReporteAdmin) {
+                window.manejarDetalleReporteAdmin(params || reportId);
+            }
+            return;
+        }
+
+        // Asegurar que las utilidades comunes estén cargadas antes del script admin
+        const commonScript = document.querySelector('script[src*="detalle-reporte-common.js"]');
+        const loadAdmin = () => {
+            const script = document.createElement('script');
+            script.src = '/js/detalle-reporte-admin.js';
+            script.async = false;
+
+            script.onload = () => {
+                console.log('✅ SPA: Script detalle-reporte-admin.js cargado exitosamente');
+                // Ejecutar la función después de cargar
+                setTimeout(() => {
+                    if (typeof window.manejarDetalleReporteAdmin === 'function') {
+                        try { window.manejarDetalleReporteAdmin(params || reportId); }
+                        catch (err) { console.warn('Error al ejecutar manejarDetalleReporteAdmin después de cargar script', err); }
+                    } else {
+                        console.error('❌ SPA: manejarDetalleReporteAdmin no disponible después de cargar script');
+                    }
+                }, 100);
+            };
+
+            script.onerror = () => {
+                console.error('❌ SPA: Error cargando script detalle-reporte-admin.js');
+            };
+
+            document.head.appendChild(script);
+        };
+
+        if (!commonScript) {
+            console.log('📦 SPA: detalle-reporte-common.js no está presente, cargándolo antes del admin...');
+            const sCommon = document.createElement('script');
+            sCommon.src = '/js/detalle-reporte-common.js';
+            sCommon.async = false;
+            sCommon.onload = () => {
+                console.log('✅ SPA: Script detalle-reporte-common.js cargado');
+                loadAdmin();
+            };
+            sCommon.onerror = () => {
+                console.error('❌ SPA: Error cargando detalle-reporte-common.js');
+                // Intentar cargar admin de todas formas
+                loadAdmin();
+            };
+            document.head.appendChild(sCommon);
+        } else {
+            loadAdmin();
+        }
     }
 }
 

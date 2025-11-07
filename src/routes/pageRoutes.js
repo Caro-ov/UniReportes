@@ -44,6 +44,7 @@ protectedPages.forEach((file) => {
 const adminPages = [
   'admin-dashboard.html',
   'admin-settings.html',
+  'detalle-reporte-admin.html',
   'crear-usuario.html',
   'explorar-reportes.html',
   'ver-usuarios.html'
