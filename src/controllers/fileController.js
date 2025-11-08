@@ -1,4 +1,5 @@
 import * as fileModel from '../models/fileModel.js';
+import * as reportModel from '../models/reportModel.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -189,7 +190,103 @@ export async function deleteFile(req, res) {
     }
 }
 
-// Función auxiliar para buscar archivo por nombre
+/**
+ * Agregar archivos a un reporte existente
+ */
+export async function addFilesToReport(req, res) {
+    try {
+        const { reportId } = req.params;
+        const userId = req.session.user?.id;
+        const userRole = req.session.user?.rol;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Usuario no autenticado'
+            });
+        }
+
+        if (!reportId) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID de reporte requerido'
+            });
+        }
+
+        // Verificar que el reporte existe
+        const reporte = await reportModel.getReportById(reportId);
+        if (!reporte) {
+            return res.status(404).json({
+                success: false,
+                message: 'Reporte no encontrado'
+            });
+        }
+
+        // Verificar permisos: solo el propietario o admin pueden agregar archivos
+        if (reporte.id_usuario !== userId && userRole !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'No tienes permisos para agregar archivos a este reporte'
+            });
+        }
+
+        // Verificar que hay archivos
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'No se recibieron archivos'
+            });
+        }
+
+        console.log(`📁 Agregando ${req.files.length} archivos al reporte ${reportId}:`, req.files.map(f => f.originalname));
+
+        // Guardar archivos en la base de datos
+        const archivosGuardados = [];
+        for (const file of req.files) {
+            try {
+                const fileData = {
+                    id_reporte: parseInt(reportId),
+                    url: file.path.replace(/\\/g, '/'), // Normalizar path para BD
+                    tipo: file.mimetype
+                };
+
+                const fileId = await fileModel.createFile(fileData);
+                console.log(`✅ Archivo ${file.originalname} guardado con ID:`, fileId);
+                
+                archivosGuardados.push({
+                    id: fileId,
+                    nombre: file.originalname,
+                    tipo: file.mimetype,
+                    url: file.path.replace(/\\/g, '/')
+                });
+            } catch (fileError) {
+                console.error(`❌ Error guardando archivo ${file.originalname}:`, fileError);
+            }
+        }
+
+        if (archivosGuardados.length > 0) {
+            res.json({
+                success: true,
+                message: `${archivosGuardados.length} archivo(s) agregado(s) exitosamente`,
+                data: archivosGuardados
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                message: 'Error al procesar los archivos'
+            });
+        }
+
+    } catch (error) {
+        console.error('❌ Error en addFilesToReport:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor'
+        });
+    }
+}
+
+// Función auxiliar para buscar archivos por nombre
 function findFileByName(filename) {
     const uploadsDir = 'uploads/reports';
     
@@ -246,5 +343,6 @@ async function getFileInfoByPath(filePath) {
 export default {
     serveFile,
     getReportFiles,
-    deleteFile
+    deleteFile,
+    addFilesToReport
 };

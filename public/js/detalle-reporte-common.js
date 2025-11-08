@@ -41,7 +41,8 @@
             'asignacion': 'person',
             'comentario': 'chat',
             'resolucion': 'check_circle',
-            'cierre': 'lock'
+            'cierre': 'lock',
+            'edicion': 'edit'
         };
         return iconos[tipo] || 'info';
     };
@@ -54,7 +55,8 @@
             'asignacion': 'Técnico asignado',
             'comentario': 'Comentario agregado',
             'resolucion': 'Reporte resuelto',
-            'cierre': 'Reporte cerrado'
+            'cierre': 'Reporte cerrado',
+            'edicion': 'Reporte editado'
         };
         return titulos[tipo] || 'Actividad registrada';
     };

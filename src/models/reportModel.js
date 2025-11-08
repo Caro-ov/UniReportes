@@ -51,6 +51,8 @@ export async function createReport(reportData) {
  * Obtener todos los reportes con información de usuario y categoría
  */
 export async function getAllReports(limit = 50, offset = 0) {
+    console.log('🔍 getAllReports MODEL: Ejecutando consulta SQL...');
+    
     const [rows] = await pool.execute(
         `SELECT 
             r.*,
@@ -78,12 +80,39 @@ export async function getAllReports(limit = 50, offset = 0) {
         [limit, offset]
     );
     
+    console.log(`🔍 CONSULTA SQL devolvió ${rows.length} filas`);
+    
+    // Log específico para el reporte 12
+    const reporte12Raw = rows.find(r => r.id_reporte === 12);
+    if (reporte12Raw) {
+        console.log('🔍 REPORTE 12 RAW SQL:', {
+            id_reporte: reporte12Raw.id_reporte,
+            titulo: reporte12Raw.titulo,
+            id_estado: reporte12Raw.id_estado,
+            estado_nombre: reporte12Raw.estado
+        });
+    } else {
+        console.log('❌ REPORTE 12 NO ENCONTRADO en SQL RAW');
+    }
+    
     // Procesar archivos para cada reporte
-    return rows.map(row => ({
+    const processedReports = rows.map(row => ({
         ...row,
         archivos: parseArchivosInfo(row.archivos_info),
         total_archivos: parseInt(row.total_archivos) || 0
     }));
+    
+    // Log del reporte 12 procesado
+    const reporte12Processed = processedReports.find(r => r.id_reporte === 12);
+    if (reporte12Processed) {
+        console.log('🔍 REPORTE 12 PROCESADO:', {
+            id_reporte: reporte12Processed.id_reporte,
+            titulo: reporte12Processed.titulo,
+            estado: reporte12Processed.estado
+        });
+    }
+    
+    return processedReports;
 }
 
 /**
@@ -166,12 +195,77 @@ export async function getReportById(reportId) {
 /**
  * Actualizar estado de un reporte
  */
-export async function updateReportStatus(reportId, newStatus) {
-    const [result] = await pool.execute(
-        'UPDATE reportes SET estado = ? WHERE id_reporte = ?',
-        [newStatus, reportId]
-    );
-    return result.affectedRows > 0;
+export async function updateReportStatus(reportId, newStatus, userId = null) {
+    const connection = await pool.getConnection();
+    
+    try {
+        await connection.beginTransaction();
+        
+        // Obtener el estado actual del reporte
+        const [currentReport] = await connection.execute(
+            'SELECT id_estado FROM reportes WHERE id_reporte = ?',
+            [reportId]
+        );
+        
+        if (currentReport.length === 0) {
+            throw new Error('Reporte no encontrado');
+        }
+        
+        const estadoAnteriorId = currentReport[0].id_estado;
+        
+        // Obtener el id_estado correspondiente al nuevo estado
+        const [estadoRows] = await connection.execute(
+            'SELECT id_estado FROM estados WHERE LOWER(nombre) = LOWER(?)',
+            [newStatus]
+        );
+        
+        if (estadoRows.length === 0) {
+            throw new Error(`Estado "${newStatus}" no válido`);
+        }
+        
+        const nuevoEstadoId = estadoRows[0].id_estado;
+        
+        // Si es el mismo estado, no hacer nada
+        if (estadoAnteriorId === nuevoEstadoId) {
+            await connection.rollback();
+            return true;
+        }
+        
+        // Actualizar el reporte con el nuevo estado
+        const [result] = await connection.execute(
+            'UPDATE reportes SET id_estado = ? WHERE id_reporte = ?',
+            [nuevoEstadoId, reportId]
+        );
+        
+        if (result.affectedRows === 0) {
+            throw new Error('No se pudo actualizar el reporte');
+        }
+        
+        // Registrar el cambio en el historial
+        await connection.execute(
+            `INSERT INTO historial_cambios (
+                id_reporte, tipo, id_estado_anterior, id_estado_nuevo,
+                id_usuario_actor, descripcion, fecha
+            ) VALUES (?, 'cambio_estado', ?, ?, ?, ?, NOW())`,
+            [
+                reportId, 
+                estadoAnteriorId, 
+                nuevoEstadoId, 
+                userId, 
+                `Estado cambiado de estado anterior a "${newStatus}"`
+            ]
+        );
+        
+        await connection.commit();
+        return true;
+        
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error actualizando estado del reporte:', error);
+        throw error;
+    } finally {
+        connection.release();
+    }
 }
 
 /**

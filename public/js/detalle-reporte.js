@@ -3,6 +3,12 @@ $(document).ready(function() {
     // VARIABLES GLOBALES
     // ===========================
     let reporteActual = null;
+    let modoEdicion = false;
+    let datosOriginales = null;
+    let categoriasDisponibles = [];
+    let ubicacionesDisponibles = [];
+    let archivosTemporales = []; // Archivos pendientes de confirmar
+    let archivosEliminados = []; // IDs de archivos marcados para eliminar
 
     // ===========================
     // FUNCIONES UTILITARIAS
@@ -252,6 +258,9 @@ $(document).ready(function() {
                             <button class="btn-descargar-archivo" onclick="descargarArchivo('${archivo.fileUrl}', '${archivo.filename}')" title="Descargar">
                                 <span class="material-symbols-outlined">download</span>
                             </button>
+                            <button class="btn-eliminar-archivo" onclick="eliminarArchivo(${archivo.id_archivo}, '${archivo.filename}')" title="Eliminar archivo" style="display: none;">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -272,6 +281,9 @@ $(document).ready(function() {
                             <button class="btn-descargar-archivo" onclick="descargarArchivo('${archivo.fileUrl}', '${archivo.filename}')" title="Descargar">
                                 <span class="material-symbols-outlined">download</span>
                             </button>
+                            <button class="btn-eliminar-archivo" onclick="eliminarArchivo(${archivo.id_archivo}, '${archivo.filename}')" title="Eliminar archivo" style="display: none;">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -283,6 +295,9 @@ $(document).ready(function() {
         });
         
         archivosSection.show();
+        
+        // Mostrar/ocultar botones de eliminar según el modo de edición
+        actualizarBotonesEliminacion();
     }
     
     // Función para cargar historial de cambios
@@ -316,39 +331,39 @@ $(document).ready(function() {
         const timeline = $('.timeline');
         timeline.empty();
         
-        if (!historial || historial.length === 0) {
-            // Mostrar al menos el evento de creación
-            timeline.append(`
-                <div class="timeline-item">
-                    <div class="timeline-icon">
-                        <span class="material-symbols-outlined">send</span>
-                    </div>
-                    <div class="timeline-content">
-                        <p class="timeline-titulo">Reporte enviado</p>
-                        <p class="timeline-fecha">${formatearFecha(reporteActual?.fecha_creacion)}</p>
-                    </div>
+        // Siempre mostrar el evento inicial de "Reporte enviado"
+        timeline.append(`
+            <div class="timeline-item">
+                <div class="timeline-icon">
+                    <span class="material-symbols-outlined">send</span>
                 </div>
-            `);
-            return;
-        }
+                <div class="timeline-content">
+                    <p class="timeline-titulo">Reporte enviado</p>
+                    <p class="timeline-fecha">${formatearFecha(reporteActual?.fecha_creacion)}</p>
+                </div>
+            </div>
+        `);
         
-        historial.forEach(evento => {
-            const icono = obtenerIconoHistorial(evento.tipo);
-            const titulo = obtenerTituloHistorial(evento.tipo, evento);
-            
-            timeline.append(`
-                <div class="timeline-item">
-                    <div class="timeline-icon">
-                        <span class="material-symbols-outlined">${icono}</span>
+        // Luego mostrar el resto del historial si existe
+        if (historial && historial.length > 0) {
+            historial.forEach(evento => {
+                const icono = obtenerIconoHistorial(evento.tipo);
+                const titulo = obtenerTituloHistorial(evento.tipo, evento);
+                
+                timeline.append(`
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <span class="material-symbols-outlined">${icono}</span>
+                        </div>
+                        <div class="timeline-content">
+                            <p class="timeline-titulo">${titulo}</p>
+                            <p class="timeline-fecha">${formatearFecha(evento.fecha)}</p>
+                            ${evento.descripcion ? `<p class="timeline-descripcion">${escapeHtml(evento.descripcion)}</p>` : ''}
+                        </div>
                     </div>
-                    <div class="timeline-content">
-                        <p class="timeline-titulo">${titulo}</p>
-                        <p class="timeline-fecha">${formatearFecha(evento.fecha)}</p>
-                        ${evento.descripcion ? `<p class="timeline-descripcion">${escapeHtml(evento.descripcion)}</p>` : ''}
-                    </div>
-                </div>
-            `);
-        });
+                `);
+            });
+        }
     }
     
     // ===========================
@@ -389,7 +404,8 @@ $(document).ready(function() {
             'asignacion': 'person',
             'comentario': 'chat',
             'resolucion': 'check_circle',
-            'cierre': 'lock'
+            'cierre': 'lock',
+            'edicion': 'edit'
         };
         return iconos[tipo] || 'info';
     }
@@ -402,7 +418,8 @@ $(document).ready(function() {
             'asignacion': 'Técnico asignado',
             'comentario': 'Comentario agregado',
             'resolucion': 'Reporte resuelto',
-            'cierre': 'Reporte cerrado'
+            'cierre': 'Reporte cerrado',
+            'edicion': 'Reporte editado'
         };
         return titulos[tipo] || 'Actividad registrada';
     }
@@ -1025,6 +1042,580 @@ $(document).ready(function() {
         div.textContent = text;
         return div.innerHTML;
     }
+
+    // ===========================
+    // FUNCIONALIDAD DE EDICIÓN
+    // ===========================
+
+    // Función para alternar modo de edición
+    window.toggleEditarReporte = function() {
+        if (!reporteActual) {
+            alert('No hay reporte cargado para editar');
+            return;
+        }
+
+        if (modoEdicion) {
+            cancelarEdicion();
+        } else {
+            iniciarEdicion();
+        }
+    };
+
+    // Función para iniciar modo de edición
+    async function iniciarEdicion() {
+        console.log('🖊️ Iniciando modo de edición...');
+        
+        try {
+            // Limpiar arrays temporales
+            archivosTemporales = [];
+            archivosEliminados = [];
+            
+            // Guardar datos originales
+            datosOriginales = JSON.parse(JSON.stringify(reporteActual));
+            
+            // Cargar datos necesarios para edición
+            await cargarCategoriasParaEdicion();
+            await cargarUbicacionesParaEdicion();
+            
+            // Activar modo edición
+            modoEdicion = true;
+            
+            // Actualizar interfaz
+            actualizarInterfazEdicion(true);
+            
+            // Convertir campos a editables
+            convertirCamposEditables();
+            
+            // Asegurar que los botones de eliminación estén visibles si hay archivos
+            setTimeout(() => {
+                actualizarBotonesEliminacion();
+            }, 100);
+            
+        } catch (error) {
+            console.error('❌ Error iniciando edición:', error);
+            alert('Error al iniciar edición: ' + error.message);
+        }
+    }
+
+    // Función para cancelar edición
+    window.cancelarEdicion = function() {
+        if (!modoEdicion) return;
+        
+        console.log('❌ Cancelando edición...');
+        
+        // Limpiar archivos temporales
+        archivosTemporales = [];
+        archivosEliminados = [];
+        
+        // Restaurar datos originales
+        if (datosOriginales) {
+            reporteActual = JSON.parse(JSON.stringify(datosOriginales));
+            mostrarDetalleReporte(reporteActual);
+            // Recargar archivos originales
+            cargarArchivosReporte(reporteActual.id_reporte);
+        }
+        
+        // Desactivar modo edición
+        modoEdicion = false;
+        datosOriginales = null;
+        
+        // Actualizar interfaz
+        actualizarInterfazEdicion(false);
+    };
+
+    // Función para guardar cambios
+    window.guardarCambiosReporte = async function() {
+        if (!modoEdicion || !reporteActual) return;
+        
+        console.log('💾 Guardando cambios del reporte...');
+        
+        try {
+            // Obtener datos del formulario
+            const datosActualizados = obtenerDatosFormulario();
+            
+            // Validar datos
+            if (!validarDatosReporte(datosActualizados)) {
+                return;
+            }
+            
+            // Mostrar indicador de carga
+            const btnGuardar = document.getElementById('btn-guardar-cambios');
+            const textoOriginal = btnGuardar.innerHTML;
+            btnGuardar.disabled = true;
+            btnGuardar.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Guardando...';
+            
+            // 1. Actualizar datos del reporte
+            const response = await fetch(`/api/reports/${reporteActual.id_reporte}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(datosActualizados)
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Error al actualizar el reporte');
+            }
+            
+            // 2. Procesar archivos eliminados
+            if (archivosEliminados.length > 0) {
+                for (const archivoId of archivosEliminados) {
+                    try {
+                        await fetch(`/api/files/${archivoId}`, {
+                            method: 'DELETE',
+                            credentials: 'include'
+                        });
+                    } catch (error) {
+                        console.error('Error eliminando archivo:', error);
+                    }
+                }
+            }
+            
+            // 3. Procesar archivos nuevos
+            if (archivosTemporales.length > 0) {
+                const formData = new FormData();
+                archivosTemporales.forEach(archivo => {
+                    formData.append('archivos', archivo);
+                });
+                
+                await fetch(`/api/files/report/${reporteActual.id_reporte}`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+            }
+            
+            // Limpiar arrays temporales
+            archivosTemporales = [];
+            archivosEliminados = [];
+            
+            // Actualizar datos locales
+            Object.assign(reporteActual, datosActualizados);
+            
+            // Recargar datos del reporte para obtener información actualizada
+            await cargarDetalleReporte(reporteActual.id_reporte);
+            
+            // Desactivar modo edición
+            modoEdicion = false;
+            datosOriginales = null;
+            actualizarInterfazEdicion(false);
+            
+            // Mostrar mensaje de éxito
+            mostrarToast('Reporte actualizado exitosamente', 'success');
+            
+        } catch (error) {
+            console.error('❌ Error guardando cambios:', error);
+            alert('Error al guardar cambios: ' + error.message);
+        } finally {
+            // Restaurar botón
+            const btnGuardar = document.getElementById('btn-guardar-cambios');
+            if (btnGuardar) {
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = '<span class="material-symbols-outlined">save</span> Guardar Cambios';
+            }
+        }
+    };
+
+    // Función para actualizar la interfaz según el modo de edición
+    function actualizarInterfazEdicion(editando) {
+        // Botón editar/cancelar
+        const btnEditar = document.getElementById('btn-editar-reporte');
+        const btnGuardar = document.getElementById('btn-guardar-cambios');
+        
+        if (btnEditar) {
+            if (editando) {
+                btnEditar.innerHTML = '<span class="material-symbols-outlined">close</span> Cancelar';
+                btnEditar.classList.add('cancelar');
+            } else {
+                btnEditar.innerHTML = '<span class="material-symbols-outlined">edit</span> Editar Reporte';
+                btnEditar.classList.remove('cancelar');
+            }
+        }
+        
+        // Mostrar/ocultar botón de guardar
+        if (btnGuardar) {
+            btnGuardar.style.display = editando ? 'flex' : 'none';
+        }
+        
+        // Controles de archivos
+        const accionesArchivos = document.querySelector('.archivos-acciones');
+        if (accionesArchivos) {
+            accionesArchivos.style.display = editando ? 'flex' : 'none';
+        }
+        
+        // Actualizar botones de eliminación de archivos
+        actualizarBotonesEliminacion();
+    }
+
+    // Función para convertir campos a editables
+    function convertirCamposEditables() {
+        const detallesGrid = document.querySelector('.detalles-grid');
+        if (!detallesGrid) return;
+        
+        // Reconstruir la grilla con campos editables
+        detallesGrid.innerHTML = '';
+        
+        // Título
+        detallesGrid.appendChild(crearCampoEditable('titulo', 'Título', reporteActual.titulo, 'text'));
+        
+        // Ubicación - usar id_salon actual del reporte
+        const idSalonActual = reporteActual.id_salon;
+        detallesGrid.appendChild(crearCampoEditable('ubicacion', 'Ubicación', idSalonActual, 'select', ubicacionesDisponibles));
+        
+        // Categoría
+        detallesGrid.appendChild(crearCampoEditable('categoria', 'Categoría', reporteActual.id_categoria, 'select', categoriasDisponibles));
+        
+        // Fecha del incidente
+        if (reporteActual.fecha_reporte) {
+            const fechaFormatted = new Date(reporteActual.fecha_reporte).toISOString().split('T')[0];
+            detallesGrid.appendChild(crearCampoEditable('fecha_reporte', 'Fecha del incidente', fechaFormatted, 'date'));
+        }
+        
+        // Fecha de envío (solo lectura)
+        const fechaEnvio = document.createElement('div');
+        fechaEnvio.className = 'detalle-item';
+        fechaEnvio.innerHTML = `
+            <p class="detalle-label">Fecha de envío</p>
+            <p class="detalle-valor">${formatearFecha(reporteActual.fecha_creacion)}</p>
+        `;
+        detallesGrid.appendChild(fechaEnvio);
+        
+        // Reportado por (solo lectura)
+        if (reporteActual.usuario_nombre) {
+            const reportadoPor = document.createElement('div');
+            reportadoPor.className = 'detalle-item';
+            reportadoPor.innerHTML = `
+                <p class="detalle-label">Reportado por</p>
+                <p class="detalle-valor">${escapeHtml(reporteActual.usuario_nombre)}</p>
+            `;
+            detallesGrid.appendChild(reportadoPor);
+        }
+        
+        // Descripción
+        detallesGrid.appendChild(crearCampoEditable('descripcion', 'Descripción', reporteActual.descripcion, 'textarea'));
+    }
+
+    // Función para crear un campo editable
+    function crearCampoEditable(nombre, etiqueta, valor, tipo, opciones = null) {
+        const div = document.createElement('div');
+        div.className = `detalle-item detalle-editable`;
+        
+        let inputHTML;
+        
+        switch (tipo) {
+            case 'textarea':
+                inputHTML = `<textarea id="edit-${nombre}" class="detalle-input" rows="4">${escapeHtml(valor || '')}</textarea>`;
+                break;
+            case 'select':
+                const optionsHTML = opciones ? opciones.map(op => 
+                    `<option value="${op.value}" ${op.value == valor ? 'selected' : ''}>${escapeHtml(op.text)}</option>`
+                ).join('') : '';
+                inputHTML = `<select id="edit-${nombre}" class="detalle-input">${optionsHTML}</select>`;
+                break;
+            case 'date':
+                inputHTML = `<input type="date" id="edit-${nombre}" class="detalle-input" value="${valor || ''}">`;
+                break;
+            default:
+                inputHTML = `<input type="text" id="edit-${nombre}" class="detalle-input" value="${escapeHtml(valor || '')}">`;
+        }
+        
+        div.innerHTML = `
+            <p class="detalle-label">${escapeHtml(etiqueta)}</p>
+            ${inputHTML}
+        `;
+        
+        return div;
+    }
+
+    // Función para obtener datos del formulario
+    function obtenerDatosFormulario() {
+        return {
+            titulo: document.getElementById('edit-titulo')?.value?.trim(),
+            descripcion: document.getElementById('edit-descripcion')?.value?.trim(),
+            id_salon: document.getElementById('edit-ubicacion')?.value,
+            id_categoria: document.getElementById('edit-categoria')?.value || null,
+            fecha_reporte: document.getElementById('edit-fecha_reporte')?.value || null
+        };
+    }
+
+    // Función para validar datos del reporte
+    function validarDatosReporte(datos) {
+        if (!datos.titulo || datos.titulo.length < 5) {
+            alert('El título debe tener al menos 5 caracteres');
+            return false;
+        }
+        
+        if (!datos.descripcion || datos.descripcion.length < 10) {
+            alert('La descripción debe tener al menos 10 caracteres');
+            return false;
+        }
+        
+        if (!datos.id_salon) {
+            alert('Debes seleccionar una ubicación');
+            return false;
+        }
+        
+        return true;
+    }
+
+    // Función para cargar categorías para edición
+    async function cargarCategoriasParaEdicion() {
+        try {
+            const response = await fetch('/api/categories', { credentials: 'include' });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data) {
+                    categoriasDisponibles = [
+                        { value: '', text: 'Seleccionar categoría...' },
+                        ...data.data.map(cat => ({ value: cat.id_categoria, text: cat.nombre }))
+                    ];
+                }
+            }
+        } catch (error) {
+            console.error('Error cargando categorías:', error);
+            categoriasDisponibles = [{ value: '', text: 'Error cargando categorías' }];
+        }
+    }
+
+    // Función para cargar ubicaciones para edición
+    async function cargarUbicacionesParaEdicion() {
+        try {
+            const response = await fetch('/api/ubicaciones', { credentials: 'include' });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data) {
+                    // Crear un array temporal para almacenar todas las ubicaciones con sus salones
+                    const opcionesUbicacion = [{ value: '', text: 'Seleccionar ubicación...' }];
+                    
+                    // Cargar salones para cada ubicación
+                    for (const ubicacion of data.data) {
+                        try {
+                            const salonesRes = await fetch(`/api/ubicaciones/${ubicacion.id_ubicacion}/salones`, { credentials: 'include' });
+                            if (salonesRes.ok) {
+                                const salonesData = await salonesRes.json();
+                                if (salonesData.success && salonesData.data) {
+                                    // Agregar cada salón con formato "Salón, Ubicación"
+                                    salonesData.data.forEach(salon => {
+                                        opcionesUbicacion.push({
+                                            value: salon.id_salon,
+                                            text: `${salon.nombre}, ${ubicacion.nombre}`
+                                        });
+                                    });
+                                }
+                            }
+                        } catch (salonError) {
+                            console.error(`Error cargando salones para ${ubicacion.nombre}:`, salonError);
+                        }
+                    }
+                    
+                    ubicacionesDisponibles = opcionesUbicacion;
+                }
+            }
+        } catch (error) {
+            console.error('Error cargando ubicaciones:', error);
+            ubicacionesDisponibles = [{ value: '', text: 'Error cargando ubicaciones' }];
+        }
+    }
+
+    // Función para mostrar toast de notificación
+    function mostrarToast(mensaje, tipo = 'info') {
+        if (window.mostrarToast) {
+            window.mostrarToast(mensaje, tipo);
+        } else {
+            console.log(`📢 ${tipo.toUpperCase()}: ${mensaje}`);
+        }
+    }
+
+    // ===========================
+    // GESTIÓN DE ARCHIVOS
+    // ===========================
+
+    // Función para actualizar botones de eliminación
+    function actualizarBotonesEliminacion() {
+        const botonesEliminar = document.querySelectorAll('.btn-eliminar-archivo');
+        console.log(`🔄 Actualizando ${botonesEliminar.length} botones de eliminación. Modo edición: ${modoEdicion}`);
+        botonesEliminar.forEach(btn => {
+            btn.style.display = modoEdicion ? 'flex' : 'none';
+        });
+    }
+
+    // Función para eliminar archivo
+    window.eliminarArchivo = function(archivoId, nombreArchivo) {
+        if (!modoEdicion) {
+            alert('No puedes eliminar archivos fuera del modo de edición');
+            return;
+        }
+
+        if (!confirm(`¿Estás seguro de que deseas eliminar el archivo "${nombreArchivo}"?`)) {
+            return;
+        }
+
+        try {
+            console.log(`🗑️ Marcando archivo para eliminación: ${archivoId} - ${nombreArchivo}`);
+            
+            // Agregar a la lista de archivos a eliminar
+            if (!archivosEliminados.includes(archivoId)) {
+                archivosEliminados.push(archivoId);
+            }
+
+            // Ocultar elemento del DOM (no remover, solo ocultar)
+            const archivoElement = document.querySelector(`[data-archivo-id="${archivoId}"]`);
+            if (archivoElement) {
+                archivoElement.style.opacity = '0.5';
+                archivoElement.style.pointerEvents = 'none';
+                // Agregar indicador de eliminación
+                const indicator = document.createElement('div');
+                indicator.className = 'archivo-eliminado-indicator';
+                indicator.innerHTML = '<span style="color: red; font-weight: bold;">⚠️ Marcado para eliminar</span>';
+                archivoElement.appendChild(indicator);
+            }
+
+            mostrarToast('Archivo marcado para eliminación. Se eliminará al guardar.', 'warning');
+
+        } catch (error) {
+            console.error('❌ Error marcando archivo para eliminación:', error);
+            alert('Error al marcar archivo para eliminación: ' + error.message);
+        }
+    };
+
+    // Manejar selección de nuevos archivos
+    document.addEventListener('change', function(e) {
+        if (e.target.id === 'nuevos-archivos') {
+            const files = e.target.files;
+            if (files.length > 0) {
+                subirNuevosArchivos(files);
+            }
+        }
+    });
+
+    // Función para subir nuevos archivos
+    async function subirNuevosArchivos(files) {
+        if (!modoEdicion || !reporteActual) {
+            alert('No se pueden agregar archivos en este momento');
+            return;
+        }
+
+        try {
+            console.log(`📤 Procesando ${files.length} archivos para agregar...`);
+            
+            // Validar límite de archivos
+            const archivosActuales = document.querySelectorAll('.archivo-item:not([style*="opacity: 0.5"])').length;
+            const archivosTemporalesCount = archivosTemporales.length;
+            const totalArchivos = archivosActuales + archivosTemporalesCount + files.length - archivosEliminados.length;
+            
+            if (totalArchivos > 5) {
+                alert(`No puedes agregar más archivos. Límite máximo: 5 archivos.\nActuales: ${archivosActuales + archivosTemporalesCount}, Intentas agregar: ${files.length}`);
+                return;
+            }
+            
+            // Validar tamaño de archivos
+            for (let file of files) {
+                if (file.size > 50 * 1024 * 1024) { // 50MB
+                    alert(`El archivo "${file.name}" es demasiado grande. Máximo: 50MB`);
+                    return;
+                }
+                
+                // Validar tipo de archivo
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/avi'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert(`Tipo de archivo no permitido: "${file.name}". Solo se permiten imágenes y videos.`);
+                    return;
+                }
+            }
+            
+            // Agregar archivos a la lista temporal
+            for (let file of files) {
+                archivosTemporales.push(file);
+                
+                // Mostrar vista previa temporal
+                agregarVistaPrevia(file);
+            }
+
+            mostrarToast(`${files.length} archivo(s) agregado(s) temporalmente. Se subirán al guardar.`, 'info');
+
+            // Limpiar input
+            document.getElementById('nuevos-archivos').value = '';
+
+        } catch (error) {
+            console.error('❌ Error procesando archivos:', error);
+            alert('Error al procesar archivos: ' + error.message);
+        }
+    }
+    
+    // Función para agregar vista previa de archivo temporal
+    function agregarVistaPrevia(file) {
+        const archivosGrid = document.querySelector('.archivos-grid');
+        if (!archivosGrid) return;
+        
+        const isImage = file.type.startsWith('image/');
+        const isVideo = file.type.startsWith('video/');
+        const fileId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        let contenidoArchivo = '';
+        
+        if (isImage) {
+            contenidoArchivo = `
+                <div class="archivo-item imagen-item archivo-temporal" data-archivo-temp="${fileId}">
+                    <div class="archivo-icono imagen">
+                        <span class="material-symbols-outlined">image</span>
+                    </div>
+                    <div class="archivo-info">
+                        <div class="archivo-nombre">${escapeHtml(file.name)}</div>
+                        <div class="archivo-meta">Imagen • ${formatearTamaño(file.size)} • <strong style="color: orange;">Pendiente de guardar</strong></div>
+                    </div>
+                    <div class="archivo-acciones">
+                        <button class="btn-eliminar-archivo-temp" onclick="eliminarArchivoTemporal('${fileId}')" title="Quitar archivo">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else if (isVideo) {
+            contenidoArchivo = `
+                <div class="archivo-item video-item archivo-temporal" data-archivo-temp="${fileId}">
+                    <div class="archivo-icono video">
+                        <span class="material-symbols-outlined">videocam</span>
+                    </div>
+                    <div class="archivo-info">
+                        <div class="archivo-nombre">${escapeHtml(file.name)}</div>
+                        <div class="archivo-meta">Video • ${formatearTamaño(file.size)} • <strong style="color: orange;">Pendiente de guardar</strong></div>
+                    </div>
+                    <div class="archivo-acciones">
+                        <button class="btn-eliminar-archivo-temp" onclick="eliminarArchivoTemporal('${fileId}')" title="Quitar archivo">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (contenidoArchivo) {
+            archivosGrid.insertAdjacentHTML('beforeend', contenidoArchivo);
+        }
+    }
+    
+    // Función para eliminar archivo temporal
+    window.eliminarArchivoTemporal = function(tempId) {
+        const archivoElement = document.querySelector(`[data-archivo-temp="${tempId}"]`);
+        if (archivoElement) {
+            // Encontrar el índice en archivosTemporales basado en el tiempo del ID
+            const timestamp = tempId.split('-')[1];
+            const index = archivosTemporales.findIndex((_, i) => {
+                // Como no podemos identificar exactamente, removemos el último agregado
+                return i === archivosTemporales.length - document.querySelectorAll('.archivo-temporal').length + Array.from(document.querySelectorAll('.archivo-temporal')).indexOf(archivoElement);
+            });
+            
+            if (index >= 0) {
+                archivosTemporales.splice(index, 1);
+            }
+            
+            archivoElement.remove();
+            mostrarToast('Archivo temporal eliminado', 'info');
+        }
+    };
     
     // Función para inicializar después de navegación SPA
     window.inicializarDetalleReporte = function() {

@@ -488,6 +488,15 @@ class SPANavigation {
                 }, 200);
             }
             
+            // Manejar perfil específicamente aquí
+            if (page === 'perfil') {
+                console.log('🎯 SPA: Manejando perfil directamente...');
+                // Dar más tiempo para que el DOM se estabilice
+                setTimeout(() => {
+                    this.manejarPerfil();
+                }, 200);
+            }
+            
             // Manejar detalle-reporte (estándar y admin) específicamente aquí
             if (page === 'detalle-reporte' || page === 'detalle-reporte-admin') {
                 console.log('🎯 SPA: Manejando detalle-reporte directamente...', page);
@@ -1140,13 +1149,18 @@ class SPANavigation {
             
             await esperarContenido();
             
-            console.log('🔄 SPA: Llamando cargarReportes desde ExplorarReportes...');
+            console.log('🔄 SPA: Llamando inicializarExplorarReportes desde SPA...');
             
-            // Intentar ejecutar la función cargarReportes directamente
+            // Intentar ejecutar la función de inicialización completa
             setTimeout(() => {
                 try {
+                    // Usar la nueva función de inicialización global
+                    if (typeof window.inicializarExplorarReportes === 'function') {
+                        console.log('📞 SPA: Ejecutando window.inicializarExplorarReportes()');
+                        window.inicializarExplorarReportes();
+                    }
                     // Si la función está disponible globalmente
-                    if (typeof cargarReportes === 'function') {
+                    else if (typeof cargarReportes === 'function') {
                         console.log('📞 SPA: Ejecutando cargarReportes directamente');
                         cargarReportes();
                     }
@@ -1165,7 +1179,7 @@ class SPANavigation {
                         this.cargarScriptExplorarReportes();
                     }
                 } catch (error) {
-                    console.error('❌ SPA: Error ejecutando cargarReportes:', error);
+                    console.error('❌ SPA: Error ejecutando inicializarExplorarReportes:', error);
                 }
             }, 100);
             
@@ -1180,10 +1194,12 @@ class SPANavigation {
         // Verificar si el script ya está cargado
         const scriptExistente = document.querySelector('script[src*="explorar-reportes.js"]');
         if (scriptExistente) {
-            console.log('📜 SPA: Script explorar-reportes.js ya existe, reejecutando...');
-            // Forzar recarga de reportes
+            console.log('📜 SPA: Script explorar-reportes.js ya existe, re-inicializando...');
+            // Forzar re-inicialización completa
             setTimeout(() => {
-                if (window.recargarReportes) {
+                if (window.inicializarExplorarReportes) {
+                    window.inicializarExplorarReportes();
+                } else if (window.recargarReportes) {
                     window.recargarReportes();
                 }
             }, 100);
@@ -1279,6 +1295,97 @@ class SPANavigation {
         };
         script.onerror = () => {
             console.error('❌ SPA: Error cargando script mis-reportes.js');
+        };
+        
+        document.head.appendChild(script);
+    }
+
+    // Función específica para manejar la página de perfil
+    async manejarPerfil() {
+        console.log('🚀 SPA: Iniciando manejo directo de perfil...');
+        
+        try {
+            // Esperar a que el DOM esté disponible
+            const esperarContenido = () => {
+                return new Promise((resolve) => {
+                    const checkearDOM = () => {
+                        const tarjetaPerfil = document.querySelector('.tarjeta-perfil');
+                        const estadisticas = document.querySelector('.tarjetas-estadisticas');
+                        
+                        if (tarjetaPerfil && estadisticas) {
+                            console.log('✅ SPA: DOM de perfil está listo');
+                            resolve();
+                        } else {
+                            console.log('⏳ SPA: Esperando DOM de perfil...');
+                            setTimeout(checkearDOM, 50);
+                        }
+                    };
+                    checkearDOM();
+                });
+            };
+            
+            await esperarContenido();
+            
+            console.log('🔄 SPA: Llamando inicializarPerfil desde SPA...');
+            
+            // Intentar ejecutar la función de inicialización
+            setTimeout(() => {
+                try {
+                    // Usar la función de inicialización global
+                    if (typeof window.inicializarPerfil === 'function') {
+                        console.log('📞 SPA: Ejecutando window.inicializarPerfil()');
+                        window.inicializarPerfil();
+                    }
+                    // Si las funciones están disponibles globalmente
+                    else if (typeof cargarDatosPerfil === 'function') {
+                        console.log('📞 SPA: Ejecutando cargarDatosPerfil directamente');
+                        cargarDatosPerfil();
+                        if (typeof cargarEstadisticasUsuario === 'function') {
+                            cargarEstadisticasUsuario();
+                        }
+                    }
+                    // Fallback: cargar el script y ejecutar
+                    else {
+                        console.log('📦 SPA: Cargando script perfil.js...');
+                        this.cargarScriptPerfil();
+                    }
+                } catch (error) {
+                    console.error('❌ SPA: Error ejecutando inicializarPerfil:', error);
+                }
+            }, 100);
+            
+        } catch (error) {
+            console.error('💥 SPA: Error en manejarPerfil:', error);
+        }
+    }
+
+    cargarScriptPerfil() {
+        console.log('📦 SPA: Cargando script perfil.js...');
+        
+        // Verificar si el script ya está cargado
+        const scriptExistente = document.querySelector('script[src*="perfil.js"]');
+        if (scriptExistente) {
+            console.log('📜 SPA: Script perfil.js ya existe, re-inicializando...');
+            // Forzar re-inicialización
+            setTimeout(() => {
+                if (window.inicializarPerfil) {
+                    window.inicializarPerfil();
+                }
+            }, 100);
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = '/js/perfil.js';
+        script.async = false;
+        
+        script.onload = () => {
+            console.log('✅ SPA: Script perfil.js cargado exitosamente');
+            // El script se ejecutará automáticamente
+        };
+        
+        script.onerror = () => {
+            console.error('❌ SPA: Error cargando script perfil.js');
         };
         
         document.head.appendChild(script);

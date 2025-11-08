@@ -28,7 +28,6 @@ const protectedPages = [
   'pantalla-carga.html', // Solo para transición login -> dashboard
   'dashboard.html',
   'perfil.html',
-  'crear-reporte.html',
   'mis-reportes.html',
   'detalle-reporte.html',
   'ayuda.html'
@@ -38,6 +37,16 @@ protectedPages.forEach((file) => {
   router.get('/' + file, requireAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', file));
   });
+});
+
+// Crear reporte - solo para usuarios no administradores
+router.get('/crear-reporte.html', requireAuth, (req, res) => {
+  // Verificar que el usuario no sea administrador
+  if (req.session && req.session.user && req.session.user.rol === 'Administrador') {
+    // Redirigir administradores al dashboard de admin
+    return res.redirect('/admin-dashboard.html');
+  }
+  res.sendFile(path.join(__dirname, 'views', 'crear-reporte.html'));
 });
 
 // Páginas de administrador (también requieren sesión)
