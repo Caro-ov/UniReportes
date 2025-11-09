@@ -26,28 +26,6 @@ $(document).ready(function() {
     }
 
     // ===========================
-    // DROPDOWN DEL PERFIL
-    // ===========================
-    // ===== Dropdown del perfil (usar delegación y namespace para evitar conflictos con components.js)
-    // Delegar el toggle del avatar en el documento y usar namespace para permitir limpieza segura
-    $(document).off('click.detalleAvatar').on('click.detalleAvatar', '.avatar-usuario', function(e) {
-        e.stopPropagation();
-        $('.menu-desplegable').toggleClass('mostrar');
-    });
-
-    // Cerrar menú al hacer clic fuera (namespaced)
-    $(document).off('click.detalleDoc').on('click.detalleDoc', function() {
-        $('.menu-desplegable').removeClass('mostrar');
-    });
-
-    // No detener la propagación dentro del menú para permitir que los handlers globales
-    // (por ejemplo el de logout en components.js) reciban el evento delegado.
-    $(document).off('click.detalleMenu').on('click.detalleMenu', '.menu-desplegable', function(e) {
-        // Intencionalmente NO se llama a e.stopPropagation() aquí.
-        // Se puede usar para manejo específico interno si se necesita más adelante.
-    });
-
-    // ===========================
     // FUNCIONALIDAD PRINCIPAL
     // ===========================
     
@@ -211,18 +189,38 @@ $(document).ready(function() {
             
             if (!response.ok) {
                 console.log('ℹ️ No se pudieron cargar archivos:', response.status);
+                mostrarArchivos([]);
                 return;
             }
             
-            const data = await response.json();
-            console.log('📁 Archivos recibidos:', data);
+            // Verificar si la respuesta es HTML (indica redirección a login)
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('text/html')) {
+                console.log('⚠️ Recibido HTML en lugar de JSON - posible problema de sesión');
+                mostrarArchivos([]);
+                return;
+            }
             
-            if (data.success && data.data) {
-                mostrarArchivos(data.data);
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+                console.log('📁 Archivos recibidos:', data);
+                
+                if (data.success && data.data) {
+                    mostrarArchivos(data.data);
+                } else {
+                    mostrarArchivos([]);
+                }
+            } catch (parseError) {
+                console.error('❌ Error parseando JSON de archivos:', parseError);
+                console.log('📄 Contenido recibido (primeros 200 chars):', responseText.substring(0, 200));
+                mostrarArchivos([]);
             }
             
         } catch (error) {
             console.error('❌ Error cargando archivos:', error);
+            mostrarArchivos([]);
         }
     }
     
@@ -252,10 +250,15 @@ $(document).ready(function() {
             `;
             archivosGrid.html(mensajeSinArchivos);
             
+            console.log('📁 Mensaje sin archivos mostrado, modo edición:', modoEdicion);
+            
             // Configurar drag & drop solo en modo edición
             if (modoEdicion) {
-                configurarDragDropSinArchivos();
-                $('.sin-archivos-drag-hint').show();
+                console.log('🎯 Configurando drag & drop para sin archivos...');
+                setTimeout(() => {
+                    configurarDragDropSinArchivos();
+                    $('.sin-archivos-drag-hint').show();
+                }, 100); // Pequeño delay para asegurar que el DOM esté listo
             }
             return;
         }
@@ -312,7 +315,13 @@ $(document).ready(function() {
             }
             
             if (contenidoArchivo) {
-                archivosGrid.append(contenidoArchivo);
+                // Insertar antes de la zona de drop si existe, o al final
+                const dropZone = archivosGrid[0].querySelector('.drop-zone-existentes');
+                if (dropZone) {
+                    dropZone.insertAdjacentHTML('beforebegin', contenidoArchivo);
+                } else {
+                    archivosGrid[0].insertAdjacentHTML('beforeend', contenidoArchivo);
+                }
             }
         });
         
@@ -321,9 +330,14 @@ $(document).ready(function() {
         // Mostrar/ocultar botones de eliminar según el modo de edición
         actualizarBotonesEliminacion();
         
+        console.log('📁 Archivos existentes mostrados, modo edición:', modoEdicion);
+        
         // Configurar drag & drop para el área de archivos existentes
         if (modoEdicion) {
-            configurarDragDropArchivosExistentes();
+            console.log('🎯 Configurando drag & drop para archivos existentes...');
+            setTimeout(() => {
+                configurarDragDropArchivosExistentes();
+            }, 100); // Pequeño delay para asegurar que el DOM esté listo
         }
     }
     
@@ -1177,8 +1191,16 @@ $(document).ready(function() {
             btnGuardar.disabled = true;
             btnGuardar.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Guardando...';
             
+            console.log('📤 Enviando datos:', { 
+                datosActualizados,
+                archivosTemporales: archivosTemporales.length,
+                archivosEliminados: archivosEliminados.length
+            });
+            
             // 1. Actualizar datos del reporte con archivos
             let response, data;
+            const url = `/api/reports/${reporteActual.id_reporte}`;
+            console.log('🌐 URL de petición:', url);
             
             if (archivosTemporales.length > 0) {
                 // Si hay archivos nuevos, usar FormData para enviar tanto datos como archivos
@@ -1196,14 +1218,14 @@ $(document).ready(function() {
                     formData.append('archivos', archivo);
                 });
                 
-                response = await fetch(`/api/reports/${reporteActual.id_reporte}`, {
+                response = await fetch(url, {
                     method: 'PUT',
                     credentials: 'include',
                     body: formData // Sin Content-Type para que el navegador configure multipart/form-data
                 });
             } else {
                 // Si no hay archivos nuevos, usar JSON como antes
-                response = await fetch(`/api/reports/${reporteActual.id_reporte}`, {
+                response = await fetch(url, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1213,10 +1235,18 @@ $(document).ready(function() {
                 });
             }
             
+            console.log('📡 Respuesta recibida:', response.status, response.statusText);
+            
+            // Verificar si es una redirección a login
+            if (response.url && response.url.includes('/login')) {
+                throw new Error('Tu sesión ha expirado. Serás redirigido al login.');
+            }
+            
             const responseText = await response.text();
             console.log('📥 Respuesta del servidor:', { 
                 status: response.status, 
                 statusText: response.statusText,
+                url: response.url,
                 responseText: responseText.substring(0, 500) + '...'
             });
             
@@ -1224,8 +1254,14 @@ $(document).ready(function() {
                 data = JSON.parse(responseText);
             } catch (parseError) {
                 console.error('❌ Error parseando JSON:', parseError);
-                console.error('📄 Contenido de respuesta:', responseText);
-                throw new Error('El servidor devolvió una respuesta inválida. Verifica tu sesión e intenta nuevamente.');
+                console.error('📄 Contenido completo de respuesta:', responseText);
+                
+                // Si el contenido es HTML, probablemente es un redireccionamiento de autenticación
+                if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+                    throw new Error('Tu sesión ha expirado. Por favor, recarga la página e inicia sesión nuevamente.');
+                }
+                
+                throw new Error('El servidor devolvió una respuesta inválida. Intenta nuevamente.');
             }
             
             if (!response.ok || !data.success) {
@@ -1276,6 +1312,15 @@ $(document).ready(function() {
             
         } catch (error) {
             console.error('❌ Error guardando cambios:', error);
+            
+            // Manejar errores de sesión específicamente
+            if (error.message.includes('sesión') || error.message.includes('login') || error.message.includes('autenticación')) {
+                alert('Tu sesión ha expirado. Serás redirigido al login.');
+                // Redirigir al login
+                window.location.href = '/login.html';
+                return;
+            }
+            
             alert('Error al guardar cambios: ' + error.message);
         } finally {
             // Restaurar botón
@@ -1315,20 +1360,35 @@ $(document).ready(function() {
         }
         
         // Actualizar drag & drop para área sin archivos si existe
-        if (editando && document.querySelector('.sin-archivos')) {
+        const sinArchivos = document.querySelector('.sin-archivos');
+        if (editando && sinArchivos) {
+            console.log('🎯 Reconfigurado drag & drop para sin archivos en modo edición');
             configurarDragDropSinArchivos();
             $('.sin-archivos-drag-hint').show();
-        } else if (document.querySelector('.sin-archivos')) {
+        } else if (sinArchivos) {
+            console.log('🎯 Ocultando drag & drop hint para sin archivos');
             $('.sin-archivos-drag-hint').hide();
         }
         
         // Mostrar/ocultar zona de drop para archivos existentes
         const dropZoneExistentes = document.querySelector('.drop-zone-existentes');
+        const archivosGrid = document.querySelector('.archivos-grid');
+        const hayArchivos = archivosGrid && archivosGrid.children.length > 0;
+        
+        console.log('🎯 actualizarInterfazEdicion - hay archivos:', hayArchivos, 'modo edición:', editando);
+        
         if (dropZoneExistentes) {
             dropZoneExistentes.style.display = editando ? 'flex' : 'none';
             if (editando) {
+                console.log('🎯 Reconfigurado drag & drop para archivos existentes');
                 configurarDragDropArchivosExistentes();
             }
+        } else if (editando && hayArchivos) {
+            // Si no existe la zona de drop pero hay archivos y estamos en modo edición, crearla
+            console.log('🎯 No hay zona de drop, creándola para archivos existentes...');
+            setTimeout(() => {
+                configurarDragDropArchivosExistentes();
+            }, 100);
         }
         
         // Actualizar botones de eliminación de archivos
@@ -1521,10 +1581,15 @@ $(document).ready(function() {
     // Función para configurar drag & drop cuando hay archivos existentes
     function configurarDragDropArchivosExistentes() {
         const archivosGrid = document.querySelector('.archivos-grid');
+        console.log('🎯 configurarDragDropArchivosExistentes llamada, archivos-grid encontrado:', !!archivosGrid);
+        
         if (!archivosGrid) return;
         
         // Agregar área de drop visual al final de los archivos existentes
-        if (!document.querySelector('.drop-zone-existentes')) {
+        const dropZoneExistente = document.querySelector('.drop-zone-existentes');
+        console.log('🎯 drop-zone-existentes ya existe:', !!dropZoneExistente);
+        
+        if (!dropZoneExistente) {
             const dropZone = `
                 <div class="drop-zone-existentes">
                     <div class="drop-zone-contenido">
@@ -1534,6 +1599,7 @@ $(document).ready(function() {
                 </div>
             `;
             archivosGrid.insertAdjacentHTML('beforeend', dropZone);
+            console.log('✅ Zona de drop agregada al DOM');
         }
         
         const dropZone = document.querySelector('.drop-zone-existentes');
@@ -1634,6 +1700,8 @@ $(document).ready(function() {
     // Función para configurar drag & drop cuando no hay archivos
     function configurarDragDropSinArchivos() {
         const sinArchivos = document.querySelector('.sin-archivos');
+        console.log('🎯 configurarDragDropSinArchivos llamada, elemento encontrado:', !!sinArchivos);
+        
         if (!sinArchivos) return;
         
         // Limpiar eventos previos
@@ -1900,7 +1968,14 @@ $(document).ready(function() {
         }
         
         if (contenidoArchivo) {
-            archivosGrid.insertAdjacentHTML('beforeend', contenidoArchivo);
+            // Insertar antes de la zona de drop si existe, o al final
+            const archivosGrid = document.querySelector('.archivos-grid');
+            const dropZone = archivosGrid.querySelector('.drop-zone-existentes');
+            if (dropZone) {
+                dropZone.insertAdjacentHTML('beforebegin', contenidoArchivo);
+            } else {
+                archivosGrid.insertAdjacentHTML('beforeend', contenidoArchivo);
+            }
         }
     }
     
@@ -1952,4 +2027,36 @@ $(document).ready(function() {
             });
         }
     };
+    
+    // ===========================
+    // FUNCIÓN DE LIMPIEZA PARA SPA
+    // ===========================
+    
+    // Función para limpiar estado cuando se navega fuera de la página
+    window.limpiarDetalleReporte = function() {
+        console.log('🧹 Limpiando estado de detalle-reporte...');
+        
+        // Cerrar cualquier menú desplegable abierto
+        $('.menu-desplegable').removeClass('mostrar');
+        $('.user-dropdown, .dropdown-perfil').removeClass('open');
+        
+        // Limpiar modo edición si está activo
+        if (modoEdicion) {
+            modoEdicion = false;
+            datosOriginales = null;
+            archivosTemporales = [];
+            archivosEliminados = [];
+        }
+        
+        // Limpiar variables globales
+        reporteActual = null;
+        categoriasDisponibles = [];
+        ubicacionesDisponibles = [];
+    };
+    
+    // Exponer función de limpieza globalmente para que SPA la pueda llamar
+    if (typeof window.spaCleanupFunctions === 'undefined') {
+        window.spaCleanupFunctions = {};
+    }
+    window.spaCleanupFunctions['detalle-reporte'] = window.limpiarDetalleReporte;
 });

@@ -1412,6 +1412,10 @@ class SPANavigation {
         $('#modal-eliminar').remove();
         $('.modal-overlay').remove();
         
+        // Cerrar menús desplegables abiertos
+        $('.menu-desplegable').removeClass('mostrar');
+        $('.user-dropdown, .dropdown-perfil').removeClass('open');
+        
         console.log('✅ Estilos del body limpiados');
     }
     
