@@ -1,5 +1,6 @@
 import * as fileModel from '../models/fileModel.js';
 import * as reportModel from '../models/reportModel.js';
+import * as historialModel from '../models/historialModel.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -170,6 +171,23 @@ export async function deleteFile(req, res) {
         const deleted = await fileModel.deleteFile(parseInt(fileId));
         
         if (deleted) {
+            // Registrar eliminación en el historial del reporte
+            try {
+                // Extraer nombre del archivo desde la URL
+                const nombreArchivo = fileInfo.url ? path.basename(fileInfo.url) : 'archivo';
+                
+                await historialModel.createHistorialEntry({
+                    id_reporte: fileInfo.id_reporte,
+                    tipo: 'archivo',
+                    id_usuario_actor: userId,
+                    descripcion: `1 archivo eliminado: ${nombreArchivo}`
+                });
+                console.log(`📝 Eliminación de archivo registrada en historial del reporte ${fileInfo.id_reporte}`);
+            } catch (historialError) {
+                console.error('❌ Error registrando eliminación de archivo en historial:', historialError);
+                // No fallar la eliminación por error en historial
+            }
+            
             res.json({
                 success: true,
                 message: 'Archivo eliminado exitosamente'

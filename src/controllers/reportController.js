@@ -3,6 +3,7 @@ import * as categoryModel from '../models/categoryModel.js';
 import * as fileModel from '../models/fileModel.js';
 import * as historialModel from '../models/historialModel.js';
 import path from 'path';
+import fs from 'fs';
 
 /**
  * Obtener todos los reportes (API)
@@ -284,15 +285,26 @@ export async function updateReport(req, res) {
 
         // Extraer datos del body, manejando tanto JSON como FormData
         let titulo, descripcion, id_salon, id_categoria, fecha_reporte, estado;
+        let archivosEliminados = [];
         
-        // Si viene FormData (con archivos), los datos están en req.body directamente como strings
-        if (req.files && req.files.length > 0) {
+        // Si viene FormData (con archivos o archivosEliminados), los datos están en req.body directamente como strings
+        if (req.files && req.files.length > 0 || req.body.archivosEliminados) {
             titulo = req.body.titulo;
             descripcion = req.body.descripcion;
             id_salon = req.body.id_salon ? parseInt(req.body.id_salon) : undefined;
             id_categoria = req.body.id_categoria ? parseInt(req.body.id_categoria) : undefined;
             fecha_reporte = req.body.fecha_reporte;
             estado = req.body.estado;
+            
+            // Procesar archivos eliminados si vienen
+            if (req.body.archivosEliminados) {
+                try {
+                    archivosEliminados = JSON.parse(req.body.archivosEliminados);
+                    console.log('📁 Archivos marcados para eliminación:', archivosEliminados);
+                } catch (error) {
+                    console.error('❌ Error parseando archivosEliminados:', error);
+                }
+            }
         } else {
             // Si es JSON normal
             ({ titulo, descripcion, id_salon, id_categoria, fecha_reporte, estado } = req.body);
@@ -423,6 +435,53 @@ export async function updateReport(req, res) {
                 }
             }
 
+            // Procesar archivos eliminados si hay
+            let archivosEliminadosInfo = [];
+            if (archivosEliminados.length > 0) {
+                console.log(`🗑️ Procesando ${archivosEliminados.length} archivos para eliminación...`);
+                
+                for (const archivoId of archivosEliminados) {
+                    try {
+                        // Obtener información del archivo antes de eliminarlo
+                        const archivoInfo = await fileModel.getFileById(parseInt(archivoId));
+                        if (archivoInfo) {
+                            // Verificar que el archivo pertenezca al reporte actual
+                            if (archivoInfo.id_reporte === reportId) {
+                                // Eliminar archivo físico
+                                if (fs.existsSync(archivoInfo.url)) {
+                                    fs.unlinkSync(archivoInfo.url);
+                                }
+                                
+                                // Eliminar de la base de datos
+                                const eliminado = await fileModel.deleteFile(parseInt(archivoId));
+                                if (eliminado) {
+                                    const nombreArchivo = archivoInfo.url ? path.basename(archivoInfo.url) : 'archivo';
+                                    archivosEliminadosInfo.push(nombreArchivo);
+                                    console.log(`✅ Archivo ${nombreArchivo} eliminado exitosamente`);
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`❌ Error eliminando archivo ${archivoId}:`, error);
+                    }
+                }
+                
+                // Agregar entrada en historial si se eliminaron archivos
+                if (archivosEliminadosInfo.length > 0) {
+                    try {
+                        await historialModel.createHistorialEntry({
+                            id_reporte: reportId,
+                            tipo: 'archivo',
+                            id_usuario_actor: userId,
+                            descripcion: `${archivosEliminadosInfo.length} archivo(s) eliminado(s): ${archivosEliminadosInfo.join(', ')}`
+                        });
+                        console.log(`📝 Eliminación de ${archivosEliminadosInfo.length} archivo(s) registrada en historial`);
+                    } catch (historialError) {
+                        console.error('❌ Error registrando eliminación en historial:', historialError);
+                    }
+                }
+            }
+
             // Registrar cambios en el historial si hay cambios
             if (cambios.length > 0) {
                 try {
@@ -454,12 +513,16 @@ export async function updateReport(req, res) {
             if (archivosGuardados.length > 0) {
                 mensaje += ` con ${archivosGuardados.length} archivo(s) agregado(s)`;
             }
+            if (archivosEliminadosInfo.length > 0) {
+                mensaje += ` y ${archivosEliminadosInfo.length} archivo(s) eliminado(s)`;
+            }
 
             res.json({
                 success: true,
                 message: mensaje,
                 cambios: cambios.length,
-                archivos_agregados: archivosGuardados.length
+                archivos_agregados: archivosGuardados.length,
+                archivos_eliminados: archivosEliminadosInfo.length
             });
         } else {
             res.status(400).json({

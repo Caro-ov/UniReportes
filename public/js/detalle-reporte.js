@@ -1213,6 +1213,11 @@ $(document).ready(function() {
                     }
                 });
                 
+                // Agregar archivos eliminados (enviar como JSON string)
+                if (archivosEliminados.length > 0) {
+                    formData.append('archivosEliminados', JSON.stringify(archivosEliminados));
+                }
+                
                 // Agregar archivos nuevos
                 archivosTemporales.forEach(archivo => {
                     formData.append('archivos', archivo);
@@ -1224,15 +1229,36 @@ $(document).ready(function() {
                     body: formData // Sin Content-Type para que el navegador configure multipart/form-data
                 });
             } else {
-                // Si no hay archivos nuevos, usar JSON como antes
-                response = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify(datosActualizados)
-                });
+                // Si no hay archivos nuevos pero sí eliminados, usar FormData también
+                if (archivosEliminados.length > 0) {
+                    const formData = new FormData();
+                    
+                    // Agregar datos del reporte al FormData
+                    Object.keys(datosActualizados).forEach(key => {
+                        if (datosActualizados[key] !== null && datosActualizados[key] !== undefined) {
+                            formData.append(key, datosActualizados[key]);
+                        }
+                    });
+                    
+                    // Agregar archivos eliminados
+                    formData.append('archivosEliminados', JSON.stringify(archivosEliminados));
+                    
+                    response = await fetch(url, {
+                        method: 'PUT',
+                        credentials: 'include',
+                        body: formData
+                    });
+                } else {
+                    // Si no hay archivos nuevos ni eliminados, usar JSON como antes
+                    response = await fetch(url, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify(datosActualizados)
+                    });
+                }
             }
             
             console.log('📡 Respuesta recibida:', response.status, response.statusText);
@@ -1268,20 +1294,6 @@ $(document).ready(function() {
                 throw new Error(data.message || 'Error al actualizar el reporte');
             }
             
-            // 2. Procesar archivos eliminados
-            if (archivosEliminados.length > 0) {
-                for (const archivoId of archivosEliminados) {
-                    try {
-                        await fetch(`/api/files/${archivoId}`, {
-                            method: 'DELETE',
-                            credentials: 'include'
-                        });
-                    } catch (error) {
-                        console.error('Error eliminando archivo:', error);
-                    }
-                }
-            }
-            
             // Limpiar arrays temporales
             archivosTemporales = [];
             archivosEliminados = [];
@@ -1307,6 +1319,13 @@ $(document).ready(function() {
             let mensajeExito = 'Reporte actualizado exitosamente';
             if (data.archivos_agregados && data.archivos_agregados > 0) {
                 mensajeExito += ` con ${data.archivos_agregados} archivo(s) agregado(s)`;
+            }
+            if (data.archivos_eliminados && data.archivos_eliminados > 0) {
+                if (data.archivos_agregados && data.archivos_agregados > 0) {
+                    mensajeExito += ` y ${data.archivos_eliminados} archivo(s) eliminado(s)`;
+                } else {
+                    mensajeExito += ` con ${data.archivos_eliminados} archivo(s) eliminado(s)`;
+                }
             }
             mostrarToast(mensajeExito, 'success');
             
