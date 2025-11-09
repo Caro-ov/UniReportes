@@ -350,13 +350,27 @@ export async function updateReport(req, res) {
             });
         }
 
-        if (fecha_reporte && fecha_reporte !== existingReport.fecha_reporte) {
-            updateData.fecha_reporte = fecha_reporte;
-            cambios.push({
-                campo: 'fecha_reporte',
-                valor_anterior: existingReport.fecha_reporte,
-                valor_nuevo: fecha_reporte
-            });
+        if (fecha_reporte) {
+            // Normalizar fechas comparando solo fecha y hora, ignorando diferencias de timezone menores
+            const fechaReporteNormalizada = new Date(fecha_reporte);
+            const fechaExistenteNormalizada = existingReport.fecha_reporte ? 
+                new Date(existingReport.fecha_reporte) : null;
+            
+            // Solo considerar cambio si la diferencia es mayor a 1 minuto (para evitar problemas de timezone)
+            const diferencia = fechaExistenteNormalizada ? 
+                Math.abs(fechaReporteNormalizada.getTime() - fechaExistenteNormalizada.getTime()) : 
+                Number.MAX_VALUE;
+            
+            const UMBRAL_CAMBIO = 60000; // 1 minuto en milisegundos
+                
+            if (diferencia > UMBRAL_CAMBIO) {
+                updateData.fecha_reporte = fecha_reporte;
+                cambios.push({
+                    campo: 'fecha_reporte',
+                    valor_anterior: existingReport.fecha_reporte,
+                    valor_nuevo: fecha_reporte
+                });
+            }
         }
 
         // Solo admin puede cambiar estado
@@ -490,7 +504,7 @@ export async function updateReport(req, res) {
                         'titulo': 'Título',
                         'descripcion': 'Descripción',
                         'id_salon': 'Salón',
-                        'fecha_reporte': 'Fecha reportada',
+                        'fecha_reporte': 'Fecha y hora del incidente',
                         'id_categoria': 'Categoría',
                         'estado': 'Estado'
                     };

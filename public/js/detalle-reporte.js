@@ -1432,10 +1432,25 @@ $(document).ready(function() {
         // Categoría
         detallesGrid.appendChild(crearCampoEditable('categoria', 'Categoría', reporteActual.id_categoria, 'select', categoriasDisponibles));
         
-        // Fecha del incidente
+        // Fecha del incidente (con hora)
         if (reporteActual.fecha_reporte) {
-            const fechaFormatted = new Date(reporteActual.fecha_reporte).toISOString().split('T')[0];
-            detallesGrid.appendChild(crearCampoEditable('fecha_reporte', 'Fecha del incidente', fechaFormatted, 'date'));
+            // Formatear para datetime-local (YYYY-MM-DDTHH:MM)
+            // Conservar la hora original de la base de datos
+            const fechaOriginal = new Date(reporteActual.fecha_reporte);
+            
+            // Ajustar timezone para mostrar la hora local correcta
+            const offset = fechaOriginal.getTimezoneOffset();
+            const fechaLocal = new Date(fechaOriginal.getTime() - (offset * 60 * 1000));
+            const fechaDateTime = fechaLocal.toISOString().slice(0, 16);
+            
+            console.log('🕐 Preparando fecha para edición:', {
+                fechaOriginal: reporteActual.fecha_reporte,
+                fechaParseada: fechaOriginal.toISOString(),
+                fechaLocal: fechaLocal.toISOString(),
+                fechaParaInput: fechaDateTime
+            });
+            
+            detallesGrid.appendChild(crearCampoEditable('fecha_reporte', 'Fecha y hora del incidente', fechaDateTime, 'datetime-local'));
         }
         
         // Fecha de envío (solo lectura)
@@ -1481,6 +1496,9 @@ $(document).ready(function() {
                 break;
             case 'date':
                 inputHTML = `<input type="date" id="edit-${nombre}" class="detalle-input" value="${valor || ''}">`;
+                break;
+            case 'datetime-local':
+                inputHTML = `<input type="datetime-local" id="edit-${nombre}" class="detalle-input" value="${valor || ''}">`;
                 break;
             default:
                 inputHTML = `<input type="text" id="edit-${nombre}" class="detalle-input" value="${escapeHtml(valor || '')}">`;
