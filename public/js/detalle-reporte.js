@@ -229,14 +229,36 @@ $(document).ready(function() {
     // Función para mostrar archivos
     function mostrarArchivos(archivos) {
         const archivosSection = $('.archivos-section');
+        const archivosGrid = $('.archivos-grid');
+        
+        // Siempre mostrar la sección de archivos
+        archivosSection.show();
+        archivosGrid.empty();
         
         if (!archivos || archivos.length === 0) {
-            archivosSection.hide();
+            // Mostrar mensaje cuando no hay archivos
+            const mensajeSinArchivos = `
+                <div class="sin-archivos">
+                    <div class="sin-archivos-icono">
+                        <span class="material-symbols-outlined">folder_open</span>
+                    </div>
+                    <div class="sin-archivos-contenido">
+                        <h4>No hay archivos adjuntos</h4>
+                        <p class="sin-archivos-descripcion">Este reporte no tiene archivos adjuntos.</p>
+                        <p class="sin-archivos-limite">Puedes agregar hasta 5 archivos (máximo 50MB cada uno) usando el botón "Agregar archivo" de arriba.</p>
+                        <p class="sin-archivos-drag-hint" style="display: none;">O haz clic aquí o arrastra archivos para subirlos</p>
+                    </div>
+                </div>
+            `;
+            archivosGrid.html(mensajeSinArchivos);
+            
+            // Configurar drag & drop solo en modo edición
+            if (modoEdicion) {
+                configurarDragDropSinArchivos();
+                $('.sin-archivos-drag-hint').show();
+            }
             return;
         }
-        
-        const archivosGrid = $('.archivos-grid');
-        archivosGrid.empty();
         
         archivos.forEach(archivo => {
             let contenidoArchivo;
@@ -298,6 +320,11 @@ $(document).ready(function() {
         
         // Mostrar/ocultar botones de eliminar según el modo de edición
         actualizarBotonesEliminacion();
+        
+        // Configurar drag & drop para el área de archivos existentes
+        if (modoEdicion) {
+            configurarDragDropArchivosExistentes();
+        }
     }
     
     // Función para cargar historial de cambios
@@ -1107,6 +1134,12 @@ $(document).ready(function() {
         archivosTemporales = [];
         archivosEliminados = [];
         
+        // Limpiar zona de drop si existe
+        const dropZoneExistentes = document.querySelector('.drop-zone-existentes');
+        if (dropZoneExistentes) {
+            dropZoneExistentes.remove();
+        }
+        
         // Restaurar datos originales
         if (datosOriginales) {
             reporteActual = JSON.parse(JSON.stringify(datosOriginales));
@@ -1144,17 +1177,56 @@ $(document).ready(function() {
             btnGuardar.disabled = true;
             btnGuardar.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Guardando...';
             
-            // 1. Actualizar datos del reporte
-            const response = await fetch(`/api/reports/${reporteActual.id_reporte}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify(datosActualizados)
+            // 1. Actualizar datos del reporte con archivos
+            let response, data;
+            
+            if (archivosTemporales.length > 0) {
+                // Si hay archivos nuevos, usar FormData para enviar tanto datos como archivos
+                const formData = new FormData();
+                
+                // Agregar datos del reporte al FormData
+                Object.keys(datosActualizados).forEach(key => {
+                    if (datosActualizados[key] !== null && datosActualizados[key] !== undefined) {
+                        formData.append(key, datosActualizados[key]);
+                    }
+                });
+                
+                // Agregar archivos nuevos
+                archivosTemporales.forEach(archivo => {
+                    formData.append('archivos', archivo);
+                });
+                
+                response = await fetch(`/api/reports/${reporteActual.id_reporte}`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    body: formData // Sin Content-Type para que el navegador configure multipart/form-data
+                });
+            } else {
+                // Si no hay archivos nuevos, usar JSON como antes
+                response = await fetch(`/api/reports/${reporteActual.id_reporte}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(datosActualizados)
+                });
+            }
+            
+            const responseText = await response.text();
+            console.log('📥 Respuesta del servidor:', { 
+                status: response.status, 
+                statusText: response.statusText,
+                responseText: responseText.substring(0, 500) + '...'
             });
             
-            const data = await response.json();
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('❌ Error parseando JSON:', parseError);
+                console.error('📄 Contenido de respuesta:', responseText);
+                throw new Error('El servidor devolvió una respuesta inválida. Verifica tu sesión e intenta nuevamente.');
+            }
             
             if (!response.ok || !data.success) {
                 throw new Error(data.message || 'Error al actualizar el reporte');
@@ -1174,23 +1246,15 @@ $(document).ready(function() {
                 }
             }
             
-            // 3. Procesar archivos nuevos
-            if (archivosTemporales.length > 0) {
-                const formData = new FormData();
-                archivosTemporales.forEach(archivo => {
-                    formData.append('archivos', archivo);
-                });
-                
-                await fetch(`/api/files/report/${reporteActual.id_reporte}`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    body: formData
-                });
-            }
-            
             // Limpiar arrays temporales
             archivosTemporales = [];
             archivosEliminados = [];
+            
+            // Limpiar zona de drop si existe
+            const dropZoneExistentes = document.querySelector('.drop-zone-existentes');
+            if (dropZoneExistentes) {
+                dropZoneExistentes.remove();
+            }
             
             // Actualizar datos locales
             Object.assign(reporteActual, datosActualizados);
@@ -1204,7 +1268,11 @@ $(document).ready(function() {
             actualizarInterfazEdicion(false);
             
             // Mostrar mensaje de éxito
-            mostrarToast('Reporte actualizado exitosamente', 'success');
+            let mensajeExito = 'Reporte actualizado exitosamente';
+            if (data.archivos_agregados && data.archivos_agregados > 0) {
+                mensajeExito += ` con ${data.archivos_agregados} archivo(s) agregado(s)`;
+            }
+            mostrarToast(mensajeExito, 'success');
             
         } catch (error) {
             console.error('❌ Error guardando cambios:', error);
@@ -1244,6 +1312,23 @@ $(document).ready(function() {
         const accionesArchivos = document.querySelector('.archivos-acciones');
         if (accionesArchivos) {
             accionesArchivos.style.display = editando ? 'flex' : 'none';
+        }
+        
+        // Actualizar drag & drop para área sin archivos si existe
+        if (editando && document.querySelector('.sin-archivos')) {
+            configurarDragDropSinArchivos();
+            $('.sin-archivos-drag-hint').show();
+        } else if (document.querySelector('.sin-archivos')) {
+            $('.sin-archivos-drag-hint').hide();
+        }
+        
+        // Mostrar/ocultar zona de drop para archivos existentes
+        const dropZoneExistentes = document.querySelector('.drop-zone-existentes');
+        if (dropZoneExistentes) {
+            dropZoneExistentes.style.display = editando ? 'flex' : 'none';
+            if (editando) {
+                configurarDragDropArchivosExistentes();
+            }
         }
         
         // Actualizar botones de eliminación de archivos
@@ -1426,6 +1511,228 @@ $(document).ready(function() {
             window.mostrarToast(mensaje, tipo);
         } else {
             console.log(`📢 ${tipo.toUpperCase()}: ${mensaje}`);
+        }
+    }
+
+    // ===========================
+    // GESTIÓN DE ARCHIVOS - DRAG & DROP
+    // ===========================
+
+    // Función para configurar drag & drop cuando hay archivos existentes
+    function configurarDragDropArchivosExistentes() {
+        const archivosGrid = document.querySelector('.archivos-grid');
+        if (!archivosGrid) return;
+        
+        // Agregar área de drop visual al final de los archivos existentes
+        if (!document.querySelector('.drop-zone-existentes')) {
+            const dropZone = `
+                <div class="drop-zone-existentes">
+                    <div class="drop-zone-contenido">
+                        <span class="material-symbols-outlined">add</span>
+                        <span class="drop-zone-texto">Arrastra archivos aquí para agregar</span>
+                    </div>
+                </div>
+            `;
+            archivosGrid.insertAdjacentHTML('beforeend', dropZone);
+        }
+        
+        const dropZone = document.querySelector('.drop-zone-existentes');
+        if (!dropZone) return;
+        
+        // Limpiar eventos previos
+        dropZone.removeEventListener('dragover', handleDragOverExistentes);
+        dropZone.removeEventListener('dragenter', handleDragEnterExistentes);
+        dropZone.removeEventListener('dragleave', handleDragLeaveExistentes);
+        dropZone.removeEventListener('drop', handleDropExistentes);
+        dropZone.removeEventListener('click', handleClickDropZone);
+        
+        // Agregar eventos de drag & drop
+        dropZone.addEventListener('dragover', handleDragOverExistentes);
+        dropZone.addEventListener('dragenter', handleDragEnterExistentes);
+        dropZone.addEventListener('dragleave', handleDragLeaveExistentes);
+        dropZone.addEventListener('drop', handleDropExistentes);
+        dropZone.addEventListener('click', handleClickDropZone);
+        
+        console.log('🎯 Drag & drop configurado para archivos existentes');
+    }
+    
+    // Manejadores de eventos para archivos existentes
+    function handleDragOverExistentes(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function handleDragEnterExistentes(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!modoEdicion) return;
+        
+        const dropZone = e.currentTarget;
+        dropZone.classList.add('drag-over-existentes');
+        
+        const icono = dropZone.querySelector('.material-symbols-outlined');
+        const texto = dropZone.querySelector('.drop-zone-texto');
+        
+        if (icono) icono.textContent = 'upload';
+        if (texto) texto.textContent = 'Suelta los archivos aquí';
+    }
+    
+    function handleDragLeaveExistentes(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const dropZone = e.currentTarget;
+        if (!dropZone.contains(e.relatedTarget)) {
+            dropZone.classList.remove('drag-over-existentes');
+            
+            const icono = dropZone.querySelector('.material-symbols-outlined');
+            const texto = dropZone.querySelector('.drop-zone-texto');
+            
+            if (icono) icono.textContent = 'add';
+            if (texto) texto.textContent = 'Arrastra archivos aquí para agregar';
+        }
+    }
+    
+    function handleDropExistentes(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!modoEdicion) {
+            alert('No puedes agregar archivos fuera del modo de edición');
+            return;
+        }
+        
+        const dropZone = e.currentTarget;
+        dropZone.classList.remove('drag-over-existentes');
+        
+        const icono = dropZone.querySelector('.material-symbols-outlined');
+        const texto = dropZone.querySelector('.drop-zone-texto');
+        
+        if (icono) icono.textContent = 'add';
+        if (texto) texto.textContent = 'Arrastra archivos aquí para agregar';
+        
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0) {
+            console.log(`📁 ${files.length} archivos arrastrados a zona existente:`, files.map(f => f.name));
+            subirNuevosArchivos(files);
+        }
+    }
+    
+    function handleClickDropZone(e) {
+        if (!modoEdicion) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const inputArchivos = document.getElementById('nuevos-archivos');
+        if (inputArchivos) {
+            inputArchivos.click();
+        }
+    }
+
+    // Función para configurar drag & drop cuando no hay archivos
+    function configurarDragDropSinArchivos() {
+        const sinArchivos = document.querySelector('.sin-archivos');
+        if (!sinArchivos) return;
+        
+        // Limpiar eventos previos
+        sinArchivos.removeEventListener('dragover', handleDragOver);
+        sinArchivos.removeEventListener('dragenter', handleDragEnter);
+        sinArchivos.removeEventListener('dragleave', handleDragLeave);
+        sinArchivos.removeEventListener('drop', handleDrop);
+        sinArchivos.removeEventListener('click', handleClickSinArchivos);
+        
+        // Agregar eventos de drag & drop
+        sinArchivos.addEventListener('dragover', handleDragOver);
+        sinArchivos.addEventListener('dragenter', handleDragEnter);
+        sinArchivos.addEventListener('dragleave', handleDragLeave);
+        sinArchivos.addEventListener('drop', handleDrop);
+        
+        // Agregar evento de click para abrir selector de archivos
+        sinArchivos.addEventListener('click', handleClickSinArchivos);
+        
+        console.log('🎯 Drag & drop y click configurados para área sin archivos');
+    }
+    
+    // Manejar click en área sin archivos
+    function handleClickSinArchivos(e) {
+        if (!modoEdicion) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const inputArchivos = document.getElementById('nuevos-archivos');
+        if (inputArchivos) {
+            inputArchivos.click();
+        }
+    }
+    
+    // Manejadores de eventos drag & drop
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function handleDragEnter(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!modoEdicion) return;
+        
+        const sinArchivos = e.currentTarget;
+        sinArchivos.classList.add('drag-over');
+        
+        // Cambiar el icono y texto durante el drag
+        const icono = sinArchivos.querySelector('.sin-archivos-icono .material-symbols-outlined');
+        const titulo = sinArchivos.querySelector('h4');
+        
+        if (icono) icono.textContent = 'upload';
+        if (titulo) titulo.textContent = 'Suelta los archivos aquí';
+    }
+    
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const sinArchivos = e.currentTarget;
+        // Solo remover si realmente salimos del área completa
+        if (!sinArchivos.contains(e.relatedTarget)) {
+            sinArchivos.classList.remove('drag-over');
+            
+            // Restaurar icono y texto original
+            const icono = sinArchivos.querySelector('.sin-archivos-icono .material-symbols-outlined');
+            const titulo = sinArchivos.querySelector('h4');
+            
+            if (icono) icono.textContent = 'folder_open';
+            if (titulo) titulo.textContent = 'No hay archivos adjuntos';
+        }
+    }
+    
+    function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!modoEdicion) {
+            alert('No puedes agregar archivos fuera del modo de edición');
+            return;
+        }
+        
+        const sinArchivos = e.currentTarget;
+        sinArchivos.classList.remove('drag-over');
+        
+        // Restaurar icono y texto original
+        const icono = sinArchivos.querySelector('.sin-archivos-icono .material-symbols-outlined');
+        const titulo = sinArchivos.querySelector('h4');
+        
+        if (icono) icono.textContent = 'folder_open';
+        if (titulo) titulo.textContent = 'No hay archivos adjuntos';
+        
+        // Obtener archivos arrastrados
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0) {
+            console.log(`📁 ${files.length} archivos arrastrados:`, files.map(f => f.name));
+            subirNuevosArchivos(files);
         }
     }
 

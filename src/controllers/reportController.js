@@ -250,6 +250,14 @@ export async function updateReport(req, res) {
         const userId = req.session.user?.id;
         const userRole = req.session.user?.rol;
 
+        console.log('🔄 updateReport iniciado:', { 
+            reportId, 
+            userId, 
+            userRole,
+            hasFiles: req.files ? req.files.length : 0,
+            bodyKeys: Object.keys(req.body || {})
+        });
+
         if (!reportId) {
             return res.status(400).json({
                 success: false,
@@ -274,7 +282,22 @@ export async function updateReport(req, res) {
             });
         }
 
-        const { titulo, descripcion, id_salon, id_categoria, fecha_reporte, estado } = req.body;
+        // Extraer datos del body, manejando tanto JSON como FormData
+        let titulo, descripcion, id_salon, id_categoria, fecha_reporte, estado;
+        
+        // Si viene FormData (con archivos), los datos están en req.body directamente como strings
+        if (req.files && req.files.length > 0) {
+            titulo = req.body.titulo;
+            descripcion = req.body.descripcion;
+            id_salon = req.body.id_salon ? parseInt(req.body.id_salon) : undefined;
+            id_categoria = req.body.id_categoria ? parseInt(req.body.id_categoria) : undefined;
+            fecha_reporte = req.body.fecha_reporte;
+            estado = req.body.estado;
+        } else {
+            // Si es JSON normal
+            ({ titulo, descripcion, id_salon, id_categoria, fecha_reporte, estado } = req.body);
+        }
+        
         const updateData = {};
         const cambios = [];
 
@@ -346,14 +369,78 @@ export async function updateReport(req, res) {
         const success = await reportModel.updateReport(reportId, updateData);
 
         if (success) {
+            // Manejar archivos nuevos si se subieron
+            let archivosGuardados = [];
+            if (req.files && req.files.length > 0) {
+                console.log(`📁 ${req.files.length} archivos recibidos para agregar al reporte ${reportId}:`, req.files.map(f => f.originalname));
+                
+                // Verificar límite total de archivos (máximo 5)
+                const archivosExistentes = await fileModel.getFilesByReportId(reportId);
+                const totalArchivos = archivosExistentes.length + req.files.length;
+                
+                if (totalArchivos > 5) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `El reporte no puede tener más de 5 archivos. Actualmente tiene ${archivosExistentes.length} archivo(s) y estás intentando agregar ${req.files.length}.`
+                    });
+                }
+                
+                for (const file of req.files) {
+                    try {
+                        const fileData = {
+                            id_reporte: reportId,
+                            url: file.path.replace(/\\/g, '/'), // Normalizar path para BD
+                            tipo: file.mimetype
+                        };
+
+                        const fileId = await fileModel.createFile(fileData);
+                        console.log(`✅ Archivo ${file.originalname} guardado en BD con ID:`, fileId);
+                        
+                        archivosGuardados.push({
+                            id: fileId,
+                            nombre: file.originalname,
+                            tipo: file.mimetype,
+                            url: file.path.replace(/\\/g, '/')
+                        });
+                    } catch (fileError) {
+                        console.error(`❌ Error guardando archivo ${file.originalname} en BD:`, fileError);
+                        // Continúa con el siguiente archivo si hay error
+                    }
+                }
+                
+                // Agregar entrada en historial si se agregaron archivos
+                if (archivosGuardados.length > 0) {
+                    try {
+                        await historialModel.createHistorialEntry({
+                            id_reporte: reportId,
+                            tipo: 'archivo',
+                            id_usuario_actor: userId,
+                            descripcion: `${archivosGuardados.length} archivo(s) agregado(s): ${archivosGuardados.map(a => a.nombre).join(', ')}`
+                        });
+                    } catch (historialError) {
+                        console.error('❌ Error registrando archivos en historial:', historialError);
+                    }
+                }
+            }
+
             // Registrar cambios en el historial si hay cambios
             if (cambios.length > 0) {
                 try {
+                    // Mapeo de nombres técnicos a nombres amigables
+                    const nombresAmigables = {
+                        'titulo': 'Título',
+                        'descripcion': 'Descripción',
+                        'id_salon': 'Salón',
+                        'fecha_reporte': 'Fecha reportada',
+                        'id_categoria': 'Categoría',
+                        'estado': 'Estado'
+                    };
+
                     await historialModel.createHistorialEntry({
                         id_reporte: reportId,
                         tipo: 'edicion',
                         id_usuario_actor: userId,
-                        descripcion: `Reporte editado: ${cambios.map(c => c.campo).join(', ')}`,
+                        descripcion: `Reporte editado: ${cambios.map(c => nombresAmigables[c.campo] || c.campo).join(', ')}`,
                         cambios_json: JSON.stringify(cambios)
                     });
                     console.log(`📝 Registrados ${cambios.length} cambios en el historial del reporte ${reportId}`);
@@ -363,10 +450,16 @@ export async function updateReport(req, res) {
                 }
             }
 
+            let mensaje = 'Reporte actualizado exitosamente';
+            if (archivosGuardados.length > 0) {
+                mensaje += ` con ${archivosGuardados.length} archivo(s) agregado(s)`;
+            }
+
             res.json({
                 success: true,
-                message: 'Reporte actualizado exitosamente',
-                cambios: cambios.length
+                message: mensaje,
+                cambios: cambios.length,
+                archivos_agregados: archivosGuardados.length
             });
         } else {
             res.status(400).json({

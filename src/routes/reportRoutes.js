@@ -29,8 +29,8 @@ router.get('/:id/historial', reportController.getReportHistorial);
 // POST /api/reports - Crear un nuevo reporte (con múltiples archivos opcionales)
 router.post('/', uploadMultiple, handleMulterError, reportController.createReport);
 
-// PUT /api/reports/:id - Actualizar un reporte
-router.put('/:id', reportController.updateReport);
+// PUT /api/reports/:id - Actualizar un reporte (con archivos opcionales)
+router.put('/:id', uploadMultiple, handleMulterError, reportController.updateReport);
 
 // PATCH /api/reports/:id/status - Actualizar solo el estado (admin)
 router.patch('/:id/status', reportController.updateReportStatus);
