@@ -16,28 +16,31 @@
 <body>
 <div>
 <header class="encabezado">
-  <div class="logo">
+  <a class="logo menu-enlace" href="#hero">
     <span class="material-symbols-outlined icono-beneficio">school</span>
     <h2 class="titulo">UniReportes</h2>
-  </div>
+  </a>
   <nav class="menu">
-    <a class="menu-enlace" href="#">Inicio</a>
-    <a class="menu-enlace" href="#">Reportar Daño</a>
-    <a class="menu-enlace" href="#">Mis Reportes</a>
-    <a class="menu-enlace" href="#">Ayuda</a>
+    <a class="menu-enlace" href="#mejora-experiencia">Mejora la Experiencia Universitaria</a>
+    <a class="menu-enlace" href="#reportes-comunes">Reportes Comunes</a>
+    <a class="menu-enlace" href="#mejoras-recientes">Mejoras Recientes</a>
   </nav>
   <div class="menu">
-    <button class="boton boton-secundario"><span>Iniciar Sesión</span></button>
+    <!-- Botón de Iniciar Sesión movido al hero -->
   </div>
 </header>
 <main>
-  <section class="hero">
-    <div>
+  <section id="hero" class="hero">
+    <div class="hero-card">
       <h1 class="hero-titulo">Reporta y Resuelve Daños en tu Campus</h1>
       <p class="hero-texto">UniReportes facilita la notificación y seguimiento de problemas en las instalaciones universitarias. Únete a nuestra comunidad para mantener un entorno de aprendizaje seguro y eficiente.</p>
+      <div class="hero-boton">
+        <a href="login.html" class="boton boton-principal">Iniciar Sesión</a>
+      </div>
     </div>
   </section>
   <section class="seccion-beneficios">
+    <section id="mejora-experiencia" class="seccion-beneficios">
     <h2 class="titulo-seccion">Mejora la Experiencia Universitaria</h2>
     <p class="subtitulo-seccion">UniReportes te permite reportar daños de manera eficiente, asegurando un entorno seguro y funcional para todos.</p>
     <div class="beneficios">
@@ -58,7 +61,7 @@
       </div>
     </div>
   </section>
-<section class="tarjetas-reportes">
+  <section id="reportes-comunes" class="tarjetas-reportes">
     <h2 class="titulo-seccion">Reportes Comunes</h2>
     <div class="contenedor-tarjetas">
       <div class="tarjeta-reporte">
@@ -78,7 +81,7 @@
       </div>
     </div>
   </section>
-  <section class="tarjetas-reportes">
+  <section id="mejoras-recientes" class="tarjetas-reportes">
     <h2 class="titulo-seccion">Mejoras Recientes</h2>
     <div class="contenedor-tarjetas">
       <div class="tarjeta-reporte">
