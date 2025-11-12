@@ -78,6 +78,89 @@ let cargarReportes, renderizarTabla, actualizarContadores, cargarCategoriasFiltr
 let reportesFiltrados = [];
 let todosLosReportes = [];
 
+// Paginación cliente
+let currentPage = 1;
+const PAGE_SIZE = 6; // Mostrar 6 items por página
+// Modo paginación server-side
+const SERVER_SIDE = true;
+
+// Información de paginación devuelta por el servidor
+let paginationInfo = {
+    totalItems: 0,
+    totalPages: 1
+};
+
+/**
+ * Renderizar la página actual tomando los reportes filtrados y cortando el slice.
+ */
+function renderCurrentPage() {
+    if (SERVER_SIDE) {
+        // Pedir la página al servidor
+        cargarReportes(currentPage);
+        return;
+    }
+
+    const totalItems = reportesFiltrados.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    const pageItems = reportesFiltrados.slice(start, end);
+
+    renderizarTabla(pageItems);
+    renderPageControls(currentPage, totalPages, totalItems, start + 1, Math.min(end, totalItems));
+}
+
+/**
+ * Renderizar controles de paginación simples (Prev / Página X de Y / Next)
+ */
+function renderPageControls(page, totalPages, totalItems, fromItem, toItem) {
+    // Asegurarse de que exista el contenedor
+    let container = $('#paginacion-reportes');
+    if (container.length === 0) {
+        // Insertar después de la tabla si no existe (sin estilos inline)
+        $('.tabla-container').append('<div id="paginacion-reportes" class="paginacion-container"></div>');
+        container = $('#paginacion-reportes');
+    }
+
+    const prevDisabled = page <= 1 ? 'disabled' : '';
+    const nextDisabled = page >= totalPages ? 'disabled' : '';
+
+    // Ajustes cuando no hay items
+    if (totalItems === 0) {
+        fromItem = 0;
+        toItem = 0;
+    }
+
+    container.html(`
+        <div class="paginacion-info">Mostrando ${fromItem}-${toItem} de ${totalItems}</div>
+        <div class="paginacion-botones">
+            <button id="paginacion-prev" class="btn-paginacion" ${prevDisabled}>Anterior</button>
+            <span class="paginacion-page-label">Página ${page} / ${totalPages}</span>
+            <button id="paginacion-next" class="btn-paginacion" ${nextDisabled}>Siguiente</button>
+        </div>
+    `);
+
+    // Eventos
+    $('#paginacion-prev').off('click').on('click', function() {
+        if (currentPage > 1) {
+            currentPage -= 1;
+            renderCurrentPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+
+    $('#paginacion-next').off('click').on('click', function() {
+        if (currentPage < totalPages) {
+            currentPage += 1;
+            renderCurrentPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+}
+
 // ===========================
 // FUNCIONES DE FILTROS DINÁMICOS
 // ===========================
@@ -154,7 +237,7 @@ renderizarTabla = function(reportes) {
     if (reportes.length === 0) {
         tbody.append(`
             <tr>
-                <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-secondary);">
                     No se encontraron reportes que coincidan con los filtros seleccionados.
                 </td>
             </tr>
@@ -167,8 +250,14 @@ renderizarTabla = function(reportes) {
             id: reporte.id_reporte,
             titulo: reporte.titulo,
             estado: reporte.estado,
-            estado_tipo: typeof reporte.estado
+            estado_tipo: typeof reporte.estado,
+            categoria: reporte.categoria_nombre,
+            id_categoria: reporte.id_categoria
         });
+        
+        // Determinar si es urgente (categoría "Urgencia" tiene id 6)
+        const esUrgente = reporte.id_categoria === 6 || 
+                         (reporte.categoria_nombre && reporte.categoria_nombre.toLowerCase().includes('urgencia'));
         
         // Mapear estados de la base de datos a clases CSS (los estados vienen capitalizados)
         const estadoNormalizado = (reporte.estado || 'Pendiente').toLowerCase();
@@ -192,7 +281,8 @@ renderizarTabla = function(reportes) {
             original: reporte.estado,
             normalizado: estadoNormalizado,
             clase: estadoClass,
-            texto: estadoTexto
+            texto: estadoTexto,
+            esUrgente: esUrgente
         });
 
         // Formatear fecha
@@ -204,11 +294,23 @@ renderizarTabla = function(reportes) {
             ? `${reporte.ubicacion_nombre} - ${reporte.salon_nombre}`
             : 'Sin ubicación';
 
+        // Crear badge de prioridad
+        const prioridadBadge = esUrgente 
+            ? `<span class="badge-prioridad urgente">
+                <span class="material-symbols-outlined">emergency</span>
+                URGENTE
+               </span>`
+            : `<span class="badge-prioridad normal">NORMAL</span>`;
+
+        // Clase de fila para reportes urgentes
+        const filaClass = esUrgente ? ' fila-urgente' : '';
+
         tbody.append(`
-            <tr data-reporte-id="${reporte.id_reporte}">
+            <tr data-reporte-id="${reporte.id_reporte}"${filaClass}>
                 <td class="id-reporte">#${reporte.id_reporte}</td>
                 <td class="titulo">${reporte.titulo || 'Sin título'}</td>
                 <td class="categoria">${reporte.categoria_nombre || 'Sin categoría'}</td>
+                <td class="prioridad">${prioridadBadge}</td>
                 <td><span class="estado-badge ${estadoClass}">${estadoTexto}</span></td>
                 <td class="ubicacion">${ubicacion}</td>
                 <td class="usuario">${reporte.usuario_nombre || 'Sin usuario'}</td>
@@ -227,10 +329,14 @@ renderizarTabla = function(reportes) {
 
 // Función para actualizar contadores
 actualizarContadores = function() {
-    const totalReportes = reportesFiltrados.length;
-    const pendientes = reportesFiltrados.filter(r => r.estado === 'pendiente').length;
-    const enProceso = reportesFiltrados.filter(r => r.estado === 'en_progreso').length;
-    const resueltos = reportesFiltrados.filter(r => r.estado === 'resuelto' || r.estado === 'cerrado').length;
+    // Si el servidor proporciona el totalItems, usarlo para el contador total
+    const totalReportes = paginationInfo.totalItems || reportesFiltrados.length;
+    const pendientes = reportesFiltrados.filter(r => (r.estado || '').toLowerCase() === 'pendiente').length;
+    const enProceso = reportesFiltrados.filter(r => (r.estado || '').toLowerCase().includes('proceso')).length;
+    const resueltos = reportesFiltrados.filter(r => {
+        const st = (r.estado || '').toLowerCase();
+        return st === 'resuelto' || st === 'cerrado' || st === 'resuelto';
+    }).length;
 
     // Actualizar contadores en la interfaz (si existen)
     $('#total-reportes').text(totalReportes);
@@ -239,50 +345,122 @@ actualizarContadores = function() {
     $('#reportes-resueltos').text(resueltos);
 };
 
+// Función para actualizar notificaciones urgentes
+function actualizarNotificacionesUrgentes(reportes) {
+    console.log('🚨 Actualizando notificaciones urgentes...');
+    
+    // Filtrar reportes urgentes (categoría "Urgencia" o id_categoria = 6)
+    const reportesUrgentes = reportes.filter(reporte => 
+        reporte.id_categoria === 6 || 
+        (reporte.categoria_nombre && reporte.categoria_nombre.toLowerCase().includes('urgencia'))
+    );
+    
+    console.log(`🚨 Reportes urgentes encontrados: ${reportesUrgentes.length}`, reportesUrgentes);
+    
+    const seccionNotificaciones = $('#notificaciones-urgentes');
+    const listaReportesUrgentes = $('#lista-reportes-urgentes');
+    
+    if (reportesUrgentes.length > 0) {
+        // Mostrar sección de notificaciones
+        seccionNotificaciones.show();
+        
+        // Limpiar lista anterior
+        listaReportesUrgentes.empty();
+        
+        // Agregar cada reporte urgente
+        reportesUrgentes.forEach(reporte => {
+            const fecha = new Date(reporte.fecha_creacion || reporte.fecha_reporte);
+            const fechaFormateada = fecha.toLocaleDateString('es-ES');
+            
+            const ubicacion = reporte.ubicacion_nombre && reporte.salon_nombre 
+                ? `${reporte.ubicacion_nombre} - ${reporte.salon_nombre}`
+                : 'Sin ubicación';
+                
+            const estadoTexto = (reporte.estado || 'Pendiente').toUpperCase();
+            
+            const itemHtml = `
+                <div class="reporte-urgente-item" data-reporte-id="${reporte.id_reporte}">
+                    <div class="info-reporte-urgente">
+                        <div class="titulo-reporte-urgente">
+                            Reporte #${reporte.id_reporte}: ${reporte.titulo || 'Sin título'}
+                        </div>
+                        <div class="detalles-reporte-urgente">
+                            ${ubicacion} • ${estadoTexto} • ${fechaFormateada}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            listaReportesUrgentes.append(itemHtml);
+        });
+        
+        // Actualizar el título con el contador
+        $('.titulo-notificacion').html(`
+            <span class="material-symbols-outlined" style="font-size: 18px;">emergency</span>
+            Notificaciones Urgentes (${reportesUrgentes.length})
+        `);
+        
+    } else {
+        // Ocultar sección si no hay reportes urgentes
+        seccionNotificaciones.hide();
+    }
+}
+
+// Función para configurar eventos de notificaciones urgentes
+function configurarEventosNotificaciones() {
+    // Cerrar notificaciones
+    $(document).on('click', '#cerrar-notificaciones', function() {
+        $('#notificaciones-urgentes').fadeOut(300);
+    });
+    
+    // Navegar al reporte urgente cuando se hace clic
+    $(document).on('click', '.reporte-urgente-item', function() {
+        const reporteId = $(this).data('reporte-id');
+        console.log('🔗 Navegando al reporte urgente:', reporteId);
+        
+        // Crear URL de detalle del reporte
+        const urlDetalle = `detalle-reporte-admin.html?id=${reporteId}`;
+        
+        // Usar navegación SPA si está disponible
+        if (window.spaNavigation && window.spaNavigation.navigate) {
+            window.spaNavigation.navigate(urlDetalle);
+        } else {
+            window.location.href = urlDetalle;
+        }
+    });
+}
+
 // Función para aplicar filtros
 function aplicarFiltros() {
-    const busqueda = $('.filtro-buscar').val().toLowerCase();
-    const categoriaFiltro = $('#filtro-categoria').val();
-    const estadoFiltro = $('#filtro-estado').val();
-    const fechaFiltro = $('#filtro-fecha').val();
+    // Aplicar estilos visuales para filtros activos
+    actualizarEstilosFiltros();
+    
+    // Para paginación server-side, simplemente recargar la primera página con los filtros actuales
+    currentPage = 1;
+    cargarReportes(1);
+}
 
-    reportesFiltrados = todosLosReportes.filter(reporte => {
-        const coincideBusqueda = !busqueda || 
-            reporte.id_reporte.toString().includes(busqueda) ||
-            (reporte.titulo && reporte.titulo.toLowerCase().includes(busqueda)) ||
-            (reporte.usuario_nombre && reporte.usuario_nombre.toLowerCase().includes(busqueda)) ||
-            (reporte.categoria_nombre && reporte.categoria_nombre.toLowerCase().includes(busqueda)) ||
-            (reporte.ubicacion_nombre && reporte.ubicacion_nombre.toLowerCase().includes(busqueda)) ||
-            (reporte.salon_nombre && reporte.salon_nombre.toLowerCase().includes(busqueda));
-
-        const coincideCategoria = !categoriaFiltro || reporte.id_categoria == categoriaFiltro;
-        const coincideEstado = !estadoFiltro || reporte.estado === estadoFiltro;
-        
-        let coincideFecha = true;
-        if (fechaFiltro) {
-            const fechaReporte = new Date(reporte.fecha_creacion || reporte.fecha_reporte);
-            const hoy = new Date();
-            
-            switch(fechaFiltro) {
-                case 'hoy':
-                    coincideFecha = fechaReporte.toDateString() === hoy.toDateString();
-                    break;
-                case 'semana':
-                    const semanaAtras = new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000);
-                    coincideFecha = fechaReporte >= semanaAtras;
-                    break;
-                case 'mes':
-                    const mesAtras = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
-                    coincideFecha = fechaReporte >= mesAtras;
-                    break;
-            }
+// Función para actualizar estilos visuales de filtros activos
+function actualizarEstilosFiltros() {
+    const prioridad = $('#filtro-prioridad').val();
+    const filtroGrupo = $('#filtro-prioridad').closest('.filtro-grupo');
+    
+    if (prioridad) {
+        filtroGrupo.addClass('filtro-prioridad-activo');
+        $('#filtro-prioridad').attr('data-filtered', 'true');
+    } else {
+        filtroGrupo.removeClass('filtro-prioridad-activo');
+        $('#filtro-prioridad').removeAttr('data-filtered');
+    }
+    
+    // Aplicar estilos similares para otros filtros
+    $('.filtro-select').each(function() {
+        if ($(this).val()) {
+            $(this).attr('data-filtered', 'true');
+        } else {
+            $(this).removeAttr('data-filtered');
         }
-
-        return coincideBusqueda && coincideCategoria && coincideEstado && coincideFecha;
     });
-
-    renderizarTabla(reportesFiltrados);
-    actualizarContadores();
 }
 
 // ===========================
@@ -295,12 +473,12 @@ configurarEventos = function() {
     
     // Remover eventos anteriores para evitar duplicados
     $('.filtro-buscar').off('input.explorarReportes');
-    $('#filtro-categoria, #filtro-estado, #filtro-fecha').off('change.explorarReportes');
+    $('#filtro-categoria, #filtro-prioridad, #filtro-estado, #filtro-fecha').off('change.explorarReportes');
     $(document).off('click.explorarReportes', 'a[data-page="new-report"]');
     
     // Configurar eventos con namespace para poder removerlos
     $('.filtro-buscar').on('input.explorarReportes', aplicarFiltros);
-    $('#filtro-categoria, #filtro-estado, #filtro-fecha').on('change.explorarReportes', aplicarFiltros);
+    $('#filtro-categoria, #filtro-prioridad, #filtro-estado, #filtro-fecha').on('change.explorarReportes', aplicarFiltros);
     
     // Configurar navegación para el botón "Nuevo reporte"
     $(document).on('click.explorarReportes', 'a[data-page="new-report"]', function(e) {
@@ -316,6 +494,9 @@ configurarEventos = function() {
         }
     });
     
+    // Configurar eventos de notificaciones urgentes
+    configurarEventosNotificaciones();
+    
     console.log('✅ Eventos configurados correctamente');
 };
 
@@ -330,28 +511,79 @@ $(document).ready(function() {
     cargarCategoriasFiltro();
     cargarEstadosFiltro();
 
-    // Cargar reportes desde la API
-    cargarReportes = async function() {
+    // Cargar reportes desde la API (server-side pagination)
+    cargarReportes = async function(page = 1) {
         try {
-            console.log('🔄 Cargando reportes desde la API...');
+            console.log('🔄 Cargando reportes desde la API (server-side)...');
             console.log('🌐 URL: /api/reports');
+            // establecer página actual
+            currentPage = page || 1;
             
             // Mostrar indicador de carga
             const tbody = $('#tabla-reportes-body');
             tbody.html(`
                 <tr>
-                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-secondary);">
                         <span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span>
                         Cargando reportes...
                     </td>
                 </tr>
             `);
             
-            // Agregar timestamp para evitar cache del navegador
+            // Construir query params: page, limit y filtros
+            const params = new URLSearchParams();
+            params.append('page', currentPage);
+            params.append('limit', PAGE_SIZE);
+
+            const buscar = $('.filtro-buscar').val();
+            const categoria = $('#filtro-categoria').val();
+            const prioridad = $('#filtro-prioridad').val();
+            const estado = $('#filtro-estado').val();
+            const fecha = $('#filtro-fecha').val();
+
+            // Normalizar valores de filtros antes de enviarlos al servidor
+            if (buscar) params.append('buscar', buscar);
+            if (categoria) params.append('id_categoria', categoria);
+            if (prioridad) params.append('prioridad', prioridad);
+            if (estado) {
+                const normalizedEstado = (function(v) {
+                    if (!v) return v;
+                    const s = v.toString().toLowerCase().trim();
+                    if (s === 'en proceso' || s === 'en-proceso' || s === 'en_proceso' || s === 'enproceso') return 'en_proceso';
+                    if (s === 'pendiente') return 'pendiente';
+                    if (s === 'resuelto') return 'resuelto';
+                    if (s === 'revisado') return 'revisado';
+                    if (s === 'abierto') return 'abierto';
+                    return v; // fallback
+                })(estado);
+                params.append('estado', normalizedEstado);
+            }
+
+            // Mapear filtro de fecha a fecha_desde/fecha_hasta
+            if (fecha) {
+                const hoy = new Date();
+                let desde = null;
+                switch (fecha) {
+                    case 'hoy':
+                        desde = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+                        break;
+                    case 'semana':
+                        desde = new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        break;
+                    case 'mes':
+                        desde = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        break;
+                }
+                if (desde) {
+                    params.append('fecha_desde', new Date(desde).toISOString().slice(0,19).replace('T',' '));
+                    params.append('fecha_hasta', new Date().toISOString().slice(0,19).replace('T',' '));
+                }
+            }
+
             const timestamp = new Date().getTime();
-            const ultimoCambio = sessionStorage.getItem('ultimo_cambio_estado') || '0';
-            
-            const response = await fetch(`/api/reports?t=${timestamp}&last_change=${ultimoCambio}`, {
+            params.append('t', timestamp);
+
+            const response = await fetch(`/api/reports?${params.toString()}`, {
                 method: 'GET',
                 credentials: 'include', // Incluir cookies de sesión
                 headers: {
@@ -372,28 +604,24 @@ $(document).ready(function() {
             console.log('📊 Datos recibidos RAW:', data);
             console.log('📊 ¿Es exitoso?:', data.success);
             console.log('📊 ¿Tiene datos?:', !!data.data);
-            console.log('📊 Cantidad de reportes:', data.data?.length);
-            
+            console.log('📊 Cantidad de reportes en página:', data.data?.length);
+
             if (response.ok && data.success) {
+                // Actualizar datos de la página actual
                 todosLosReportes = data.data || [];
                 reportesFiltrados = [...todosLosReportes];
-                console.log('✅ Reportes cargados exitosamente:', todosLosReportes.length);
-                
-                // Log específico para el reporte 12
-                const reporte12 = todosLosReportes.find(r => r.id_reporte === 12);
-                if (reporte12) {
-                    console.log('🔍 REPORTE 12 EN FRONTEND:', {
-                        id: reporte12.id_reporte,
-                        titulo: reporte12.titulo,
-                        estado: reporte12.estado,
-                        categoria: reporte12.categoria_nombre
-                    });
-                } else {
-                    console.log('❌ REPORTE 12 NO ENCONTRADO en datos del frontend');
-                }
-                
-                console.log('📋 Primer reporte (ejemplo):', todosLosReportes[0]);
+                paginationInfo.totalItems = data.pagination?.totalItems || 0;
+                paginationInfo.totalPages = data.pagination?.totalPages || 1;
+                console.log('✅ Reportes cargados en página:', todosLosReportes.length, ' totalItems:', paginationInfo.totalItems);
+
+                // Renderizar tabla con los items de la página
                 renderizarTabla(reportesFiltrados);
+                renderPageControls(currentPage, paginationInfo.totalPages, paginationInfo.totalItems, (paginationInfo.totalItems>0? ( (currentPage-1)*PAGE_SIZE +1) : 0), Math.min(currentPage*PAGE_SIZE, paginationInfo.totalItems));
+                
+                // Actualizar notificaciones urgentes
+                actualizarNotificacionesUrgentes(reportesFiltrados);
+                
+                // Actualizar contadores (usar totalItems como total si está disponible)
                 actualizarContadores();
             } else {
                 console.error('❌ Error al cargar reportes:', {
@@ -414,7 +642,7 @@ $(document).ready(function() {
         const tbody = $('#tabla-reportes-body');
         tbody.html(`
             <tr>
-                <td colspan="8" style="text-align: center; padding: 40px; color: #dc2626; background-color: #fef2f2;">
+                <td colspan="9" style="text-align: center; padding: 40px; color: #dc2626; background-color: #fef2f2;">
                     <span class="material-symbols-outlined" style="font-size: 48px; display: block; margin-bottom: 16px;">error</span>
                     <strong style="display: block; margin-bottom: 8px;">Error al cargar reportes</strong>
                     <span style="color: #7f1d1d; font-size: 14px;">${mensaje}</span>
@@ -583,8 +811,9 @@ $(document).ready(function() {
         }, 3000);
     }
 
-    // Inicializar la página
-    renderizarTabla(reportesFiltrados);
+    // Inicializar la página (usar paginación)
+    currentPage = 1;
+    renderCurrentPage();
     actualizarGraficos();
 
     // Animaciones de entrada

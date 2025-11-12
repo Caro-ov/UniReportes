@@ -19,8 +19,23 @@ export async function getAllReports(req, res) {
 
         console.log('📄 Paginación:', { page, limit, offset });
 
-        const reports = await reportModel.getAllReports(limit, offset);
-        console.log('📊 Reportes obtenidos del modelo:', reports.length);
+        // Build filters from query (so search, estado, id_categoria, fecha ranges are supported)
+        const filters = {};
+        if (req.query.buscar) filters.buscar = req.query.buscar;
+        if (req.query.estado) filters.estado = req.query.estado;
+        if (req.query.id_categoria) filters.id_categoria = parseInt(req.query.id_categoria);
+        if (req.query.prioridad) filters.prioridad = req.query.prioridad;
+        if (req.query.fecha_desde) filters.fecha_desde = req.query.fecha_desde;
+        if (req.query.fecha_hasta) filters.fecha_hasta = req.query.fecha_hasta;
+
+        filters.limit = limit;
+        filters.offset = offset;
+
+        const result = await reportModel.getReportsFiltered(filters);
+        const reports = result.rows;
+        const totalItems = result.total || 0;
+
+        console.log('📊 Reportes obtenidos del modelo:', reports.length, ' totalItems:', totalItems);
         
         // Log específico para el reporte 12
         const reporte12 = reports.find(r => r.id_reporte === 12);
@@ -37,13 +52,16 @@ export async function getAllReports(req, res) {
         
         console.log('🔍 Primer reporte (ejemplo):', reports[0]);
         
+        const totalPages = Math.max(1, Math.ceil(totalItems / limit));
         res.json({
             success: true,
             data: reports,
             pagination: {
                 page,
                 limit,
-                hasMore: reports.length === limit
+                totalItems,
+                totalPages,
+                hasMore: page < totalPages
             }
         });
     } catch (error) {
