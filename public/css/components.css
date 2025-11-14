@@ -580,6 +580,8 @@ body {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     z-index: 1000;
     opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
     transform: translateY(-20px);
     transition: all var(--transition-duration) ease;
     border: 1px solid var(--border-color);
@@ -587,6 +589,8 @@ body {
 
 .panel-notificaciones.mostrar {
     opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
     transform: translateY(0);
 }
 
@@ -1053,4 +1057,65 @@ body {
     .boton-modal {
         width: 100%;
     }
+}
+/* Badge contador de notificaciones */
+.badge-count {
+    animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Notificación urgente (roja) */
+.notificacion-item.urgente {
+    background-color: #fef2f2 !important;
+    border-left: 4px solid #dc2626 !important;
+}
+
+.notificacion-item.urgente .material-symbols-outlined {
+    color: #dc2626 !important;
+}
+
+.notificacion-item.urgente:hover {
+    background-color: #fee2e2 !important;
+}
+
+/* Notificación de prioridad alta */
+.notificacion-item.prioridad-alta {
+    border-left: 3px solid #f59e0b;
+}
+
+/* Badge rojo para notificaciones urgentes */
+.badge-count.urgente {
+    background: #dc2626 !important;
+    animation: pulse-urgent 1s infinite !important;
+}
+
+@keyframes pulse-urgent {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+    }
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0);
+    }
+}
+
+/* Animación shake para nuevas notificaciones */
+.boton-notificaciones.shake,
+.notification-btn.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
 }

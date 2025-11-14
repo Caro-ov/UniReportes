@@ -16,6 +16,7 @@ import objectRoutes from './src/routes/objectRoutes.js';
 import ubicacionRoutes from './src/routes/ubicacionRoutes.js';
 import fileRoutes from './src/routes/fileRoutes.js';
 import commentRoutes from './src/routes/commentRoutes.js';
+import notificationRoutes from './src/routes/notificationRoutes.js';
 
 // Configurar variables de entorno (soporta archivos cifrados)
 setupEnv();
@@ -84,6 +85,7 @@ app.use('/api/objects', objectRoutes);
 app.use('/api/ubicaciones', ubicacionRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/comments', commentRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Rutas de páginas (deben ir al final)
 app.use('/', pageRoutes);
