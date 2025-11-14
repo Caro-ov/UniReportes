@@ -237,6 +237,44 @@ INSERT INTO `historial_cambios` (`id_historial`, `id_reporte`, `tipo`, `id_estad
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `notificaciones`
+--
+
+CREATE TABLE `notificaciones` (
+  `id_notificacion` int(11) NOT NULL,
+  `tipo` varchar(50) NOT NULL COMMENT 'reporte_actualizado, comentario_nuevo, estado_cambio, etc',
+  `titulo` varchar(255) NOT NULL,
+  `mensaje` text DEFAULT NULL,
+  `enlace` varchar(500) DEFAULT NULL COMMENT 'URL al recurso relacionado',
+  `prioridad` tinyint(1) DEFAULT 1 COMMENT '1=baja, 2=normal, 3=alta',
+  `icono` varchar(100) DEFAULT NULL COMMENT 'Clase CSS del icono',
+  `color` varchar(50) DEFAULT NULL COMMENT 'Color del tipo de notificación',
+  `id_reporte` int(11) DEFAULT NULL COMMENT 'Reporte relacionado',
+  `id_comentario` int(11) DEFAULT NULL COMMENT 'Comentario relacionado',
+  `id_usuario_actor` int(11) DEFAULT NULL COMMENT 'Usuario que generó la acción',
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `notificaciones_usuarios`
+--
+
+CREATE TABLE `notificaciones_usuarios` (
+  `id_notificacion_usuario` int(11) NOT NULL,
+  `id_notificacion` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL COMMENT 'Usuario destinatario',
+  `leido` tinyint(1) DEFAULT 0 COMMENT '0=no leído, 1=leído',
+  `leido_at` datetime DEFAULT NULL,
+  `archivado` tinyint(1) DEFAULT 0 COMMENT '0=activo, 1=archivado',
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `objetos`
 --
 
@@ -649,6 +687,27 @@ ALTER TABLE `historial_cambios`
   ADD KEY `hist_fk_dep_asig` (`id_dependencia_asignada`);
 
 --
+-- Indices de la tabla `notificaciones`
+--
+ALTER TABLE `notificaciones`
+  ADD PRIMARY KEY (`id_notificacion`),
+  ADD KEY `idx_notificaciones_tipo` (`tipo`),
+  ADD KEY `idx_notificaciones_reporte` (`id_reporte`),
+  ADD KEY `idx_notificaciones_usuario_actor` (`id_usuario_actor`),
+  ADD KEY `idx_notificaciones_comentario` (`id_comentario`),
+  ADD KEY `idx_notificaciones_created` (`created_at`);
+
+--
+-- Indices de la tabla `notificaciones_usuarios`
+--
+ALTER TABLE `notificaciones_usuarios`
+  ADD PRIMARY KEY (`id_notificacion_usuario`),
+  ADD KEY `idx_notif_usuario_notif` (`id_notificacion`),
+  ADD KEY `idx_notif_usuario_user` (`id_usuario`),
+  ADD KEY `idx_notif_usuario_leido` (`id_usuario`, `leido`),
+  ADD KEY `idx_notif_usuario_created` (`created_at`);
+
+--
 -- Indices de la tabla `objetos`
 --
 ALTER TABLE `objetos`
@@ -729,6 +788,18 @@ ALTER TABLE `historial_cambios`
   MODIFY `id_historial` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
+-- AUTO_INCREMENT de la tabla `notificaciones`
+--
+ALTER TABLE `notificaciones`
+  MODIFY `id_notificacion` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `notificaciones_usuarios`
+--
+ALTER TABLE `notificaciones_usuarios`
+  MODIFY `id_notificacion_usuario` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `objetos`
 --
 ALTER TABLE `objetos`
@@ -793,6 +864,21 @@ ALTER TABLE `historial_cambios`
   ADD CONSTRAINT `hist_fk_usuario_asig` FOREIGN KEY (`id_usuario_asignado`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL;
 
 --
+-- Filtros para la tabla `notificaciones`
+--
+ALTER TABLE `notificaciones`
+  ADD CONSTRAINT `notif_fk_reporte` FOREIGN KEY (`id_reporte`) REFERENCES `reportes` (`id_reporte`) ON DELETE CASCADE,
+  ADD CONSTRAINT `notif_fk_comentario` FOREIGN KEY (`id_comentario`) REFERENCES `comentarios` (`id_comentario`) ON DELETE CASCADE,
+  ADD CONSTRAINT `notif_fk_usuario_actor` FOREIGN KEY (`id_usuario_actor`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `notificaciones_usuarios`
+--
+ALTER TABLE `notificaciones_usuarios`
+  ADD CONSTRAINT `notif_usuarios_fk_notif` FOREIGN KEY (`id_notificacion`) REFERENCES `notificaciones` (`id_notificacion`) ON DELETE CASCADE,
+  ADD CONSTRAINT `notif_usuarios_fk_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `objetos`
 --
 ALTER TABLE `objetos`
@@ -813,6 +899,263 @@ ALTER TABLE `reportes`
 --
 ALTER TABLE `salones`
   ADD CONSTRAINT `salones_fk_ubicacion` FOREIGN KEY (`ubicacion`) REFERENCES `ubicaciones` (`id_ubicacion`) ON DELETE CASCADE;
+
+-- ============================================================================
+-- TRIGGERS AUTOMÁTICOS PARA NOTIFICACIONES
+-- ============================================================================
+
+--
+-- Trigger: Crear notificación cuando cambia el estado de un reporte
+--
+DELIMITER $$
+CREATE TRIGGER `notif_reporte_cambio_estado` AFTER UPDATE ON `reportes`
+FOR EACH ROW
+BEGIN
+    DECLARE v_notif_id INT;
+    DECLARE v_estado_nombre_nuevo VARCHAR(50);
+    DECLARE v_estado_nombre_anterior VARCHAR(50);
+    DECLARE v_titulo_notif VARCHAR(255);
+    DECLARE v_mensaje_notif TEXT;
+    
+    -- Solo si cambió el estado
+    IF NEW.id_estado != OLD.id_estado THEN
+        -- Obtener nombres de estados
+        SELECT nombre INTO v_estado_nombre_nuevo FROM estados WHERE id_estado = NEW.id_estado;
+        SELECT nombre INTO v_estado_nombre_anterior FROM estados WHERE id_estado = OLD.id_estado;
+        
+        -- Crear título y mensaje
+        SET v_titulo_notif = CONCAT('Reporte #', NEW.id_reporte, ' cambió de estado');
+        SET v_mensaje_notif = CONCAT('El estado cambió de "', v_estado_nombre_anterior, '" a "', v_estado_nombre_nuevo, '"');
+        
+        -- Insertar notificación
+        INSERT INTO notificaciones (
+            tipo, titulo, mensaje, enlace, prioridad, icono, color,
+            id_reporte, id_usuario_actor, metadata
+        ) VALUES (
+            'estado_cambio',
+            v_titulo_notif,
+            v_mensaje_notif,
+            CONCAT('/detalle-reporte.html?id=', NEW.id_reporte),
+            2, -- prioridad normal
+            'fa-sync-alt',
+            CASE v_estado_nombre_nuevo
+                WHEN 'resuelto' THEN 'success'
+                WHEN 'en proceso' THEN 'warning'
+                WHEN 'revisado' THEN 'info'
+                ELSE 'primary'
+            END,
+            NEW.id_reporte,
+            NULL, -- se puede capturar el usuario desde la app
+            JSON_OBJECT(
+                'estado_anterior', v_estado_nombre_anterior,
+                'estado_nuevo', v_estado_nombre_nuevo,
+                'titulo_reporte', NEW.titulo
+            )
+        );
+        
+        SET v_notif_id = LAST_INSERT_ID();
+        
+        -- Notificar al creador del reporte (si existe)
+        IF NEW.id_usuario IS NOT NULL THEN
+            INSERT INTO notificaciones_usuarios (id_notificacion, id_usuario)
+            VALUES (v_notif_id, NEW.id_usuario);
+        END IF;
+        
+        -- Notificar a todos los administradores
+        INSERT INTO notificaciones_usuarios (id_notificacion, id_usuario)
+        SELECT v_notif_id, id_usuario 
+        FROM usuarios 
+        WHERE rol = 'admin' AND id_usuario != NEW.id_usuario;
+    END IF;
+END$$
+DELIMITER ;
+
+--
+-- Trigger: Crear notificación cuando se agrega un comentario
+--
+DELIMITER $$
+CREATE TRIGGER `notif_comentario_nuevo` AFTER INSERT ON `comentarios`
+FOR EACH ROW
+BEGIN
+    DECLARE v_notif_id INT;
+    DECLARE v_reporte_usuario INT;
+    DECLARE v_reporte_titulo VARCHAR(255);
+    DECLARE v_usuario_nombre VARCHAR(150);
+    
+    -- Obtener datos del reporte
+    SELECT id_usuario, titulo INTO v_reporte_usuario, v_reporte_titulo
+    FROM reportes WHERE id_reporte = NEW.id_reporte;
+    
+    -- Obtener nombre del usuario que comentó
+    SELECT nombre INTO v_usuario_nombre FROM usuarios WHERE id_usuario = NEW.id_usuario;
+    
+    -- Crear notificación
+    INSERT INTO notificaciones (
+        tipo, titulo, mensaje, enlace, prioridad, icono, color,
+        id_reporte, id_comentario, id_usuario_actor, metadata
+    ) VALUES (
+        'comentario_nuevo',
+        CONCAT('Nuevo comentario en reporte #', NEW.id_reporte),
+        CONCAT(COALESCE(v_usuario_nombre, 'Un usuario'), ' agregó un comentario'),
+        CONCAT('/detalle-reporte.html?id=', NEW.id_reporte, '#comentarios'),
+        2,
+        'fa-comment',
+        'info',
+        NEW.id_reporte,
+        NEW.id_comentario,
+        NEW.id_usuario,
+        JSON_OBJECT(
+            'titulo_reporte', v_reporte_titulo,
+            'comentario_preview', LEFT(NEW.comentario, 100)
+        )
+    );
+    
+    SET v_notif_id = LAST_INSERT_ID();
+    
+    -- Notificar al creador del reporte (si no es quien comentó)
+    IF v_reporte_usuario IS NOT NULL AND v_reporte_usuario != NEW.id_usuario THEN
+        INSERT INTO notificaciones_usuarios (id_notificacion, id_usuario)
+        VALUES (v_notif_id, v_reporte_usuario);
+    END IF;
+    
+    -- Notificar a otros usuarios que han comentado en este reporte
+    INSERT INTO notificaciones_usuarios (id_notificacion, id_usuario)
+    SELECT DISTINCT v_notif_id, c.id_usuario
+    FROM comentarios c
+    WHERE c.id_reporte = NEW.id_reporte 
+      AND c.id_usuario != NEW.id_usuario
+      AND c.id_usuario != v_reporte_usuario
+      AND c.id_usuario IS NOT NULL;
+END$$
+DELIMITER ;
+
+--
+-- Trigger: Crear notificación cuando se modifica un reporte
+--
+DELIMITER $$
+CREATE TRIGGER `notif_reporte_modificado` AFTER UPDATE ON `reportes`
+FOR EACH ROW
+BEGIN
+    DECLARE v_notif_id INT;
+    DECLARE v_cambios TEXT;
+    
+    -- Solo si cambió algo importante (no el estado, que ya tiene su trigger)
+    IF (NEW.titulo != OLD.titulo OR NEW.descripcion != OLD.descripcion OR 
+        NEW.id_categoria != OLD.id_categoria OR NEW.id_salon != OLD.id_salon) AND
+       NEW.id_estado = OLD.id_estado THEN
+        
+        SET v_cambios = '';
+        
+        IF NEW.titulo != OLD.titulo THEN
+            SET v_cambios = CONCAT(v_cambios, 'título, ');
+        END IF;
+        
+        IF NEW.descripcion != OLD.descripcion THEN
+            SET v_cambios = CONCAT(v_cambios, 'descripción, ');
+        END IF;
+        
+        IF NEW.id_categoria != OLD.id_categoria THEN
+            SET v_cambios = CONCAT(v_cambios, 'categoría, ');
+        END IF;
+        
+        IF NEW.id_salon != OLD.id_salon THEN
+            SET v_cambios = CONCAT(v_cambios, 'ubicación, ');
+        END IF;
+        
+        -- Quitar última coma
+        SET v_cambios = TRIM(TRAILING ', ' FROM v_cambios);
+        
+        -- Crear notificación
+        INSERT INTO notificaciones (
+            tipo, titulo, mensaje, enlace, prioridad, icono, color,
+            id_reporte, id_usuario_actor, metadata
+        ) VALUES (
+            'reporte_modificado',
+            CONCAT('Reporte #', NEW.id_reporte, ' actualizado'),
+            CONCAT('Se modificó: ', v_cambios),
+            CONCAT('/detalle-reporte.html?id=', NEW.id_reporte),
+            1, -- prioridad baja
+            'fa-edit',
+            'primary',
+            NEW.id_reporte,
+            NULL,
+            JSON_OBJECT('cambios', v_cambios, 'titulo_reporte', NEW.titulo)
+        );
+        
+        SET v_notif_id = LAST_INSERT_ID();
+        
+        -- Notificar al creador del reporte
+        IF NEW.id_usuario IS NOT NULL THEN
+            INSERT INTO notificaciones_usuarios (id_notificacion, id_usuario)
+            VALUES (v_notif_id, NEW.id_usuario);
+        END IF;
+    END IF;
+END$$
+DELIMITER ;
+
+--
+-- Trigger: Notificar al administrador cuando se crea un nuevo reporte
+--
+DELIMITER $$
+CREATE TRIGGER `notif_nuevo_reporte` AFTER INSERT ON `reportes`
+FOR EACH ROW
+BEGIN
+    DECLARE v_notif_id INT;
+    DECLARE v_categoria_nombre VARCHAR(100);
+    DECLARE v_prioridad INT DEFAULT 1;
+    DECLARE v_color VARCHAR(20) DEFAULT 'azul';
+    DECLARE v_titulo_notif VARCHAR(255);
+    
+    -- Obtener nombre de la categoría
+    SELECT nombre INTO v_categoria_nombre
+    FROM categorias
+    WHERE id_categoria = NEW.id_categoria
+    LIMIT 1;
+    
+    -- Si es categoría urgente, cambiar prioridad y color
+    IF LOWER(v_categoria_nombre) LIKE '%urgencia%' OR 
+       LOWER(v_categoria_nombre) LIKE '%urgente%' OR 
+       LOWER(v_categoria_nombre) LIKE '%emergencia%' OR 
+       LOWER(v_categoria_nombre) LIKE '%crítico%' OR
+       LOWER(v_categoria_nombre) LIKE '%critico%' OR
+       NEW.id_categoria = 6 THEN
+        SET v_prioridad = 3;
+        SET v_color = 'rojo';
+        SET v_titulo_notif = '🚨 URGENTE: Nuevo reporte creado';
+    ELSE
+        SET v_prioridad = 1;
+        SET v_color = 'azul';
+        SET v_titulo_notif = 'Nuevo reporte creado';
+    END IF;
+    
+    -- Crear notificación
+    INSERT INTO notificaciones (
+        tipo, titulo, mensaje, enlace, prioridad, icono, color,
+        id_reporte, id_usuario_actor, metadata
+    ) VALUES (
+        'nuevo_reporte',
+        v_titulo_notif,
+        CONCAT('Se ha creado un nuevo reporte: ', NEW.titulo),
+        CONCAT('detalle-reporte.html?id=', NEW.id_reporte),
+        v_prioridad,
+        'add_circle',
+        v_color,
+        NEW.id_reporte,
+        NEW.id_usuario,
+        JSON_OBJECT('categoria', v_categoria_nombre)
+    );
+    
+    SET v_notif_id = LAST_INSERT_ID();
+    
+    -- Notificar a todos los administradores
+    INSERT INTO notificaciones_usuarios (id_notificacion, id_usuario)
+    SELECT v_notif_id, u.id_usuario
+    FROM usuarios u
+    WHERE u.rol = 'admin'
+      AND u.id_usuario != NEW.id_usuario;
+END$$
+DELIMITER ;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -4,9 +4,29 @@
         <span class="material-symbols-outlined">menu</span>
     </button>
     <div class="controles-usuario">
-        <button class="boton-notificaciones notification-btn">
+        <button class="boton-notificaciones notification-btn" id="btnNotificaciones">
             <span class="material-symbols-outlined">notifications</span>
+            <span class="badge-count" id="badgeNotificaciones" style="display: none; position: absolute; top: 0; right: 0; background: #ef4444; color: white; font-size: 10px; padding: 2px 5px; border-radius: 10px; font-weight: bold;">0</span>
         </button>
+        
+        <!-- Panel de notificaciones usando estilos existentes -->
+        <div class="panel-notificaciones" id="panelNotificaciones">
+            <div class="header-panel">
+                <h3>Notificaciones</h3>
+                <button class="cerrar-panel" id="btnMarcarTodas" title="Marcar todas como leídas">
+                    <span class="material-symbols-outlined">done_all</span>
+                </button>
+            </div>
+            
+            <div class="contenido-panel" id="contenidoNotificaciones">
+                <!-- Las notificaciones se cargarán aquí dinámicamente -->
+            </div>
+            
+            <div class="footer-panel">
+                <a href="#" class="ver-todos" id="verTodasNotif">Ver todas las notificaciones</a>
+            </div>
+        </div>
+        
         <div class="perfil-completo">
             <div class="usuario-info-header">
                 <p class="usuario-nombre-header">Name Lastname</p>

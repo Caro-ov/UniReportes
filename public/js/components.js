@@ -114,29 +114,41 @@ $(document).ready(function() {
     // Función para inicializar la funcionalidad del header
     function initializeHeaderFunctionality() {
         // Manejar dropdown del usuario con event delegation
-        $(document).off('click.header').on('click.header', '.user-dropdown, .dropdown-perfil', function(e) {
+        $(document).off('click.header').on('click.header', '.perfil-usuario, #dropdownPerfil', function(e) {
             e.stopPropagation();
-            $(this).toggleClass('open');
-            $('.menu-desplegable', this).toggleClass('mostrar');
+            
+            // Cerrar panel de notificaciones si está abierto
+            if (window.notificationManager && window.notificationManager.isPanelOpen) {
+                window.notificationManager.closePanel();
+            }
+            
+            const dropdown = $(this).closest('.user-dropdown, .dropdown-perfil');
+            dropdown.toggleClass('open');
+            dropdown.find('.menu-desplegable').toggleClass('mostrar');
         });
 
-        // Cerrar dropdown al hacer clic fuera
-        $(document).off('click.headerClose').on('click.headerClose', function() {
-            $('.user-dropdown, .dropdown-perfil').removeClass('open');
-            $('.menu-desplegable').removeClass('mostrar');
+        // Cerrar dropdown al hacer clic fuera (pero no cerrar notificaciones)
+        $(document).off('click.headerClose').on('click.headerClose', function(e) {
+            // No cerrar si se hace click en el panel de notificaciones o su botón
+            if ($(e.target).closest('.panel-notificaciones, .notification-btn, .boton-notificaciones, .user-dropdown, .dropdown-perfil').length === 0) {
+                $('.user-dropdown, .dropdown-perfil').removeClass('open');
+                $('.menu-desplegable').removeClass('mostrar');
+            }
         });
 
-        // Manejar notificaciones con event delegation
-        $(document).off('click.notifications').on('click.notifications', '.notification-btn, .boton-notificaciones', function(e) {
-            e.stopPropagation();
-            console.log('Notificaciones clicked');
-            // Aquí se puede agregar funcionalidad de notificaciones
-            mostrarToast('Notificaciones', 'info');
+        // Manejar clicks en opciones del menú de perfil (NO prevenir default para que SPA funcione)
+        $(document).off('click.menuOption').on('click.menuOption', '.menu-desplegable .opcion-menu:not(.logout-btn)', function(e) {
+            // Cerrar el dropdown después del click
+            setTimeout(() => {
+                $('.user-dropdown, .dropdown-perfil').removeClass('open');
+                $('.menu-desplegable').removeClass('mostrar');
+            }, 100);
         });
 
         // Manejar logout con event delegation
         $(document).off('click.logout').on('click.logout', '.logout-btn, .cerrar-sesion', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             mostrarModalLogout();
         });
 
@@ -320,4 +332,34 @@ $(document).ready(function() {
     window.toggleSidebar = toggleSidebar;
     window.mostrarToast = mostrarToast;
     window.mostrarModalLogout = mostrarModalLogout;
+    
+    // Cargar sistema de notificaciones dinámicamente
+    loadNotificationSystem();
 });
+
+// Función para cargar el sistema de notificaciones
+function loadNotificationSystem() {
+    // Solo cargar en páginas protegidas (no en login ni index)
+    if (window.location.pathname.includes('login') || 
+        window.location.pathname === '/' ||
+        window.location.pathname.includes('index.html')) {
+        return;
+    }
+    
+    // Verificar si el script ya está cargado
+    if (window.notificationManager) {
+        return;
+    }
+    
+    // Cargar el script de notificaciones
+    const script = document.createElement('script');
+    script.src = 'js/notificaciones.js';
+    script.async = true;
+    script.onload = function() {
+        console.log('✓ Sistema de notificaciones cargado');
+    };
+    script.onerror = function() {
+        console.error('✗ Error al cargar el sistema de notificaciones');
+    };
+    document.head.appendChild(script);
+}
