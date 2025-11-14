@@ -18,12 +18,10 @@ $(document).ready(function() {
         // Si es un enlace interno (comienza con #)
         if (href.startsWith('#')) {
             e.preventDefault();
-            
-            const target = $(href);
-            if (target.length) {
-                $('html, body').animate({
-                    scrollTop: target.offset().top - 80
-                }, 800, 'easeInOutCubic');
+            const targetEl = document.querySelector(href);
+            if (targetEl) {
+                const top = targetEl.getBoundingClientRect().top + window.pageYOffset - 80;
+                window.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
             }
         }
     });
@@ -78,9 +76,11 @@ $(document).ready(function() {
         // Si el botón es "Comenzar" (hero)
         if ($boton.text().trim() === 'Comenzar') {
             // Scroll hacia la sección de beneficios
-            $('html, body').animate({
-                scrollTop: $('.seccion-beneficios').offset().top - 80
-            }, 1000, 'easeInOutCubic');
+            const target = document.querySelector('.seccion-beneficios');
+            if (target) {
+                const top = target.getBoundingClientRect().top + window.pageYOffset - 80;
+                window.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
+            }
             return;
         }
         
@@ -275,9 +275,11 @@ $(document).ready(function() {
 function navegarA(seccion) {
     const $target = $('.' + seccion);
     if ($target.length) {
-        $('html, body').animate({
-            scrollTop: $target.offset().top - 80
-        }, 800, 'easeInOutCubic');
+        const targetEl = document.querySelector('.' + seccion);
+        if (targetEl) {
+            const top = targetEl.getBoundingClientRect().top + window.pageYOffset - 80;
+            window.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
+        }
     }
 }
 

@@ -62,6 +62,22 @@ $(document).ready(function() {
             $('.breadcrumb-current').text(`Reporte #${reporte.id_reporte}`);
             $('.breadcrumb-link').off('click').on('click', function(e) {
                 e.preventDefault();
+                
+                // Marcar múltiples formas que los reportes necesitan actualización
+                if (window.sessionStorage) {
+                    sessionStorage.setItem('reportes_actualizados', 'true');
+                    sessionStorage.setItem('ultimo_cambio_estado', Date.now().toString());
+                }
+                
+                // Disparar evento antes de navegar
+                window.dispatchEvent(new CustomEvent('reporteActualizado', { 
+                    detail: { 
+                        reporteId: reporteActual?.id_reporte || 'desconocido', 
+                        accion: 'navegacion_vuelta' 
+                    } 
+                }));
+                
+                // Navegar
                 if (window.spaNav) {
                     window.spaNav.navigateTo('explorar-reportes');
                 } else if (window.spaNavigation) {
@@ -186,16 +202,191 @@ $(document).ready(function() {
 
     function mostrarHistorial(historial) {
         const timeline = $('.timeline'); timeline.empty();
-        if (!historial || historial.length === 0) {
-            timeline.append(`<div class="timeline-item"><div class="timeline-icon"><span class="material-symbols-outlined">send</span></div><div class="timeline-content"><p class="timeline-titulo">Reporte enviado</p><p class="timeline-fecha">${window.formatearFecha(reporteActual?.fecha_creacion)}</p></div></div>`);
+        
+        // Siempre mostrar el evento inicial de "Reporte enviado"
+        timeline.append(`<div class="timeline-item"><div class="timeline-icon"><span class="material-symbols-outlined">send</span></div><div class="timeline-content"><p class="timeline-titulo">Reporte enviado</p><p class="timeline-fecha">${window.formatearFecha(reporteActual?.fecha_creacion)}</p></div></div>`);
+        
+        // Luego mostrar el resto del historial si existe
+        if (historial && historial.length > 0) {
+            historial.forEach(evento => {
+                const icono = window.obtenerIconoHistorial(evento.tipo);
+                const titulo = window.obtenerTituloHistorial(evento.tipo, evento);
+                timeline.append(`<div class="timeline-item"><div class="timeline-icon"><span class="material-symbols-outlined">${icono}</span></div><div class="timeline-content"><p class="timeline-titulo">${titulo}</p><p class="timeline-fecha">${window.formatearFecha(evento.fecha)}</p>${evento.descripcion ? `<p class="timeline-descripcion">${window.escapeHtml(evento.descripcion)}</p>` : ''}</div></div>`);
+            });
+        }
+    }
+
+    // ========================================
+    // GESTIÓN DE ESTADO (ADMIN)
+    // ========================================
+
+    // Cargar estados disponibles
+    async function cargarEstadosDisponibles() {
+        try {
+            const response = await fetch('/api/categories/states', { credentials: 'include' });
+            if (!response.ok) throw new Error('Error al cargar estados');
+            
+            const data = await response.json();
+            if (data.success && data.data) {
+                const select = $('#nuevo-estado');
+                select.empty().append('<option value="">Seleccionar nuevo estado...</option>');
+                
+                data.data.forEach(estado => {
+                    const valorEstado = estado.nombre.toLowerCase();
+                    const textoEstado = estado.nombre; // Ya está capitalizado desde la BD
+                    select.append(`<option value="${valorEstado}">${textoEstado}</option>`);
+                });
+            }
+        } catch (error) {
+            console.error('❌ Error cargando estados:', error);
+        }
+    }
+
+    // Actualizar estado del reporte
+    async function actualizarEstadoReporte() {
+        if (!reporteActual) {
+            window.mostrarToast?.('No hay reporte cargado', 'error');
             return;
         }
-        historial.forEach(evento => {
-            const icono = window.obtenerIconoHistorial(evento.tipo);
-            const titulo = window.obtenerTituloHistorial(evento.tipo, evento);
-            timeline.append(`<div class="timeline-item"><div class="timeline-icon"><span class="material-symbols-outlined">${icono}</span></div><div class="timeline-content"><p class="timeline-titulo">${titulo}</p><p class="timeline-fecha">${window.formatearFecha(evento.fecha)}</p>${evento.descripcion ? `<p class="timeline-descripcion">${window.escapeHtml(evento.descripcion)}</p>` : ''}</div></div>`);
-        });
+
+        const nuevoEstado = $('#nuevo-estado').val();
+        console.log('🔍 Estado seleccionado:', { nuevoEstado, reporteActual });
+        
+        if (!nuevoEstado) {
+            window.mostrarToast?.('Selecciona un nuevo estado', 'warning');
+            return;
+        }
+
+        const estadoActual = reporteActual.estado;
+        if (nuevoEstado === estadoActual) {
+            window.mostrarToast?.('El reporte ya tiene ese estado', 'warning');
+            return;
+        }
+
+        const btnActualizar = $('.btn-actualizar-estado');
+        const textoOriginal = btnActualizar.html();
+        
+        try {
+            // Mostrar estado de carga
+            btnActualizar.prop('disabled', true).html('<span class="material-symbols-outlined">sync</span>Actualizando...');
+            
+            console.log('🚀 Enviando solicitud de cambio de estado:', { 
+                reportId: reporteActual.id_reporte, 
+                estado: nuevoEstado 
+            });
+            
+            const response = await fetch(`/api/reports/${reporteActual.id_reporte}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ estado: nuevoEstado })
+            });
+
+            console.log('📡 Respuesta del servidor:', { status: response.status, ok: response.ok });
+            
+            const data = await response.json();
+            console.log('📄 Datos de respuesta:', data);
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Error al actualizar estado');
+            }
+
+            // Actualizar estado en la interfaz
+            reporteActual.estado = nuevoEstado;
+            actualizarEstadoEnInterfaz(nuevoEstado);
+            
+            // Limpiar selección
+            $('#nuevo-estado').val('');
+            
+            // Recargar historial para mostrar el cambio
+            await cargarHistorialReporte(reporteActual.id_reporte);
+            
+            // Forzar actualización de reportes usando múltiples métodos
+            if (window.sessionStorage) {
+                sessionStorage.setItem('reportes_actualizados', 'true');
+                sessionStorage.setItem('ultimo_cambio_estado', Date.now().toString());
+            }
+            
+            // Disparar evento personalizado para notificar cambios
+            window.dispatchEvent(new CustomEvent('reporteActualizado', { 
+                detail: { 
+                    reporteId: reporteActual.id_reporte, 
+                    nuevoEstado: nuevoEstado 
+                } 
+            }));
+            
+            // Si hay una función global para recargar, usarla
+            if (window.recargarReportes && typeof window.recargarReportes === 'function') {
+                console.log('🔄 Forzando recarga inmediata de reportes...');
+                setTimeout(() => window.recargarReportes(), 100);
+            }
+            
+            window.mostrarToast?.(`Estado actualizado a "${window.capitalizarPrimeraLetra(nuevoEstado.replace('_', ' '))}"`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error actualizando estado:', error);
+            window.mostrarToast?.(error.message || 'Error al actualizar estado', 'error');
+        } finally {
+            // Restaurar botón
+            btnActualizar.prop('disabled', false).html(textoOriginal);
+        }
     }
+
+    // Actualizar estado en la interfaz
+    function actualizarEstadoEnInterfaz(nuevoEstado) {
+        const estadoDisplay = $('#estado-actual-display');
+        const estadoContainer = $('.estado-container .estado');
+        const estadoTexto = window.capitalizarPrimeraLetra(nuevoEstado.replace('_', ' '));
+        
+        // Actualizar display del estado actual
+        if (estadoDisplay.length) {
+            estadoDisplay.text(estadoTexto)
+                         .attr('class', `estado estado-${window.obtenerClaseEstado(nuevoEstado)}`);
+        }
+        
+        // Actualizar estado en header si existe
+        if (estadoContainer.length) {
+            estadoContainer.text(estadoTexto)
+                          .attr('class', `estado estado-${window.obtenerClaseEstado(nuevoEstado)}`);
+        }
+    }
+
+    // Funciones globales
+    window.actualizarEstadoReporte = actualizarEstadoReporte;
+
+    // Funciones auxiliares si no existen
+    if (!window.capitalizarPrimeraLetra) {
+        window.capitalizarPrimeraLetra = function(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+        };
+    }
+
+    if (!window.obtenerClaseEstado) {
+        window.obtenerClaseEstado = function(estado) {
+            const estadosMap = {
+                'pendiente': 'pendiente',
+                'revisado': 'revisado', 
+                'en proceso': 'en-proceso',
+                'en_proceso': 'en-proceso',
+                'resuelto': 'resuelto',
+                'cerrado': 'resuelto'
+            };
+            return estadosMap[estado] || 'pendiente';
+        };
+    }
+
+    // Modificar la función cargarDetalleReporte para incluir carga de estados
+    const originalCargarDetalle = cargarDetalleReporte;
+    cargarDetalleReporte = async function(reportId) {
+        await originalCargarDetalle(reportId);
+        if (reporteActual) {
+            await cargarEstadosDisponibles();
+            actualizarEstadoEnInterfaz(reporteActual.estado);
+        }
+    };
 
     // Inicialización (Admin)
     console.log('🚀 Inicializando página Detalle Reporte (Admin)...');

@@ -84,7 +84,19 @@
                                 <span class="estado estado-enviado">Cargando...</span>
                             </div>
                         </div>
-                        <p class="numero-reporte">Reporte #---</p>
+                        <div class="header-actions">
+                            <p class="numero-reporte">Reporte #---</p>
+                            <div class="botones-header">
+                                <button id="btn-editar-reporte" class="btn-editar" onclick="toggleEditarReporte()">
+                                    <span class="material-symbols-outlined">edit</span>
+                                    Editar Reporte
+                                </button>
+                                <button id="btn-guardar-cambios" class="btn-guardar-cambios" onclick="guardarCambiosReporte()" style="display: none;">
+                                    <span class="material-symbols-outlined">save</span>
+                                    Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Contenido del reporte -->
@@ -100,7 +112,16 @@
 
                     <!-- Archivos adjuntos - Sección independiente -->
                     <div class="archivos-section">
-                        <h3 class="section-titulo">Archivos adjuntos</h3>
+                        <div class="section-header">
+                            <h3 class="section-titulo">Archivos adjuntos</h3>
+                            <div class="archivos-acciones" style="display: none;">
+                                <input type="file" id="nuevos-archivos" accept="image/*,video/*" multiple style="display: none;">
+                                <button id="btn-agregar-archivo" class="btn-agregar-archivo" onclick="document.getElementById('nuevos-archivos').click()">
+                                    <span class="material-symbols-outlined">add</span>
+                                    Agregar archivo
+                                </button>
+                            </div>
+                        </div>
                         <div class="archivos-grid">
                             <!-- Los archivos se cargarán dinámicamente -->
                         </div>

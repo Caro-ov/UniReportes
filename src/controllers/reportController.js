@@ -3,6 +3,7 @@ import * as categoryModel from '../models/categoryModel.js';
 import * as fileModel from '../models/fileModel.js';
 import * as historialModel from '../models/historialModel.js';
 import path from 'path';
+import fs from 'fs';
 
 /**
  * Obtener todos los reportes (API)
@@ -18,17 +19,49 @@ export async function getAllReports(req, res) {
 
         console.log('📄 Paginación:', { page, limit, offset });
 
-        const reports = await reportModel.getAllReports(limit, offset);
-        console.log('📊 Reportes obtenidos del modelo:', reports.length);
+        // Build filters from query (so search, estado, id_categoria, fecha ranges are supported)
+        const filters = {};
+        if (req.query.buscar) filters.buscar = req.query.buscar;
+        if (req.query.estado) filters.estado = req.query.estado;
+        if (req.query.id_categoria) filters.id_categoria = parseInt(req.query.id_categoria);
+        if (req.query.prioridad) filters.prioridad = req.query.prioridad;
+        if (req.query.fecha_desde) filters.fecha_desde = req.query.fecha_desde;
+        if (req.query.fecha_hasta) filters.fecha_hasta = req.query.fecha_hasta;
+
+        filters.limit = limit;
+        filters.offset = offset;
+
+        const result = await reportModel.getReportsFiltered(filters);
+        const reports = result.rows;
+        const totalItems = result.total || 0;
+
+        console.log('📊 Reportes obtenidos del modelo:', reports.length, ' totalItems:', totalItems);
+        
+        // Log específico para el reporte 12
+        const reporte12 = reports.find(r => r.id_reporte === 12);
+        if (reporte12) {
+            console.log('🔍 REPORTE 12 ESPECÍFICO:', {
+                id: reporte12.id_reporte,
+                titulo: reporte12.titulo,
+                estado: reporte12.estado,
+                id_estado: reporte12.id_estado
+            });
+        } else {
+            console.log('❌ REPORTE 12 NO ENCONTRADO en la consulta');
+        }
+        
         console.log('🔍 Primer reporte (ejemplo):', reports[0]);
         
+        const totalPages = Math.max(1, Math.ceil(totalItems / limit));
         res.json({
             success: true,
             data: reports,
             pagination: {
                 page,
                 limit,
-                hasMore: reports.length === limit
+                totalItems,
+                totalPages,
+                hasMore: page < totalPages
             }
         });
     } catch (error) {
@@ -117,10 +150,20 @@ export async function getReportById(req, res) {
 export async function createReport(req, res) {
     try {
         const userId = req.session.user?.id;
+        const userRole = req.session.user?.rol;
+        
         if (!userId) {
             return res.status(401).json({
                 success: false,
                 message: 'Usuario no autenticado'
+            });
+        }
+
+        // Verificar que el usuario no sea administrador
+        if (userRole === 'Administrador') {
+            return res.status(403).json({
+                success: false,
+                message: 'Los administradores no pueden crear reportes'
             });
         }
 
@@ -226,6 +269,14 @@ export async function updateReport(req, res) {
         const userId = req.session.user?.id;
         const userRole = req.session.user?.rol;
 
+        console.log('🔄 updateReport iniciado:', { 
+            reportId, 
+            userId, 
+            userRole,
+            hasFiles: req.files ? req.files.length : 0,
+            bodyKeys: Object.keys(req.body || {})
+        });
+
         if (!reportId) {
             return res.status(400).json({
                 success: false,
@@ -250,26 +301,260 @@ export async function updateReport(req, res) {
             });
         }
 
-        const { titulo, descripcion, ubicacion, id_categoria, estado } = req.body;
+        // Extraer datos del body, manejando tanto JSON como FormData
+        let titulo, descripcion, id_salon, id_categoria, fecha_reporte, estado;
+        let archivosEliminados = [];
+        
+        // Si viene FormData (con archivos o archivosEliminados), los datos están en req.body directamente como strings
+        if (req.files && req.files.length > 0 || req.body.archivosEliminados) {
+            titulo = req.body.titulo;
+            descripcion = req.body.descripcion;
+            id_salon = req.body.id_salon ? parseInt(req.body.id_salon) : undefined;
+            id_categoria = req.body.id_categoria ? parseInt(req.body.id_categoria) : undefined;
+            fecha_reporte = req.body.fecha_reporte;
+            estado = req.body.estado;
+            
+            // Procesar archivos eliminados si vienen
+            if (req.body.archivosEliminados) {
+                try {
+                    archivosEliminados = JSON.parse(req.body.archivosEliminados);
+                    console.log('📁 Archivos marcados para eliminación:', archivosEliminados);
+                } catch (error) {
+                    console.error('❌ Error parseando archivosEliminados:', error);
+                }
+            }
+        } else {
+            // Si es JSON normal
+            ({ titulo, descripcion, id_salon, id_categoria, fecha_reporte, estado } = req.body);
+        }
+        
         const updateData = {};
+        const cambios = [];
 
-        // Solo permitir ciertos campos según el rol
-        if (titulo) updateData.titulo = titulo.trim();
-        if (descripcion) updateData.descripcion = descripcion.trim();
-        if (ubicacion) updateData.ubicacion = ubicacion.trim();
-        if (id_categoria) updateData.id_categoria = id_categoria;
-
-        // Solo admin puede cambiar estado
-        if (estado && userRole === 'admin') {
-            updateData.estado = estado;
+        // Registrar cambios para el historial
+        if (titulo && titulo.trim() !== existingReport.titulo) {
+            updateData.titulo = titulo.trim();
+            cambios.push({
+                campo: 'titulo',
+                valor_anterior: existingReport.titulo,
+                valor_nuevo: titulo.trim()
+            });
         }
 
+        if (descripcion && descripcion.trim() !== existingReport.descripcion) {
+            updateData.descripcion = descripcion.trim();
+            cambios.push({
+                campo: 'descripcion',
+                valor_anterior: existingReport.descripcion,
+                valor_nuevo: descripcion.trim()
+            });
+        }
+
+        if (id_salon && id_salon != existingReport.id_salon) {
+            updateData.id_salon = id_salon;
+            cambios.push({
+                campo: 'id_salon',
+                valor_anterior: existingReport.id_salon?.toString(),
+                valor_nuevo: id_salon.toString()
+            });
+        }
+
+        if (id_categoria !== undefined && id_categoria != existingReport.id_categoria) {
+            updateData.id_categoria = id_categoria || null;
+            cambios.push({
+                campo: 'id_categoria',
+                valor_anterior: existingReport.id_categoria?.toString() || 'null',
+                valor_nuevo: id_categoria?.toString() || 'null'
+            });
+        }
+
+        if (fecha_reporte) {
+            // Normalizar fechas comparando solo fecha y hora, ignorando diferencias de timezone menores
+            const fechaReporteNormalizada = new Date(fecha_reporte);
+            const fechaExistenteNormalizada = existingReport.fecha_reporte ? 
+                new Date(existingReport.fecha_reporte) : null;
+            
+            // Solo considerar cambio si la diferencia es mayor a 1 minuto (para evitar problemas de timezone)
+            const diferencia = fechaExistenteNormalizada ? 
+                Math.abs(fechaReporteNormalizada.getTime() - fechaExistenteNormalizada.getTime()) : 
+                Number.MAX_VALUE;
+            
+            const UMBRAL_CAMBIO = 60000; // 1 minuto en milisegundos
+                
+            if (diferencia > UMBRAL_CAMBIO) {
+                updateData.fecha_reporte = fecha_reporte;
+                cambios.push({
+                    campo: 'fecha_reporte',
+                    valor_anterior: existingReport.fecha_reporte,
+                    valor_nuevo: fecha_reporte
+                });
+            }
+        }
+
+        // Solo admin puede cambiar estado
+        if (estado && userRole === 'admin' && estado !== existingReport.estado) {
+            updateData.estado = estado;
+            cambios.push({
+                campo: 'estado',
+                valor_anterior: existingReport.estado,
+                valor_nuevo: estado
+            });
+        }
+
+        // Si no hay cambios, devolver mensaje
+        if (Object.keys(updateData).length === 0) {
+            return res.json({
+                success: true,
+                message: 'No hay cambios para actualizar'
+            });
+        }
+
+        // Actualizar reporte
         const success = await reportModel.updateReport(reportId, updateData);
 
         if (success) {
+            // Manejar archivos nuevos si se subieron
+            let archivosGuardados = [];
+            if (req.files && req.files.length > 0) {
+                console.log(`📁 ${req.files.length} archivos recibidos para agregar al reporte ${reportId}:`, req.files.map(f => f.originalname));
+                
+                // Verificar límite total de archivos (máximo 5)
+                const archivosExistentes = await fileModel.getFilesByReportId(reportId);
+                const totalArchivos = archivosExistentes.length + req.files.length;
+                
+                if (totalArchivos > 5) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `El reporte no puede tener más de 5 archivos. Actualmente tiene ${archivosExistentes.length} archivo(s) y estás intentando agregar ${req.files.length}.`
+                    });
+                }
+                
+                for (const file of req.files) {
+                    try {
+                        const fileData = {
+                            id_reporte: reportId,
+                            url: file.path.replace(/\\/g, '/'), // Normalizar path para BD
+                            tipo: file.mimetype
+                        };
+
+                        const fileId = await fileModel.createFile(fileData);
+                        console.log(`✅ Archivo ${file.originalname} guardado en BD con ID:`, fileId);
+                        
+                        archivosGuardados.push({
+                            id: fileId,
+                            nombre: file.originalname,
+                            tipo: file.mimetype,
+                            url: file.path.replace(/\\/g, '/')
+                        });
+                    } catch (fileError) {
+                        console.error(`❌ Error guardando archivo ${file.originalname} en BD:`, fileError);
+                        // Continúa con el siguiente archivo si hay error
+                    }
+                }
+                
+                // Agregar entrada en historial si se agregaron archivos
+                if (archivosGuardados.length > 0) {
+                    try {
+                        await historialModel.createHistorialEntry({
+                            id_reporte: reportId,
+                            tipo: 'archivo',
+                            id_usuario_actor: userId,
+                            descripcion: `${archivosGuardados.length} archivo(s) agregado(s): ${archivosGuardados.map(a => a.nombre).join(', ')}`
+                        });
+                    } catch (historialError) {
+                        console.error('❌ Error registrando archivos en historial:', historialError);
+                    }
+                }
+            }
+
+            // Procesar archivos eliminados si hay
+            let archivosEliminadosInfo = [];
+            if (archivosEliminados.length > 0) {
+                console.log(`🗑️ Procesando ${archivosEliminados.length} archivos para eliminación...`);
+                
+                for (const archivoId of archivosEliminados) {
+                    try {
+                        // Obtener información del archivo antes de eliminarlo
+                        const archivoInfo = await fileModel.getFileById(parseInt(archivoId));
+                        if (archivoInfo) {
+                            // Verificar que el archivo pertenezca al reporte actual
+                            if (archivoInfo.id_reporte === reportId) {
+                                // Eliminar archivo físico
+                                if (fs.existsSync(archivoInfo.url)) {
+                                    fs.unlinkSync(archivoInfo.url);
+                                }
+                                
+                                // Eliminar de la base de datos
+                                const eliminado = await fileModel.deleteFile(parseInt(archivoId));
+                                if (eliminado) {
+                                    const nombreArchivo = archivoInfo.url ? path.basename(archivoInfo.url) : 'archivo';
+                                    archivosEliminadosInfo.push(nombreArchivo);
+                                    console.log(`✅ Archivo ${nombreArchivo} eliminado exitosamente`);
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`❌ Error eliminando archivo ${archivoId}:`, error);
+                    }
+                }
+                
+                // Agregar entrada en historial si se eliminaron archivos
+                if (archivosEliminadosInfo.length > 0) {
+                    try {
+                        await historialModel.createHistorialEntry({
+                            id_reporte: reportId,
+                            tipo: 'archivo',
+                            id_usuario_actor: userId,
+                            descripcion: `${archivosEliminadosInfo.length} archivo(s) eliminado(s): ${archivosEliminadosInfo.join(', ')}`
+                        });
+                        console.log(`📝 Eliminación de ${archivosEliminadosInfo.length} archivo(s) registrada en historial`);
+                    } catch (historialError) {
+                        console.error('❌ Error registrando eliminación en historial:', historialError);
+                    }
+                }
+            }
+
+            // Registrar cambios en el historial si hay cambios
+            if (cambios.length > 0) {
+                try {
+                    // Mapeo de nombres técnicos a nombres amigables
+                    const nombresAmigables = {
+                        'titulo': 'Título',
+                        'descripcion': 'Descripción',
+                        'id_salon': 'Salón',
+                        'fecha_reporte': 'Fecha y hora del incidente',
+                        'id_categoria': 'Categoría',
+                        'estado': 'Estado'
+                    };
+
+                    await historialModel.createHistorialEntry({
+                        id_reporte: reportId,
+                        tipo: 'edicion',
+                        id_usuario_actor: userId,
+                        descripcion: `Reporte editado: ${cambios.map(c => nombresAmigables[c.campo] || c.campo).join(', ')}`,
+                        cambios_json: JSON.stringify(cambios)
+                    });
+                    console.log(`📝 Registrados ${cambios.length} cambios en el historial del reporte ${reportId}`);
+                } catch (historialError) {
+                    console.error('❌ Error registrando en historial:', historialError);
+                    // No fallar la actualización por error en historial
+                }
+            }
+
+            let mensaje = 'Reporte actualizado exitosamente';
+            if (archivosGuardados.length > 0) {
+                mensaje += ` con ${archivosGuardados.length} archivo(s) agregado(s)`;
+            }
+            if (archivosEliminadosInfo.length > 0) {
+                mensaje += ` y ${archivosEliminadosInfo.length} archivo(s) eliminado(s)`;
+            }
+
             res.json({
                 success: true,
-                message: 'Reporte actualizado exitosamente'
+                message: mensaje,
+                cambios: cambios.length,
+                archivos_agregados: archivosGuardados.length,
+                archivos_eliminados: archivosEliminadosInfo.length
             });
         } else {
             res.status(400).json({
@@ -295,7 +580,10 @@ export async function updateReportStatus(req, res) {
         const { estado } = req.body;
         const userRole = req.session.user?.rol;
 
+        console.log('🔄 Actualizando estado del reporte:', { reportId, estado, userRole });
+
         if (userRole !== 'admin') {
+            console.log('❌ Usuario no es admin:', { userRole });
             return res.status(403).json({
                 success: false,
                 message: 'Solo los administradores pueden cambiar el estado'
@@ -303,35 +591,41 @@ export async function updateReportStatus(req, res) {
         }
 
         if (!reportId || !estado) {
+            console.log('❌ Faltan parámetros:', { reportId, estado });
             return res.status(400).json({
                 success: false,
                 message: 'ID de reporte y estado son requeridos'
             });
         }
 
-        const validStates = ['pendiente', 'en_proceso', 'resuelto', 'cerrado'];
-        if (!validStates.includes(estado)) {
+        const validStates = ['pendiente', 'revisado', 'en proceso', 'resuelto'];
+        console.log('🔍 Validando estado:', { estado, estadoLower: estado.toLowerCase(), validStates });
+        
+        if (!validStates.includes(estado.toLowerCase())) {
+            console.log('❌ Estado no válido:', { estado, validStates });
             return res.status(400).json({
                 success: false,
                 message: 'Estado no válido'
             });
         }
 
-        const success = await reportModel.updateReportStatus(reportId, estado);
+        const success = await reportModel.updateReportStatus(reportId, estado, req.session.user?.id_usuario);
 
         if (success) {
+            console.log('✅ Estado actualizado exitosamente');
             res.json({
                 success: true,
                 message: 'Estado actualizado exitosamente'
             });
         } else {
+            console.log('❌ Reporte no encontrado');
             res.status(404).json({
                 success: false,
                 message: 'Reporte no encontrado'
             });
         }
     } catch (error) {
-        console.error('Error al actualizar estado:', error);
+        console.error('❌ Error al actualizar estado:', error);
         res.status(500).json({
             success: false,
             message: 'Error interno del servidor'

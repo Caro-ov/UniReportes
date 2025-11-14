@@ -51,6 +51,8 @@ export async function createReport(reportData) {
  * Obtener todos los reportes con información de usuario y categoría
  */
 export async function getAllReports(limit = 50, offset = 0) {
+    console.log('🔍 getAllReports MODEL: Ejecutando consulta SQL...');
+    
     const [rows] = await pool.execute(
         `SELECT 
             r.*,
@@ -78,12 +80,39 @@ export async function getAllReports(limit = 50, offset = 0) {
         [limit, offset]
     );
     
+    console.log(`🔍 CONSULTA SQL devolvió ${rows.length} filas`);
+    
+    // Log específico para el reporte 12
+    const reporte12Raw = rows.find(r => r.id_reporte === 12);
+    if (reporte12Raw) {
+        console.log('🔍 REPORTE 12 RAW SQL:', {
+            id_reporte: reporte12Raw.id_reporte,
+            titulo: reporte12Raw.titulo,
+            id_estado: reporte12Raw.id_estado,
+            estado_nombre: reporte12Raw.estado
+        });
+    } else {
+        console.log('❌ REPORTE 12 NO ENCONTRADO en SQL RAW');
+    }
+    
     // Procesar archivos para cada reporte
-    return rows.map(row => ({
+    const processedReports = rows.map(row => ({
         ...row,
         archivos: parseArchivosInfo(row.archivos_info),
         total_archivos: parseInt(row.total_archivos) || 0
     }));
+    
+    // Log del reporte 12 procesado
+    const reporte12Processed = processedReports.find(r => r.id_reporte === 12);
+    if (reporte12Processed) {
+        console.log('🔍 REPORTE 12 PROCESADO:', {
+            id_reporte: reporte12Processed.id_reporte,
+            titulo: reporte12Processed.titulo,
+            estado: reporte12Processed.estado
+        });
+    }
+    
+    return processedReports;
 }
 
 /**
@@ -166,12 +195,77 @@ export async function getReportById(reportId) {
 /**
  * Actualizar estado de un reporte
  */
-export async function updateReportStatus(reportId, newStatus) {
-    const [result] = await pool.execute(
-        'UPDATE reportes SET estado = ? WHERE id_reporte = ?',
-        [newStatus, reportId]
-    );
-    return result.affectedRows > 0;
+export async function updateReportStatus(reportId, newStatus, userId = null) {
+    const connection = await pool.getConnection();
+    
+    try {
+        await connection.beginTransaction();
+        
+        // Obtener el estado actual del reporte
+        const [currentReport] = await connection.execute(
+            'SELECT id_estado FROM reportes WHERE id_reporte = ?',
+            [reportId]
+        );
+        
+        if (currentReport.length === 0) {
+            throw new Error('Reporte no encontrado');
+        }
+        
+        const estadoAnteriorId = currentReport[0].id_estado;
+        
+        // Obtener el id_estado correspondiente al nuevo estado
+        const [estadoRows] = await connection.execute(
+            'SELECT id_estado FROM estados WHERE LOWER(nombre) = LOWER(?)',
+            [newStatus]
+        );
+        
+        if (estadoRows.length === 0) {
+            throw new Error(`Estado "${newStatus}" no válido`);
+        }
+        
+        const nuevoEstadoId = estadoRows[0].id_estado;
+        
+        // Si es el mismo estado, no hacer nada
+        if (estadoAnteriorId === nuevoEstadoId) {
+            await connection.rollback();
+            return true;
+        }
+        
+        // Actualizar el reporte con el nuevo estado
+        const [result] = await connection.execute(
+            'UPDATE reportes SET id_estado = ? WHERE id_reporte = ?',
+            [nuevoEstadoId, reportId]
+        );
+        
+        if (result.affectedRows === 0) {
+            throw new Error('No se pudo actualizar el reporte');
+        }
+        
+        // Registrar el cambio en el historial
+        await connection.execute(
+            `INSERT INTO historial_cambios (
+                id_reporte, tipo, id_estado_anterior, id_estado_nuevo,
+                id_usuario_actor, descripcion, fecha
+            ) VALUES (?, 'cambio_estado', ?, ?, ?, ?, NOW())`,
+            [
+                reportId, 
+                estadoAnteriorId, 
+                nuevoEstadoId, 
+                userId, 
+                `Estado cambiado de estado anterior a "${newStatus}"`
+            ]
+        );
+        
+        await connection.commit();
+        return true;
+        
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error actualizando estado del reporte:', error);
+        throw error;
+    } finally {
+        connection.release();
+    }
 }
 
 /**
@@ -218,54 +312,104 @@ export async function deleteReport(reportId) {
  * Obtener reportes por filtros
  */
 export async function getReportsFiltered(filters = {}) {
-    let query = `
-        SELECT 
-            r.*,
-            u.nombre as usuario_nombre,
-            c.nombre as categoria_nombre
-        FROM reportes r
-        LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
-        LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
-        WHERE 1=1
-    `;
-    
+    // Construir WHERE dinámico (reutilizable para COUNT y SELECT)
+    let where = ' WHERE 1=1';
     const values = [];
 
     if (filters.estado) {
-        query += ' AND r.estado = ?';
+        // Filtrar por nombre del estado en la tabla 'estados'
+        where += ' AND e.nombre = ?';
         values.push(filters.estado);
     }
 
     if (filters.id_categoria) {
-        query += ' AND r.id_categoria = ?';
+        where += ' AND r.id_categoria = ?';
         values.push(filters.id_categoria);
     }
 
+    if (filters.prioridad) {
+        if (filters.prioridad === 'urgente') {
+            where += ' AND r.id_categoria = 6';
+        } else if (filters.prioridad === 'normal') {
+            where += ' AND r.id_categoria != 6';
+        }
+    }
+
     if (filters.fecha_desde) {
-        query += ' AND r.fecha_creacion >= ?';
+        where += ' AND r.fecha_creacion >= ?';
         values.push(filters.fecha_desde);
     }
 
     if (filters.fecha_hasta) {
-        query += ' AND r.fecha_creacion <= ?';
+        where += ' AND r.fecha_creacion <= ?';
         values.push(filters.fecha_hasta);
     }
 
     if (filters.buscar) {
-        query += ' AND (r.titulo LIKE ? OR r.descripcion LIKE ? OR r.ubicacion LIKE ?)';
+        // Buscar en título, descripción, usuario, categoría, salón y ubicación (usar aliases de JOINs)
+        where += ' AND (r.titulo LIKE ? OR r.descripcion LIKE ? OR u.nombre LIKE ? OR c.nombre LIKE ? OR s.nombre LIKE ? OR ub.nombre LIKE ?)';
         const searchTerm = `%${filters.buscar}%`;
-        values.push(searchTerm, searchTerm, searchTerm);
+        values.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
     }
 
-    query += ' ORDER BY r.fecha_creacion DESC';
+    // Primero obtener el total (sin LIMIT)
+    const countQuery = `SELECT COUNT(DISTINCT r.id_reporte) AS totalItems FROM reportes r
+        LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
+        LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
+        LEFT JOIN salones s ON r.id_salon = s.id_salon
+        LEFT JOIN ubicaciones ub ON s.ubicacion = ub.id_ubicacion
+        LEFT JOIN estados e ON r.id_estado = e.id_estado
+        ${where}`;
 
+    const [countRows] = await pool.execute(countQuery, values);
+    const totalItems = (countRows[0] && countRows[0].totalItems) ? parseInt(countRows[0].totalItems) : 0;
+
+    // Construir consulta principal con joins y agrupación
+    let selectQuery = `
+        SELECT 
+            r.*,
+            u.nombre as usuario_nombre,
+            c.nombre as categoria_nombre,
+            s.nombre as salon_nombre,
+            ub.nombre as ubicacion_nombre,
+            e.nombre as estado,
+            COUNT(a.id_archivo) as total_archivos,
+            GROUP_CONCAT(
+                CONCAT(a.id_archivo, '|', a.tipo, '|', a.url) 
+                SEPARATOR ';;'
+            ) as archivos_info
+         FROM reportes r
+         LEFT JOIN usuarios u ON r.id_usuario = u.id_usuario
+         LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
+         LEFT JOIN salones s ON r.id_salon = s.id_salon
+         LEFT JOIN ubicaciones ub ON s.ubicacion = ub.id_ubicacion
+         LEFT JOIN estados e ON r.id_estado = e.id_estado
+         LEFT JOIN archivos a ON r.id_reporte = a.id_reporte
+         ${where}
+         GROUP BY r.id_reporte
+         ORDER BY r.fecha_creacion DESC
+    `;
+
+    // Agregar limit/offset si vienen
+    const selectValues = [...values];
     if (filters.limit) {
-        query += ' LIMIT ?';
-        values.push(parseInt(filters.limit));
+        selectQuery += ' LIMIT ?';
+        selectValues.push(parseInt(filters.limit));
+    }
+    if (filters.offset) {
+        selectQuery += ' OFFSET ?';
+        selectValues.push(parseInt(filters.offset));
     }
 
-    const [rows] = await pool.execute(query, values);
-    return rows;
+    const [rows] = await pool.execute(selectQuery, selectValues);
+
+    const processed = rows.map(row => ({
+        ...row,
+        archivos: parseArchivosInfo(row.archivos_info),
+        total_archivos: parseInt(row.total_archivos) || 0
+    }));
+
+    return { rows: processed, total: totalItems };
 }
 
 /**

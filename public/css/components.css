@@ -744,6 +744,7 @@ body {
 /* Transiciones suaves para el contenido principal */
 .contenido-principal {
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    background: #f8fafc;
 }
 
 .spa-loading .contenido-principal {

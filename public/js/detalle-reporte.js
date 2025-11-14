@@ -3,6 +3,12 @@ $(document).ready(function() {
     // VARIABLES GLOBALES
     // ===========================
     let reporteActual = null;
+    let modoEdicion = false;
+    let datosOriginales = null;
+    let categoriasDisponibles = [];
+    let ubicacionesDisponibles = [];
+    let archivosTemporales = []; // Archivos pendientes de confirmar
+    let archivosEliminados = []; // IDs de archivos marcados para eliminar
 
     // ===========================
     // FUNCIONES UTILITARIAS
@@ -18,28 +24,6 @@ $(document).ready(function() {
         
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
-
-    // ===========================
-    // DROPDOWN DEL PERFIL
-    // ===========================
-    // ===== Dropdown del perfil (usar delegación y namespace para evitar conflictos con components.js)
-    // Delegar el toggle del avatar en el documento y usar namespace para permitir limpieza segura
-    $(document).off('click.detalleAvatar').on('click.detalleAvatar', '.avatar-usuario', function(e) {
-        e.stopPropagation();
-        $('.menu-desplegable').toggleClass('mostrar');
-    });
-
-    // Cerrar menú al hacer clic fuera (namespaced)
-    $(document).off('click.detalleDoc').on('click.detalleDoc', function() {
-        $('.menu-desplegable').removeClass('mostrar');
-    });
-
-    // No detener la propagación dentro del menú para permitir que los handlers globales
-    // (por ejemplo el de logout en components.js) reciban el evento delegado.
-    $(document).off('click.detalleMenu').on('click.detalleMenu', '.menu-desplegable', function(e) {
-        // Intencionalmente NO se llama a e.stopPropagation() aquí.
-        // Se puede usar para manejo específico interno si se necesita más adelante.
-    });
 
     // ===========================
     // FUNCIONALIDAD PRINCIPAL
@@ -205,32 +189,79 @@ $(document).ready(function() {
             
             if (!response.ok) {
                 console.log('ℹ️ No se pudieron cargar archivos:', response.status);
+                mostrarArchivos([]);
                 return;
             }
             
-            const data = await response.json();
-            console.log('📁 Archivos recibidos:', data);
+            // Verificar si la respuesta es HTML (indica redirección a login)
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('text/html')) {
+                console.log('⚠️ Recibido HTML en lugar de JSON - posible problema de sesión');
+                mostrarArchivos([]);
+                return;
+            }
             
-            if (data.success && data.data) {
-                mostrarArchivos(data.data);
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+                console.log('📁 Archivos recibidos:', data);
+                
+                if (data.success && data.data) {
+                    mostrarArchivos(data.data);
+                } else {
+                    mostrarArchivos([]);
+                }
+            } catch (parseError) {
+                console.error('❌ Error parseando JSON de archivos:', parseError);
+                console.log('📄 Contenido recibido (primeros 200 chars):', responseText.substring(0, 200));
+                mostrarArchivos([]);
             }
             
         } catch (error) {
             console.error('❌ Error cargando archivos:', error);
+            mostrarArchivos([]);
         }
     }
     
     // Función para mostrar archivos
     function mostrarArchivos(archivos) {
         const archivosSection = $('.archivos-section');
+        const archivosGrid = $('.archivos-grid');
+        
+        // Siempre mostrar la sección de archivos
+        archivosSection.show();
+        archivosGrid.empty();
         
         if (!archivos || archivos.length === 0) {
-            archivosSection.hide();
+            // Mostrar mensaje cuando no hay archivos
+            const mensajeSinArchivos = `
+                <div class="sin-archivos">
+                    <div class="sin-archivos-icono">
+                        <span class="material-symbols-outlined">folder_open</span>
+                    </div>
+                    <div class="sin-archivos-contenido">
+                        <h4>No hay archivos adjuntos</h4>
+                        <p class="sin-archivos-descripcion">Este reporte no tiene archivos adjuntos.</p>
+                        <p class="sin-archivos-limite">Puedes agregar hasta 5 archivos (máximo 50MB cada uno) usando el botón "Agregar archivo" de arriba.</p>
+                        <p class="sin-archivos-drag-hint" style="display: none;">O haz clic aquí o arrastra archivos para subirlos</p>
+                    </div>
+                </div>
+            `;
+            archivosGrid.html(mensajeSinArchivos);
+            
+            console.log('📁 Mensaje sin archivos mostrado, modo edición:', modoEdicion);
+            
+            // Configurar drag & drop solo en modo edición
+            if (modoEdicion) {
+                console.log('🎯 Configurando drag & drop para sin archivos...');
+                setTimeout(() => {
+                    configurarDragDropSinArchivos();
+                    $('.sin-archivos-drag-hint').show();
+                }, 100); // Pequeño delay para asegurar que el DOM esté listo
+            }
             return;
         }
-        
-        const archivosGrid = $('.archivos-grid');
-        archivosGrid.empty();
         
         archivos.forEach(archivo => {
             let contenidoArchivo;
@@ -252,6 +283,9 @@ $(document).ready(function() {
                             <button class="btn-descargar-archivo" onclick="descargarArchivo('${archivo.fileUrl}', '${archivo.filename}')" title="Descargar">
                                 <span class="material-symbols-outlined">download</span>
                             </button>
+                            <button class="btn-eliminar-archivo" onclick="eliminarArchivo(${archivo.id_archivo}, '${archivo.filename}')" title="Eliminar archivo" style="display: none;">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -272,17 +306,39 @@ $(document).ready(function() {
                             <button class="btn-descargar-archivo" onclick="descargarArchivo('${archivo.fileUrl}', '${archivo.filename}')" title="Descargar">
                                 <span class="material-symbols-outlined">download</span>
                             </button>
+                            <button class="btn-eliminar-archivo" onclick="eliminarArchivo(${archivo.id_archivo}, '${archivo.filename}')" title="Eliminar archivo" style="display: none;">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
                         </div>
                     </div>
                 `;
             }
             
             if (contenidoArchivo) {
-                archivosGrid.append(contenidoArchivo);
+                // Insertar antes de la zona de drop si existe, o al final
+                const dropZone = archivosGrid[0].querySelector('.drop-zone-existentes');
+                if (dropZone) {
+                    dropZone.insertAdjacentHTML('beforebegin', contenidoArchivo);
+                } else {
+                    archivosGrid[0].insertAdjacentHTML('beforeend', contenidoArchivo);
+                }
             }
         });
         
         archivosSection.show();
+        
+        // Mostrar/ocultar botones de eliminar según el modo de edición
+        actualizarBotonesEliminacion();
+        
+        console.log('📁 Archivos existentes mostrados, modo edición:', modoEdicion);
+        
+        // Configurar drag & drop para el área de archivos existentes
+        if (modoEdicion) {
+            console.log('🎯 Configurando drag & drop para archivos existentes...');
+            setTimeout(() => {
+                configurarDragDropArchivosExistentes();
+            }, 100); // Pequeño delay para asegurar que el DOM esté listo
+        }
     }
     
     // Función para cargar historial de cambios
@@ -316,39 +372,39 @@ $(document).ready(function() {
         const timeline = $('.timeline');
         timeline.empty();
         
-        if (!historial || historial.length === 0) {
-            // Mostrar al menos el evento de creación
-            timeline.append(`
-                <div class="timeline-item">
-                    <div class="timeline-icon">
-                        <span class="material-symbols-outlined">send</span>
-                    </div>
-                    <div class="timeline-content">
-                        <p class="timeline-titulo">Reporte enviado</p>
-                        <p class="timeline-fecha">${formatearFecha(reporteActual?.fecha_creacion)}</p>
-                    </div>
+        // Siempre mostrar el evento inicial de "Reporte enviado"
+        timeline.append(`
+            <div class="timeline-item">
+                <div class="timeline-icon">
+                    <span class="material-symbols-outlined">send</span>
                 </div>
-            `);
-            return;
-        }
+                <div class="timeline-content">
+                    <p class="timeline-titulo">Reporte enviado</p>
+                    <p class="timeline-fecha">${formatearFecha(reporteActual?.fecha_creacion)}</p>
+                </div>
+            </div>
+        `);
         
-        historial.forEach(evento => {
-            const icono = obtenerIconoHistorial(evento.tipo);
-            const titulo = obtenerTituloHistorial(evento.tipo, evento);
-            
-            timeline.append(`
-                <div class="timeline-item">
-                    <div class="timeline-icon">
-                        <span class="material-symbols-outlined">${icono}</span>
+        // Luego mostrar el resto del historial si existe
+        if (historial && historial.length > 0) {
+            historial.forEach(evento => {
+                const icono = obtenerIconoHistorial(evento.tipo);
+                const titulo = obtenerTituloHistorial(evento.tipo, evento);
+                
+                timeline.append(`
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <span class="material-symbols-outlined">${icono}</span>
+                        </div>
+                        <div class="timeline-content">
+                            <p class="timeline-titulo">${titulo}</p>
+                            <p class="timeline-fecha">${formatearFecha(evento.fecha)}</p>
+                            ${evento.descripcion ? `<p class="timeline-descripcion">${escapeHtml(evento.descripcion)}</p>` : ''}
+                        </div>
                     </div>
-                    <div class="timeline-content">
-                        <p class="timeline-titulo">${titulo}</p>
-                        <p class="timeline-fecha">${formatearFecha(evento.fecha)}</p>
-                        ${evento.descripcion ? `<p class="timeline-descripcion">${escapeHtml(evento.descripcion)}</p>` : ''}
-                    </div>
-                </div>
-            `);
-        });
+                `);
+            });
+        }
     }
     
     // ===========================
@@ -389,7 +445,8 @@ $(document).ready(function() {
             'asignacion': 'person',
             'comentario': 'chat',
             'resolucion': 'check_circle',
-            'cierre': 'lock'
+            'cierre': 'lock',
+            'edicion': 'edit'
         };
         return iconos[tipo] || 'info';
     }
@@ -402,7 +459,8 @@ $(document).ready(function() {
             'asignacion': 'Técnico asignado',
             'comentario': 'Comentario agregado',
             'resolucion': 'Reporte resuelto',
-            'cierre': 'Reporte cerrado'
+            'cierre': 'Reporte cerrado',
+            'edicion': 'Reporte editado'
         };
         return titulos[tipo] || 'Actividad registrada';
     }
@@ -1025,6 +1083,958 @@ $(document).ready(function() {
         div.textContent = text;
         return div.innerHTML;
     }
+
+    // ===========================
+    // FUNCIONALIDAD DE EDICIÓN
+    // ===========================
+
+    // Función para alternar modo de edición
+    window.toggleEditarReporte = function() {
+        if (!reporteActual) {
+            alert('No hay reporte cargado para editar');
+            return;
+        }
+
+        if (modoEdicion) {
+            cancelarEdicion();
+        } else {
+            iniciarEdicion();
+        }
+    };
+
+    // Función para iniciar modo de edición
+    async function iniciarEdicion() {
+        console.log('🖊️ Iniciando modo de edición...');
+        
+        try {
+            // Limpiar arrays temporales
+            archivosTemporales = [];
+            archivosEliminados = [];
+            
+            // Guardar datos originales
+            datosOriginales = JSON.parse(JSON.stringify(reporteActual));
+            
+            // Cargar datos necesarios para edición
+            await cargarCategoriasParaEdicion();
+            await cargarUbicacionesParaEdicion();
+            
+            // Activar modo edición
+            modoEdicion = true;
+            
+            // Actualizar interfaz
+            actualizarInterfazEdicion(true);
+            
+            // Convertir campos a editables
+            convertirCamposEditables();
+            
+            // Asegurar que los botones de eliminación estén visibles si hay archivos
+            setTimeout(() => {
+                actualizarBotonesEliminacion();
+            }, 100);
+            
+        } catch (error) {
+            console.error('❌ Error iniciando edición:', error);
+            alert('Error al iniciar edición: ' + error.message);
+        }
+    }
+
+    // Función para cancelar edición
+    window.cancelarEdicion = function() {
+        if (!modoEdicion) return;
+        
+        console.log('❌ Cancelando edición...');
+        
+        // Limpiar archivos temporales
+        archivosTemporales = [];
+        archivosEliminados = [];
+        
+        // Limpiar zona de drop si existe
+        const dropZoneExistentes = document.querySelector('.drop-zone-existentes');
+        if (dropZoneExistentes) {
+            dropZoneExistentes.remove();
+        }
+        
+        // Restaurar datos originales
+        if (datosOriginales) {
+            reporteActual = JSON.parse(JSON.stringify(datosOriginales));
+            mostrarDetalleReporte(reporteActual);
+            // Recargar archivos originales
+            cargarArchivosReporte(reporteActual.id_reporte);
+        }
+        
+        // Desactivar modo edición
+        modoEdicion = false;
+        datosOriginales = null;
+        
+        // Actualizar interfaz
+        actualizarInterfazEdicion(false);
+    };
+
+    // Función para guardar cambios
+    window.guardarCambiosReporte = async function() {
+        if (!modoEdicion || !reporteActual) return;
+        
+        console.log('💾 Guardando cambios del reporte...');
+        
+        try {
+            // Obtener datos del formulario
+            const datosActualizados = obtenerDatosFormulario();
+            
+            // Validar datos
+            if (!validarDatosReporte(datosActualizados)) {
+                return;
+            }
+            
+            // Mostrar indicador de carga
+            const btnGuardar = document.getElementById('btn-guardar-cambios');
+            const textoOriginal = btnGuardar.innerHTML;
+            btnGuardar.disabled = true;
+            btnGuardar.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Guardando...';
+            
+            console.log('📤 Enviando datos:', { 
+                datosActualizados,
+                archivosTemporales: archivosTemporales.length,
+                archivosEliminados: archivosEliminados.length
+            });
+            
+            // 1. Actualizar datos del reporte con archivos
+            let response, data;
+            const url = `/api/reports/${reporteActual.id_reporte}`;
+            console.log('🌐 URL de petición:', url);
+            
+            if (archivosTemporales.length > 0) {
+                // Si hay archivos nuevos, usar FormData para enviar tanto datos como archivos
+                const formData = new FormData();
+                
+                // Agregar datos del reporte al FormData
+                Object.keys(datosActualizados).forEach(key => {
+                    if (datosActualizados[key] !== null && datosActualizados[key] !== undefined) {
+                        formData.append(key, datosActualizados[key]);
+                    }
+                });
+                
+                // Agregar archivos eliminados (enviar como JSON string)
+                if (archivosEliminados.length > 0) {
+                    formData.append('archivosEliminados', JSON.stringify(archivosEliminados));
+                }
+                
+                // Agregar archivos nuevos
+                archivosTemporales.forEach(archivo => {
+                    formData.append('archivos', archivo);
+                });
+                
+                response = await fetch(url, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    body: formData // Sin Content-Type para que el navegador configure multipart/form-data
+                });
+            } else {
+                // Si no hay archivos nuevos pero sí eliminados, usar FormData también
+                if (archivosEliminados.length > 0) {
+                    const formData = new FormData();
+                    
+                    // Agregar datos del reporte al FormData
+                    Object.keys(datosActualizados).forEach(key => {
+                        if (datosActualizados[key] !== null && datosActualizados[key] !== undefined) {
+                            formData.append(key, datosActualizados[key]);
+                        }
+                    });
+                    
+                    // Agregar archivos eliminados
+                    formData.append('archivosEliminados', JSON.stringify(archivosEliminados));
+                    
+                    response = await fetch(url, {
+                        method: 'PUT',
+                        credentials: 'include',
+                        body: formData
+                    });
+                } else {
+                    // Si no hay archivos nuevos ni eliminados, usar JSON como antes
+                    response = await fetch(url, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify(datosActualizados)
+                    });
+                }
+            }
+            
+            console.log('📡 Respuesta recibida:', response.status, response.statusText);
+            
+            // Verificar si es una redirección a login
+            if (response.url && response.url.includes('/login')) {
+                throw new Error('Tu sesión ha expirado. Serás redirigido al login.');
+            }
+            
+            const responseText = await response.text();
+            console.log('📥 Respuesta del servidor:', { 
+                status: response.status, 
+                statusText: response.statusText,
+                url: response.url,
+                responseText: responseText.substring(0, 500) + '...'
+            });
+            
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('❌ Error parseando JSON:', parseError);
+                console.error('📄 Contenido completo de respuesta:', responseText);
+                
+                // Si el contenido es HTML, probablemente es un redireccionamiento de autenticación
+                if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+                    throw new Error('Tu sesión ha expirado. Por favor, recarga la página e inicia sesión nuevamente.');
+                }
+                
+                throw new Error('El servidor devolvió una respuesta inválida. Intenta nuevamente.');
+            }
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Error al actualizar el reporte');
+            }
+            
+            // Limpiar arrays temporales
+            archivosTemporales = [];
+            archivosEliminados = [];
+            
+            // Limpiar zona de drop si existe
+            const dropZoneExistentes = document.querySelector('.drop-zone-existentes');
+            if (dropZoneExistentes) {
+                dropZoneExistentes.remove();
+            }
+            
+            // Actualizar datos locales
+            Object.assign(reporteActual, datosActualizados);
+            
+            // Recargar datos del reporte para obtener información actualizada
+            await cargarDetalleReporte(reporteActual.id_reporte);
+            
+            // Desactivar modo edición
+            modoEdicion = false;
+            datosOriginales = null;
+            actualizarInterfazEdicion(false);
+            
+            // Mostrar mensaje de éxito
+            let mensajeExito = 'Reporte actualizado exitosamente';
+            if (data.archivos_agregados && data.archivos_agregados > 0) {
+                mensajeExito += ` con ${data.archivos_agregados} archivo(s) agregado(s)`;
+            }
+            if (data.archivos_eliminados && data.archivos_eliminados > 0) {
+                if (data.archivos_agregados && data.archivos_agregados > 0) {
+                    mensajeExito += ` y ${data.archivos_eliminados} archivo(s) eliminado(s)`;
+                } else {
+                    mensajeExito += ` con ${data.archivos_eliminados} archivo(s) eliminado(s)`;
+                }
+            }
+            mostrarToast(mensajeExito, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error guardando cambios:', error);
+            
+            // Manejar errores de sesión específicamente
+            if (error.message.includes('sesión') || error.message.includes('login') || error.message.includes('autenticación')) {
+                alert('Tu sesión ha expirado. Serás redirigido al login.');
+                // Redirigir al login
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            alert('Error al guardar cambios: ' + error.message);
+        } finally {
+            // Restaurar botón
+            const btnGuardar = document.getElementById('btn-guardar-cambios');
+            if (btnGuardar) {
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = '<span class="material-symbols-outlined">save</span> Guardar Cambios';
+            }
+        }
+    };
+
+    // Función para actualizar la interfaz según el modo de edición
+    function actualizarInterfazEdicion(editando) {
+        // Botón editar/cancelar
+        const btnEditar = document.getElementById('btn-editar-reporte');
+        const btnGuardar = document.getElementById('btn-guardar-cambios');
+        
+        if (btnEditar) {
+            if (editando) {
+                btnEditar.innerHTML = '<span class="material-symbols-outlined">close</span> Cancelar';
+                btnEditar.classList.add('cancelar');
+            } else {
+                btnEditar.innerHTML = '<span class="material-symbols-outlined">edit</span> Editar Reporte';
+                btnEditar.classList.remove('cancelar');
+            }
+        }
+        
+        // Mostrar/ocultar botón de guardar
+        if (btnGuardar) {
+            btnGuardar.style.display = editando ? 'flex' : 'none';
+        }
+        
+        // Controles de archivos
+        const accionesArchivos = document.querySelector('.archivos-acciones');
+        if (accionesArchivos) {
+            accionesArchivos.style.display = editando ? 'flex' : 'none';
+        }
+        
+        // Actualizar drag & drop para área sin archivos si existe
+        const sinArchivos = document.querySelector('.sin-archivos');
+        if (editando && sinArchivos) {
+            console.log('🎯 Reconfigurado drag & drop para sin archivos en modo edición');
+            configurarDragDropSinArchivos();
+            $('.sin-archivos-drag-hint').show();
+        } else if (sinArchivos) {
+            console.log('🎯 Ocultando drag & drop hint para sin archivos');
+            $('.sin-archivos-drag-hint').hide();
+        }
+        
+        // Mostrar/ocultar zona de drop para archivos existentes
+        const dropZoneExistentes = document.querySelector('.drop-zone-existentes');
+        const archivosGrid = document.querySelector('.archivos-grid');
+        const hayArchivos = archivosGrid && archivosGrid.children.length > 0;
+        
+        console.log('🎯 actualizarInterfazEdicion - hay archivos:', hayArchivos, 'modo edición:', editando);
+        
+        if (dropZoneExistentes) {
+            dropZoneExistentes.style.display = editando ? 'flex' : 'none';
+            if (editando) {
+                console.log('🎯 Reconfigurado drag & drop para archivos existentes');
+                configurarDragDropArchivosExistentes();
+            }
+        } else if (editando && hayArchivos) {
+            // Si no existe la zona de drop pero hay archivos y estamos en modo edición, crearla
+            console.log('🎯 No hay zona de drop, creándola para archivos existentes...');
+            setTimeout(() => {
+                configurarDragDropArchivosExistentes();
+            }, 100);
+        }
+        
+        // Actualizar botones de eliminación de archivos
+        actualizarBotonesEliminacion();
+    }
+
+    // Función para convertir campos a editables
+    function convertirCamposEditables() {
+        const detallesGrid = document.querySelector('.detalles-grid');
+        if (!detallesGrid) return;
+        
+        // Reconstruir la grilla con campos editables
+        detallesGrid.innerHTML = '';
+        
+        // Título
+        detallesGrid.appendChild(crearCampoEditable('titulo', 'Título', reporteActual.titulo, 'text'));
+        
+        // Ubicación - usar id_salon actual del reporte
+        const idSalonActual = reporteActual.id_salon;
+        detallesGrid.appendChild(crearCampoEditable('ubicacion', 'Ubicación', idSalonActual, 'select', ubicacionesDisponibles));
+        
+        // Categoría
+        detallesGrid.appendChild(crearCampoEditable('categoria', 'Categoría', reporteActual.id_categoria, 'select', categoriasDisponibles));
+        
+        // Fecha del incidente (con hora)
+        if (reporteActual.fecha_reporte) {
+            // Formatear para datetime-local (YYYY-MM-DDTHH:MM)
+            // Conservar la hora original de la base de datos
+            const fechaOriginal = new Date(reporteActual.fecha_reporte);
+            
+            // Ajustar timezone para mostrar la hora local correcta
+            const offset = fechaOriginal.getTimezoneOffset();
+            const fechaLocal = new Date(fechaOriginal.getTime() - (offset * 60 * 1000));
+            const fechaDateTime = fechaLocal.toISOString().slice(0, 16);
+            
+            console.log('🕐 Preparando fecha para edición:', {
+                fechaOriginal: reporteActual.fecha_reporte,
+                fechaParseada: fechaOriginal.toISOString(),
+                fechaLocal: fechaLocal.toISOString(),
+                fechaParaInput: fechaDateTime
+            });
+            
+            detallesGrid.appendChild(crearCampoEditable('fecha_reporte', 'Fecha y hora del incidente', fechaDateTime, 'datetime-local'));
+        }
+        
+        // Fecha de envío (solo lectura)
+        const fechaEnvio = document.createElement('div');
+        fechaEnvio.className = 'detalle-item';
+        fechaEnvio.innerHTML = `
+            <p class="detalle-label">Fecha de envío</p>
+            <p class="detalle-valor">${formatearFecha(reporteActual.fecha_creacion)}</p>
+        `;
+        detallesGrid.appendChild(fechaEnvio);
+        
+        // Reportado por (solo lectura)
+        if (reporteActual.usuario_nombre) {
+            const reportadoPor = document.createElement('div');
+            reportadoPor.className = 'detalle-item';
+            reportadoPor.innerHTML = `
+                <p class="detalle-label">Reportado por</p>
+                <p class="detalle-valor">${escapeHtml(reporteActual.usuario_nombre)}</p>
+            `;
+            detallesGrid.appendChild(reportadoPor);
+        }
+        
+        // Descripción
+        detallesGrid.appendChild(crearCampoEditable('descripcion', 'Descripción', reporteActual.descripcion, 'textarea'));
+    }
+
+    // Función para crear un campo editable
+    function crearCampoEditable(nombre, etiqueta, valor, tipo, opciones = null) {
+        const div = document.createElement('div');
+        div.className = `detalle-item detalle-editable`;
+        
+        let inputHTML;
+        
+        switch (tipo) {
+            case 'textarea':
+                inputHTML = `<textarea id="edit-${nombre}" class="detalle-input" rows="4">${escapeHtml(valor || '')}</textarea>`;
+                break;
+            case 'select':
+                const optionsHTML = opciones ? opciones.map(op => 
+                    `<option value="${op.value}" ${op.value == valor ? 'selected' : ''}>${escapeHtml(op.text)}</option>`
+                ).join('') : '';
+                inputHTML = `<select id="edit-${nombre}" class="detalle-input">${optionsHTML}</select>`;
+                break;
+            case 'date':
+                inputHTML = `<input type="date" id="edit-${nombre}" class="detalle-input" value="${valor || ''}">`;
+                break;
+            case 'datetime-local':
+                inputHTML = `<input type="datetime-local" id="edit-${nombre}" class="detalle-input" value="${valor || ''}">`;
+                break;
+            default:
+                inputHTML = `<input type="text" id="edit-${nombre}" class="detalle-input" value="${escapeHtml(valor || '')}">`;
+        }
+        
+        div.innerHTML = `
+            <p class="detalle-label">${escapeHtml(etiqueta)}</p>
+            ${inputHTML}
+        `;
+        
+        return div;
+    }
+
+    // Función para obtener datos del formulario
+    function obtenerDatosFormulario() {
+        return {
+            titulo: document.getElementById('edit-titulo')?.value?.trim(),
+            descripcion: document.getElementById('edit-descripcion')?.value?.trim(),
+            id_salon: document.getElementById('edit-ubicacion')?.value,
+            id_categoria: document.getElementById('edit-categoria')?.value || null,
+            fecha_reporte: document.getElementById('edit-fecha_reporte')?.value || null
+        };
+    }
+
+    // Función para validar datos del reporte
+    function validarDatosReporte(datos) {
+        if (!datos.titulo || datos.titulo.length < 5) {
+            alert('El título debe tener al menos 5 caracteres');
+            return false;
+        }
+        
+        if (!datos.descripcion || datos.descripcion.length < 10) {
+            alert('La descripción debe tener al menos 10 caracteres');
+            return false;
+        }
+        
+        if (!datos.id_salon) {
+            alert('Debes seleccionar una ubicación');
+            return false;
+        }
+        
+        return true;
+    }
+
+    // Función para cargar categorías para edición
+    async function cargarCategoriasParaEdicion() {
+        try {
+            const response = await fetch('/api/categories', { credentials: 'include' });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data) {
+                    categoriasDisponibles = [
+                        { value: '', text: 'Seleccionar categoría...' },
+                        ...data.data.map(cat => ({ value: cat.id_categoria, text: cat.nombre }))
+                    ];
+                }
+            }
+        } catch (error) {
+            console.error('Error cargando categorías:', error);
+            categoriasDisponibles = [{ value: '', text: 'Error cargando categorías' }];
+        }
+    }
+
+    // Función para cargar ubicaciones para edición
+    async function cargarUbicacionesParaEdicion() {
+        try {
+            const response = await fetch('/api/ubicaciones', { credentials: 'include' });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data) {
+                    // Crear un array temporal para almacenar todas las ubicaciones con sus salones
+                    const opcionesUbicacion = [{ value: '', text: 'Seleccionar ubicación...' }];
+                    
+                    // Cargar salones para cada ubicación
+                    for (const ubicacion of data.data) {
+                        try {
+                            const salonesRes = await fetch(`/api/ubicaciones/${ubicacion.id_ubicacion}/salones`, { credentials: 'include' });
+                            if (salonesRes.ok) {
+                                const salonesData = await salonesRes.json();
+                                if (salonesData.success && salonesData.data) {
+                                    // Agregar cada salón con formato "Salón, Ubicación"
+                                    salonesData.data.forEach(salon => {
+                                        opcionesUbicacion.push({
+                                            value: salon.id_salon,
+                                            text: `${salon.nombre}, ${ubicacion.nombre}`
+                                        });
+                                    });
+                                }
+                            }
+                        } catch (salonError) {
+                            console.error(`Error cargando salones para ${ubicacion.nombre}:`, salonError);
+                        }
+                    }
+                    
+                    ubicacionesDisponibles = opcionesUbicacion;
+                }
+            }
+        } catch (error) {
+            console.error('Error cargando ubicaciones:', error);
+            ubicacionesDisponibles = [{ value: '', text: 'Error cargando ubicaciones' }];
+        }
+    }
+
+    // Función para mostrar toast de notificación
+    function mostrarToast(mensaje, tipo = 'info') {
+        if (window.mostrarToast) {
+            window.mostrarToast(mensaje, tipo);
+        } else {
+            console.log(`📢 ${tipo.toUpperCase()}: ${mensaje}`);
+        }
+    }
+
+    // ===========================
+    // GESTIÓN DE ARCHIVOS - DRAG & DROP
+    // ===========================
+
+    // Función para configurar drag & drop cuando hay archivos existentes
+    function configurarDragDropArchivosExistentes() {
+        const archivosGrid = document.querySelector('.archivos-grid');
+        console.log('🎯 configurarDragDropArchivosExistentes llamada, archivos-grid encontrado:', !!archivosGrid);
+        
+        if (!archivosGrid) return;
+        
+        // Agregar área de drop visual al final de los archivos existentes
+        const dropZoneExistente = document.querySelector('.drop-zone-existentes');
+        console.log('🎯 drop-zone-existentes ya existe:', !!dropZoneExistente);
+        
+        if (!dropZoneExistente) {
+            const dropZone = `
+                <div class="drop-zone-existentes">
+                    <div class="drop-zone-contenido">
+                        <span class="material-symbols-outlined">add</span>
+                        <span class="drop-zone-texto">Arrastra archivos aquí para agregar</span>
+                    </div>
+                </div>
+            `;
+            archivosGrid.insertAdjacentHTML('beforeend', dropZone);
+            console.log('✅ Zona de drop agregada al DOM');
+        }
+        
+        const dropZone = document.querySelector('.drop-zone-existentes');
+        if (!dropZone) return;
+        
+        // Limpiar eventos previos
+        dropZone.removeEventListener('dragover', handleDragOverExistentes);
+        dropZone.removeEventListener('dragenter', handleDragEnterExistentes);
+        dropZone.removeEventListener('dragleave', handleDragLeaveExistentes);
+        dropZone.removeEventListener('drop', handleDropExistentes);
+        dropZone.removeEventListener('click', handleClickDropZone);
+        
+        // Agregar eventos de drag & drop
+        dropZone.addEventListener('dragover', handleDragOverExistentes);
+        dropZone.addEventListener('dragenter', handleDragEnterExistentes);
+        dropZone.addEventListener('dragleave', handleDragLeaveExistentes);
+        dropZone.addEventListener('drop', handleDropExistentes);
+        dropZone.addEventListener('click', handleClickDropZone);
+        
+        console.log('🎯 Drag & drop configurado para archivos existentes');
+    }
+    
+    // Manejadores de eventos para archivos existentes
+    function handleDragOverExistentes(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function handleDragEnterExistentes(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!modoEdicion) return;
+        
+        const dropZone = e.currentTarget;
+        dropZone.classList.add('drag-over-existentes');
+        
+        const icono = dropZone.querySelector('.material-symbols-outlined');
+        const texto = dropZone.querySelector('.drop-zone-texto');
+        
+        if (icono) icono.textContent = 'upload';
+        if (texto) texto.textContent = 'Suelta los archivos aquí';
+    }
+    
+    function handleDragLeaveExistentes(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const dropZone = e.currentTarget;
+        if (!dropZone.contains(e.relatedTarget)) {
+            dropZone.classList.remove('drag-over-existentes');
+            
+            const icono = dropZone.querySelector('.material-symbols-outlined');
+            const texto = dropZone.querySelector('.drop-zone-texto');
+            
+            if (icono) icono.textContent = 'add';
+            if (texto) texto.textContent = 'Arrastra archivos aquí para agregar';
+        }
+    }
+    
+    function handleDropExistentes(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!modoEdicion) {
+            alert('No puedes agregar archivos fuera del modo de edición');
+            return;
+        }
+        
+        const dropZone = e.currentTarget;
+        dropZone.classList.remove('drag-over-existentes');
+        
+        const icono = dropZone.querySelector('.material-symbols-outlined');
+        const texto = dropZone.querySelector('.drop-zone-texto');
+        
+        if (icono) icono.textContent = 'add';
+        if (texto) texto.textContent = 'Arrastra archivos aquí para agregar';
+        
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0) {
+            console.log(`📁 ${files.length} archivos arrastrados a zona existente:`, files.map(f => f.name));
+            subirNuevosArchivos(files);
+        }
+    }
+    
+    function handleClickDropZone(e) {
+        if (!modoEdicion) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const inputArchivos = document.getElementById('nuevos-archivos');
+        if (inputArchivos) {
+            inputArchivos.click();
+        }
+    }
+
+    // Función para configurar drag & drop cuando no hay archivos
+    function configurarDragDropSinArchivos() {
+        const sinArchivos = document.querySelector('.sin-archivos');
+        console.log('🎯 configurarDragDropSinArchivos llamada, elemento encontrado:', !!sinArchivos);
+        
+        if (!sinArchivos) return;
+        
+        // Limpiar eventos previos
+        sinArchivos.removeEventListener('dragover', handleDragOver);
+        sinArchivos.removeEventListener('dragenter', handleDragEnter);
+        sinArchivos.removeEventListener('dragleave', handleDragLeave);
+        sinArchivos.removeEventListener('drop', handleDrop);
+        sinArchivos.removeEventListener('click', handleClickSinArchivos);
+        
+        // Agregar eventos de drag & drop
+        sinArchivos.addEventListener('dragover', handleDragOver);
+        sinArchivos.addEventListener('dragenter', handleDragEnter);
+        sinArchivos.addEventListener('dragleave', handleDragLeave);
+        sinArchivos.addEventListener('drop', handleDrop);
+        
+        // Agregar evento de click para abrir selector de archivos
+        sinArchivos.addEventListener('click', handleClickSinArchivos);
+        
+        console.log('🎯 Drag & drop y click configurados para área sin archivos');
+    }
+    
+    // Manejar click en área sin archivos
+    function handleClickSinArchivos(e) {
+        if (!modoEdicion) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const inputArchivos = document.getElementById('nuevos-archivos');
+        if (inputArchivos) {
+            inputArchivos.click();
+        }
+    }
+    
+    // Manejadores de eventos drag & drop
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function handleDragEnter(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!modoEdicion) return;
+        
+        const sinArchivos = e.currentTarget;
+        sinArchivos.classList.add('drag-over');
+        
+        // Cambiar el icono y texto durante el drag
+        const icono = sinArchivos.querySelector('.sin-archivos-icono .material-symbols-outlined');
+        const titulo = sinArchivos.querySelector('h4');
+        
+        if (icono) icono.textContent = 'upload';
+        if (titulo) titulo.textContent = 'Suelta los archivos aquí';
+    }
+    
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const sinArchivos = e.currentTarget;
+        // Solo remover si realmente salimos del área completa
+        if (!sinArchivos.contains(e.relatedTarget)) {
+            sinArchivos.classList.remove('drag-over');
+            
+            // Restaurar icono y texto original
+            const icono = sinArchivos.querySelector('.sin-archivos-icono .material-symbols-outlined');
+            const titulo = sinArchivos.querySelector('h4');
+            
+            if (icono) icono.textContent = 'folder_open';
+            if (titulo) titulo.textContent = 'No hay archivos adjuntos';
+        }
+    }
+    
+    function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!modoEdicion) {
+            alert('No puedes agregar archivos fuera del modo de edición');
+            return;
+        }
+        
+        const sinArchivos = e.currentTarget;
+        sinArchivos.classList.remove('drag-over');
+        
+        // Restaurar icono y texto original
+        const icono = sinArchivos.querySelector('.sin-archivos-icono .material-symbols-outlined');
+        const titulo = sinArchivos.querySelector('h4');
+        
+        if (icono) icono.textContent = 'folder_open';
+        if (titulo) titulo.textContent = 'No hay archivos adjuntos';
+        
+        // Obtener archivos arrastrados
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0) {
+            console.log(`📁 ${files.length} archivos arrastrados:`, files.map(f => f.name));
+            subirNuevosArchivos(files);
+        }
+    }
+
+    // ===========================
+    // GESTIÓN DE ARCHIVOS
+    // ===========================
+
+    // Función para actualizar botones de eliminación
+    function actualizarBotonesEliminacion() {
+        const botonesEliminar = document.querySelectorAll('.btn-eliminar-archivo');
+        console.log(`🔄 Actualizando ${botonesEliminar.length} botones de eliminación. Modo edición: ${modoEdicion}`);
+        botonesEliminar.forEach(btn => {
+            btn.style.display = modoEdicion ? 'flex' : 'none';
+        });
+    }
+
+    // Función para eliminar archivo
+    window.eliminarArchivo = function(archivoId, nombreArchivo) {
+        if (!modoEdicion) {
+            alert('No puedes eliminar archivos fuera del modo de edición');
+            return;
+        }
+
+        if (!confirm(`¿Estás seguro de que deseas eliminar el archivo "${nombreArchivo}"?`)) {
+            return;
+        }
+
+        try {
+            console.log(`🗑️ Marcando archivo para eliminación: ${archivoId} - ${nombreArchivo}`);
+            
+            // Agregar a la lista de archivos a eliminar
+            if (!archivosEliminados.includes(archivoId)) {
+                archivosEliminados.push(archivoId);
+            }
+
+            // Ocultar elemento del DOM (no remover, solo ocultar)
+            const archivoElement = document.querySelector(`[data-archivo-id="${archivoId}"]`);
+            if (archivoElement) {
+                archivoElement.style.opacity = '0.5';
+                archivoElement.style.pointerEvents = 'none';
+                // Agregar indicador de eliminación
+                const indicator = document.createElement('div');
+                indicator.className = 'archivo-eliminado-indicator';
+                indicator.innerHTML = '<span style="color: red; font-weight: bold;">⚠️ Marcado para eliminar</span>';
+                archivoElement.appendChild(indicator);
+            }
+
+            mostrarToast('Archivo marcado para eliminación. Se eliminará al guardar.', 'warning');
+
+        } catch (error) {
+            console.error('❌ Error marcando archivo para eliminación:', error);
+            alert('Error al marcar archivo para eliminación: ' + error.message);
+        }
+    };
+
+    // Manejar selección de nuevos archivos
+    document.addEventListener('change', function(e) {
+        if (e.target.id === 'nuevos-archivos') {
+            const files = e.target.files;
+            if (files.length > 0) {
+                subirNuevosArchivos(files);
+            }
+        }
+    });
+
+    // Función para subir nuevos archivos
+    async function subirNuevosArchivos(files) {
+        if (!modoEdicion || !reporteActual) {
+            alert('No se pueden agregar archivos en este momento');
+            return;
+        }
+
+        try {
+            console.log(`📤 Procesando ${files.length} archivos para agregar...`);
+            
+            // Validar límite de archivos
+            const archivosActuales = document.querySelectorAll('.archivo-item:not([style*="opacity: 0.5"])').length;
+            const archivosTemporalesCount = archivosTemporales.length;
+            const totalArchivos = archivosActuales + archivosTemporalesCount + files.length - archivosEliminados.length;
+            
+            if (totalArchivos > 5) {
+                alert(`No puedes agregar más archivos. Límite máximo: 5 archivos.\nActuales: ${archivosActuales + archivosTemporalesCount}, Intentas agregar: ${files.length}`);
+                return;
+            }
+            
+            // Validar tamaño de archivos
+            for (let file of files) {
+                if (file.size > 50 * 1024 * 1024) { // 50MB
+                    alert(`El archivo "${file.name}" es demasiado grande. Máximo: 50MB`);
+                    return;
+                }
+                
+                // Validar tipo de archivo
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/avi'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert(`Tipo de archivo no permitido: "${file.name}". Solo se permiten imágenes y videos.`);
+                    return;
+                }
+            }
+            
+            // Agregar archivos a la lista temporal
+            for (let file of files) {
+                archivosTemporales.push(file);
+                
+                // Mostrar vista previa temporal
+                agregarVistaPrevia(file);
+            }
+
+            mostrarToast(`${files.length} archivo(s) agregado(s) temporalmente. Se subirán al guardar.`, 'info');
+
+            // Limpiar input
+            document.getElementById('nuevos-archivos').value = '';
+
+        } catch (error) {
+            console.error('❌ Error procesando archivos:', error);
+            alert('Error al procesar archivos: ' + error.message);
+        }
+    }
+    
+    // Función para agregar vista previa de archivo temporal
+    function agregarVistaPrevia(file) {
+        const archivosGrid = document.querySelector('.archivos-grid');
+        if (!archivosGrid) return;
+        
+        const isImage = file.type.startsWith('image/');
+        const isVideo = file.type.startsWith('video/');
+        const fileId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        let contenidoArchivo = '';
+        
+        if (isImage) {
+            contenidoArchivo = `
+                <div class="archivo-item imagen-item archivo-temporal" data-archivo-temp="${fileId}">
+                    <div class="archivo-icono imagen">
+                        <span class="material-symbols-outlined">image</span>
+                    </div>
+                    <div class="archivo-info">
+                        <div class="archivo-nombre">${escapeHtml(file.name)}</div>
+                        <div class="archivo-meta">Imagen • ${formatearTamaño(file.size)} • <strong style="color: orange;">Pendiente de guardar</strong></div>
+                    </div>
+                    <div class="archivo-acciones">
+                        <button class="btn-eliminar-archivo-temp" onclick="eliminarArchivoTemporal('${fileId}')" title="Quitar archivo">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else if (isVideo) {
+            contenidoArchivo = `
+                <div class="archivo-item video-item archivo-temporal" data-archivo-temp="${fileId}">
+                    <div class="archivo-icono video">
+                        <span class="material-symbols-outlined">videocam</span>
+                    </div>
+                    <div class="archivo-info">
+                        <div class="archivo-nombre">${escapeHtml(file.name)}</div>
+                        <div class="archivo-meta">Video • ${formatearTamaño(file.size)} • <strong style="color: orange;">Pendiente de guardar</strong></div>
+                    </div>
+                    <div class="archivo-acciones">
+                        <button class="btn-eliminar-archivo-temp" onclick="eliminarArchivoTemporal('${fileId}')" title="Quitar archivo">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (contenidoArchivo) {
+            // Insertar antes de la zona de drop si existe, o al final
+            const archivosGrid = document.querySelector('.archivos-grid');
+            const dropZone = archivosGrid.querySelector('.drop-zone-existentes');
+            if (dropZone) {
+                dropZone.insertAdjacentHTML('beforebegin', contenidoArchivo);
+            } else {
+                archivosGrid.insertAdjacentHTML('beforeend', contenidoArchivo);
+            }
+        }
+    }
+    
+    // Función para eliminar archivo temporal
+    window.eliminarArchivoTemporal = function(tempId) {
+        const archivoElement = document.querySelector(`[data-archivo-temp="${tempId}"]`);
+        if (archivoElement) {
+            // Encontrar el índice en archivosTemporales basado en el tiempo del ID
+            const timestamp = tempId.split('-')[1];
+            const index = archivosTemporales.findIndex((_, i) => {
+                // Como no podemos identificar exactamente, removemos el último agregado
+                return i === archivosTemporales.length - document.querySelectorAll('.archivo-temporal').length + Array.from(document.querySelectorAll('.archivo-temporal')).indexOf(archivoElement);
+            });
+            
+            if (index >= 0) {
+                archivosTemporales.splice(index, 1);
+            }
+            
+            archivoElement.remove();
+            mostrarToast('Archivo temporal eliminado', 'info');
+        }
+    };
     
     // Función para inicializar después de navegación SPA
     window.inicializarDetalleReporte = function() {
@@ -1054,4 +2064,36 @@ $(document).ready(function() {
             });
         }
     };
+    
+    // ===========================
+    // FUNCIÓN DE LIMPIEZA PARA SPA
+    // ===========================
+    
+    // Función para limpiar estado cuando se navega fuera de la página
+    window.limpiarDetalleReporte = function() {
+        console.log('🧹 Limpiando estado de detalle-reporte...');
+        
+        // Cerrar cualquier menú desplegable abierto
+        $('.menu-desplegable').removeClass('mostrar');
+        $('.user-dropdown, .dropdown-perfil').removeClass('open');
+        
+        // Limpiar modo edición si está activo
+        if (modoEdicion) {
+            modoEdicion = false;
+            datosOriginales = null;
+            archivosTemporales = [];
+            archivosEliminados = [];
+        }
+        
+        // Limpiar variables globales
+        reporteActual = null;
+        categoriasDisponibles = [];
+        ubicacionesDisponibles = [];
+    };
+    
+    // Exponer función de limpieza globalmente para que SPA la pueda llamar
+    if (typeof window.spaCleanupFunctions === 'undefined') {
+        window.spaCleanupFunctions = {};
+    }
+    window.spaCleanupFunctions['detalle-reporte'] = window.limpiarDetalleReporte;
 });

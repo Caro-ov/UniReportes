@@ -40,6 +40,26 @@
             <!-- Contenido principal -->
             <main class="contenido-principal">
                 <div class="contenedor-contenido">
+                    <!-- Notificaciones Urgentes -->
+                    <section class="seccion-notificaciones-urgentes" id="notificaciones-urgentes" style="display: none;">
+                        <div class="notificacion-urgente">
+                            <div class="icono-urgente">
+                                <span class="material-symbols-outlined">error</span>
+                            </div>
+                            <div class="contenido-notificacion">
+                                <h3 class="titulo-notificacion">Notificaciones Urgentes</h3>
+                                <div class="lista-reportes-urgentes" id="lista-reportes-urgentes">
+                                    <!-- Los reportes urgentes se cargarán dinámicamente -->
+                                </div>
+                            </div>
+                            <div class="acciones-notificacion">
+                                <button class="btn-cerrar-notificacion" id="cerrar-notificaciones">
+                                    <span class="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
                     <!-- Sección principal de reportes -->
                     <section class="seccion-reportes-recientes">
                         <div class="header-seccion">
@@ -61,6 +81,16 @@
                                         <option value="estructural">Estructural</option>
                                         <option value="climatizacion">Climatización</option>
                                         <option value="seguridad">Seguridad</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                                
+                                <div class="filtro-grupo">
+                                    <span class="filtro-label">Prioridad</span>
+                                    <select class="filtro-select" id="filtro-prioridad">
+                                        <option value="">Todas</option>
+                                        <option value="urgente">Urgentes</option>
+                                        <option value="normal">Normales</option>
                                     </select>
                                     <span class="material-symbols-outlined">expand_more</span>
                                 </div>
@@ -97,6 +127,7 @@
                                         <th>ID</th>
                                         <th>Título</th>
                                         <th>Categoría</th>
+                                        <th>Prioridad</th>
                                         <th>Estado</th>
                                         <th>Ubicación</th>
                                         <th>Usuario</th>
@@ -108,6 +139,8 @@
                                     <!-- Los reportes se cargarán dinámicamente desde la API -->
                                 </tbody>
                             </table>
+                            <!-- Controles de paginación (se llenan dinámicamente) -->
+                            <div id="paginacion-reportes" class="paginacion-container"></div>
                         </div>
                     </section>
                 </div>

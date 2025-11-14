@@ -88,13 +88,43 @@
                         <p class="numero-reporte">Reporte #---</p>
                     </div>
 
-                    <!-- Contenido del reporte -->
+                    <!-- Detalles del reporte -->
                     <div class="reporte-contenido">
                         <!-- Detalles del reporte -->
                         <div class="detalles-section">
                             <h3 class="section-titulo">Detalles del reporte</h3>
                             <div class="detalles-grid">
                                 <!-- Los detalles se cargarán dinámicamente -->
+                            </div>
+                        </div>
+                        
+                        <!-- Gestión de estado (solo admin) -->
+                        <div class="estado-section">
+                            <h3 class="section-titulo">Gestión de estado</h3>
+                            <div class="estado-gestion">
+                                <div class="estado-actual">
+                                    <label class="estado-label">Estado actual:</label>
+                                    <span class="estado estado-pendiente" id="estado-actual-display">Cargando...</span>
+                                </div>
+                                <div class="cambiar-estado">
+                                    <label for="nuevo-estado" class="estado-label">Cambiar a:</label>
+                                    <div class="estado-controls">
+                                        <select id="nuevo-estado" class="estado-select">
+                                            <option value="">Seleccionar nuevo estado...</option>
+                                            <!-- Los estados se cargarán dinámicamente -->
+                                        </select>
+                                        <button type="button" class="btn-actualizar-estado" onclick="actualizarEstadoReporte()">
+                                            <span class="material-symbols-outlined">update</span>
+                                            Actualizar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="estado-info">
+                                    <p class="estado-descripcion">
+                                        <span class="material-symbols-outlined">info</span>
+                                        Los cambios de estado se registran automáticamente en el historial del reporte.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>

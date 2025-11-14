@@ -35,6 +35,61 @@
   border-radius: 12px;
   margin-bottom: 16px;
 }
+.tarjeta-reporte,
+.tarjeta-beneficio {
+  transition: transform 0.28s cubic-bezier(.2,.9,.2,1), box-shadow 0.28s ease, border-color 0.28s ease;
+  will-change: transform, box-shadow;
+}
+
+.contenedor-tarjetas {
+  align-items: stretch; /* make cards equal height */
+}
+
+.tarjeta-reporte {
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 8px 20px rgba(2,6,23,0.04);
+}
+
+.tarjeta-reporte:hover,
+.tarjeta-reporte:focus-within,
+.tarjeta-beneficio:hover,
+.tarjeta-beneficio:focus-within {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 22px 50px rgba(2,6,23,0.12);
+  border-color: rgba(17,115,212,0.12);
+}
+
+.tarjeta-reporte:focus-within,
+.tarjeta-beneficio:focus-within {
+  outline: none;
+  box-shadow: 0 22px 50px rgba(17,115,212,0.12);
+}
+
+.tarjeta-reporte .titulo-tarjeta,
+.tarjeta-beneficio .titulo-beneficio {
+  color: var(--texto-principal);
+  font-weight: 700;
+}
+
+.imagen-reporte {
+  transition: transform 0.45s cubic-bezier(.2,.9,.2,1);
+}
+
+.tarjeta-reporte:hover .imagen-reporte,
+.tarjeta-reporte:focus-within .imagen-reporte {
+  transform: scale(1.03);
+}
+
+/* Accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta-reporte,
+  .tarjeta-beneficio,
+  .imagen-reporte {
+    transition: none !important;
+    transform: none !important;
+  }
+}
 .titulo-tarjeta {
   font-size: 1.1rem;
   font-weight: 600;
@@ -105,35 +160,84 @@ body {
   z-index: 50;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: rgba(246,247,248,0.8);
-  border-bottom: 1px solid var(--primario);
-  padding: 12px 40px;
-  backdrop-filter: blur(4px);
+  justify-content: space-around;
+  background: rgba(255,255,255,0.72);
+  border-bottom: 1px solid rgba(15,23,42,0.06);
+  padding: 10px 28px;
+  backdrop-filter: blur(6px) saturate(120%);
+  transition: background-color 0.22s ease, box-shadow 0.22s ease, padding 0.2s ease;
 }
 .logo {
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
+/* Ensure logo anchor has no underline and keeps layout when converted to <a> */
+.logo[href] {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+}
 .titulo {
-  font-size: 1.25rem;
-  font-weight: bold;
+  font-size: 1.125rem;
+  font-weight: 700;
   color: var(--texto-principal);
+  margin: 0;
 }
 .menu {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
 }
 .menu-enlace {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--texto-principal);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(17,24,39,0.8);
   text-decoration: none;
-  transition: color 0.2s;
+  padding: 8px 6px;
+  border-radius: 8px;
+  transition: color 0.18s ease, background-color 0.18s ease, transform 0.15s ease;
 }
 .menu-enlace:hover {
+  color: var(--primario);
+  background-color: rgba(17,115,212,0.04);
+  transform: translateY(-1px);
+}
+
+/* Right-side actions inside header (login/profile/buttons) */
+.encabezado .menu:last-child {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Refined button styles for header actions */
+.boton {
+  min-width: 84px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+}
+.boton-secundario {
+  background: rgba(17,115,212,0.08);
+  color: var(--primario);
+  box-shadow: none;
+}
+.boton-secundario:hover {
+  background: rgba(17,115,212,0.14);
+  transform: translateY(-2px);
+}
+
+/* Small logo icon styling */
+.icono-beneficio {
+  font-size: 1.6rem;
   color: var(--primario);
 }
 
@@ -166,36 +270,107 @@ body {
 
 /* Sección principal */
 .hero {
-  min-height: 60vh;
+  min-height: 64vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background-size: cover;
   background-position: center;
-  padding: 80px 16px;
-  background-image: linear-gradient(rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBCIlje1q6zGokQAxfOU1zJQCn3sTNt_TKtNn3W0e2Gw7wx0l0a_FoQCKK13fdaJyrckx14P4Hkrx27qYGgAeCa0nnGhgfa3JUiPA7IraNrbrE1dgclCYRv5wS4GJAwNhyUVN-mOwQyLUEiLhjdLn-Ff8rCR994YT7bHlpy_0enhRGz9uMUDopWoLZTxdA6GwGtcLTbBUjHJ3t9RtHPLosWEoki-BEHTPvB5tfCdzDsjTIT7fXjFG0BkTOXX6uan4Z24_IK_9Prm4U");
+  padding: 50px 16px;
+  background-image: linear-gradient(rgba(8,23,40,0.45) 0%, rgba(8,23,40,0.6) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBCIlje1q6zGokQAxfOU1zJQCn3sTNt_TKtNn3W0e2Gw7wx0l0a_FoQCKK13fdaJyrckx14P4Hkrx27qYGgAeCa0nnGhgfa3JUiPA7IraNrbrE1dgclCYRv5wS4GJAwNhyUVN-mOwQyLUEiLhjdLn-Ff8rCR994YT7bHlpy_0enhRGz9uMUDopWoLZTxdA6GwGtcLTbBUjHJ3t9RtHPLosWEoki-BEHTPvB5tfCdzDsjTIT7fXjFG0BkTOXX6uan4Z24_IK_9Prm4U");
   color: var(--texto-blanco);
   text-align: center;
 }
+
+/* Card dentro del hero: semitransparente, centrado y con backdrop blur */
+.hero-card {
+  max-width: 860px;
+  width: 100%;
+  margin: 0 16px;
+  padding: 36px 36px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(2,6,23,0.45);
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  border: 1px solid rgba(255,255,255,0.06);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
 .hero-titulo {
-  font-size: 2.5rem;
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
   font-weight: 900;
-  margin-bottom: 24px;
+  margin: 0 0 14px 0;
+  color: #f8fafc;
+  line-height: 1.05;
+  text-align: center;
 }
+
 .hero-texto {
-  font-size: 1.125rem;
-  margin-bottom: 32px;
-  color: #d1d5db;
+  font-size: clamp(1rem, 1.8vw, 1.125rem);
+  margin: 0 0 20px 0;
+  color: rgba(241,245,249,0.9);
+  text-align: justify;
 }
+
 .hero-boton {
-  margin-top: 40px;
+  margin-top: 18px;
+  align-self: center;
 }
+
+.hero-boton .boton-principal {
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 10px;
+  background-image: linear-gradient(90deg, #1173d4 0%, #1d4ed8 100%);
+  box-shadow: 0 10px 30px rgba(17,115,212,0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  display: inline-block;
+}
+
+.hero-boton .boton-principal:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(17,115,212,0.22);
+}
+
+@media (max-width: 768px) {
+  .hero-card { padding: 24px; border-radius: 12px; }
+  .hero { padding: 48px 12px; }
+  .hero-card { text-align: center; }
+}
+
+/* Ajustes específicos para el CTA dentro del hero: asegurar proporciones y quitar subrayado */
 .hero-boton .boton {
-  padding: 16px 32px;
-  font-size: 1.125rem;
-  font-weight: 600;
+  height: auto;
   min-width: 150px;
-  box-shadow: 0 4px 14px 0 rgba(17, 115, 212, 0.3);
+  padding: 12px 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+/* Sangría (indent) en desktop para el contenido del hero */
+@media (min-width: 1024px) {
+  .hero-card {
+    padding-left: 56px;
+    padding-right: 56px;
+  }
+}
+
+/* Alineación y estilo del texto dentro del hero para mejorar lectura */
+.hero-texto {
+  margin-top: 6px;
+  margin-bottom: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-boton .boton-principal, .hero-card { transition: none; }
 }
 
 /* Sección de beneficios */

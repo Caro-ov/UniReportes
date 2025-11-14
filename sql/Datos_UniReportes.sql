@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 06-11-2025 a las 15:21:13
+-- Tiempo de generación: 12-11-2025 a las 16:28:45
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -34,6 +34,23 @@ CREATE TABLE `archivos` (
   `tipo` varchar(100) DEFAULT NULL,
   `fecha_subida` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `archivos`
+--
+
+INSERT INTO `archivos` (`id_archivo`, `id_reporte`, `url`, `tipo`, `fecha_subida`) VALUES
+(1, 10, 'uploads/reports/2025/11/06/1762439474156-640-tigre.jpg', 'image/jpeg', '2025-11-06 09:31:14'),
+(2, 11, 'uploads/reports/2025/11/06/1762465987375-629-UniReportes_-_Mis_Reportes_-_Brave_2025-10-27_12-5.mp4', 'video/mp4', '2025-11-06 16:53:07'),
+(3, 11, 'uploads/reports/2025/11/06/1762465987472-19-Captura_de_pantalla_2025-11-06_104233.png', 'image/png', '2025-11-06 16:53:07'),
+(4, 12, 'uploads/reports/2025/11/07/1762531072884-229-beastars9.jpg', 'image/jpeg', '2025-11-07 10:57:52'),
+(5, 12, 'uploads/reports/2025/11/07/1762531072898-421-beastars10.jpg', 'image/jpeg', '2025-11-07 10:57:52'),
+(6, 12, 'uploads/reports/2025/11/07/1762531072914-793-beastars11.jpg', 'image/jpeg', '2025-11-07 10:57:52'),
+(7, 12, 'uploads/reports/2025/11/07/1762531072936-307-beastars12.jpg', 'image/jpeg', '2025-11-07 10:57:52'),
+(8, 12, 'uploads/reports/2025/11/07/1762531072948-297-beastars13.jpg', 'image/jpeg', '2025-11-07 10:57:52'),
+(9, 10, 'uploads/reports/2025/11/08/1762644082942-135-anubis.png', 'image/png', '2025-11-08 18:21:22'),
+(17, 7, 'uploads/reports/2025/11/09/1762702696292-984-ANE1.jpg', 'image/jpeg', '2025-11-09 10:38:16'),
+(21, 13, 'uploads/reports/2025/11/09/1762705022500-795-anubis.png', 'image/png', '2025-11-09 11:17:02');
 
 -- --------------------------------------------------------
 
@@ -73,6 +90,20 @@ CREATE TABLE `comentarios` (
   `comentario` text DEFAULT NULL,
   `fecha` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `comentarios`
+--
+
+INSERT INTO `comentarios` (`id_comentario`, `id_reporte`, `id_usuario`, `comentario`, `fecha`) VALUES
+(1, 11, 1, 'prueba 1 de comentario', '2025-11-06 17:15:07'),
+(2, 11, 3, 'comentarios funcionando correctamente', '2025-11-06 17:16:39'),
+(3, 11, 3, 'todo funciona?', '2025-11-06 17:18:05'),
+(4, 11, 3, 'ya funciona el header?', '2025-11-06 17:21:35'),
+(5, 9, 3, '.............................', '2025-11-06 18:47:16'),
+(6, 13, 7, 'historial de cambios totalmente funcional sin errores!', '2025-11-09 11:50:54'),
+(7, 11, 3, 'hola papuuuu', '2025-11-10 14:12:22'),
+(8, 13, 1, 'prueba de comentario', '2025-11-12 09:25:17');
 
 -- --------------------------------------------------------
 
@@ -115,10 +146,10 @@ CREATE TABLE `estados` (
 --
 
 INSERT INTO `estados` (`id_estado`, `nombre`, `orden`, `fecha_creacion`) VALUES
-(1, 'pendiente', 1, '2025-11-04 19:19:35'),
-(2, 'revisado', 2, '2025-11-04 19:19:35'),
-(3, 'en proceso', 3, '2025-11-04 19:19:35'),
-(4, 'resuelto', 4, '2025-11-04 19:19:35');
+(1, 'Pendiente', 1, '2025-11-04 19:19:35'),
+(2, 'Revisado', 2, '2025-11-04 19:19:35'),
+(3, 'En proceso', 3, '2025-11-04 19:19:35'),
+(4, 'Resuelto', 4, '2025-11-04 19:19:35');
 
 -- --------------------------------------------------------
 
@@ -142,6 +173,66 @@ CREATE TABLE `historial_cambios` (
   `cambios_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`cambios_json`)),
   `fecha` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `historial_cambios`
+--
+
+INSERT INTO `historial_cambios` (`id_historial`, `id_reporte`, `tipo`, `id_estado_anterior`, `id_estado_nuevo`, `id_usuario_actor`, `id_usuario_asignado`, `id_dependencia_asignada`, `descripcion`, `campo`, `valor_anterior`, `valor_nuevo`, `cambios_json`, `fecha`) VALUES
+(3, 12, 'cambio_estado', 1, 2, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"revisado\"', NULL, NULL, NULL, NULL, '2025-11-07 11:44:51'),
+(4, 12, 'cambio_estado', 2, 3, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"en proceso\"', NULL, NULL, NULL, NULL, '2025-11-08 17:20:39'),
+(5, 11, 'cambio_estado', 1, 4, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"resuelto\"', NULL, NULL, NULL, NULL, '2025-11-08 17:26:10'),
+(6, 11, 'edicion', NULL, NULL, 3, NULL, NULL, 'Reporte editado: titulo, descripcion, id_salon, fecha_reporte', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Prueba de vista archivos y comentario\",\"valor_nuevo\":\"Prueba de vista archivos y comentario(edición)\"},{\"campo\":\"descripcion\",\"valor_anterior\":\"ver si los comentarios funcionan y se pueden ver fotos y videos..\",\"valor_nuevo\":\"ver si los comentarios funcionan y se pueden ver fotos y videos..\\n\\nviendo si funciona la edición\"},{\"campo\":\"id_salon\",\"valor_anterior\":\"66\",\"valor_nuevo\":\"28\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-06T21:51:00.000Z\",\"valor_nuevo\":\"2025-11-06\"}]', '2025-11-08 18:02:26'),
+(7, 10, 'edicion', NULL, NULL, 3, NULL, NULL, 'Reporte editado: fecha_reporte', NULL, NULL, NULL, '[{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-03T14:28:00.000Z\",\"valor_nuevo\":\"2025-11-03\"}]', '2025-11-08 18:28:57'),
+(8, 10, 'edicion', NULL, NULL, 3, NULL, NULL, 'Reporte editado: fecha_reporte', NULL, NULL, NULL, '[{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-03T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-03\"}]', '2025-11-08 18:30:37'),
+(9, 11, 'edicion', NULL, NULL, 3, NULL, NULL, 'Reporte editado: titulo, fecha_reporte', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Prueba de vista archivos y comentario(edición)\",\"valor_nuevo\":\"Prueba de vista archivos y comentario(edición).\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-06T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-06\"}]', '2025-11-09 08:53:22'),
+(10, 11, 'edicion', NULL, NULL, 3, NULL, NULL, 'Reporte editado: Título, Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Prueba de vista archivos y comentario(edición).\",\"valor_nuevo\":\"Prueba de vista archivos y comentario(edición)\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-06T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-06\"}]', '2025-11-09 09:30:31'),
+(11, 9, 'edicion', NULL, NULL, 3, NULL, NULL, 'Reporte editado: Título, Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Luces dañadas\",\"valor_nuevo\":\"Luces dañadas.\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-10-25T23:21:00.000Z\",\"valor_nuevo\":\"2025-10-25\"}]', '2025-11-09 09:33:26'),
+(12, 6, 'edicion', NULL, NULL, 3, NULL, NULL, 'Reporte editado: Título, Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Luces dañadas\",\"valor_nuevo\":\"Luces dañadas.\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-05T00:52:48.000Z\",\"valor_nuevo\":\"2025-11-05\"}]', '2025-11-09 09:37:00'),
+(13, 10, 'edicion', NULL, NULL, 3, NULL, NULL, 'Reporte editado: Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-03T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-03\"}]', '2025-11-09 09:42:24'),
+(14, 10, 'archivo_eliminado', NULL, NULL, 3, NULL, NULL, 'Archivo eliminado: undefined', NULL, NULL, NULL, NULL, '2025-11-09 09:42:24'),
+(15, 10, 'edicion', NULL, NULL, 3, NULL, NULL, 'Reporte editado: Título, Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Prueba manejo de archivos\",\"valor_nuevo\":\"Prueba manejo de archivos.\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-03T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-03\"}]', '2025-11-09 09:42:39'),
+(16, 11, 'edicion', NULL, NULL, 3, NULL, NULL, 'Reporte editado: Título, Descripción, Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Prueba de vista archivos y comentario(edición)\",\"valor_nuevo\":\"Prueba de vista archivos y comentario(edición).\"},{\"campo\":\"descripcion\",\"valor_anterior\":\"ver si los comentarios funcionan y se pueden ver fotos y videos..\\n\\nviendo si funciona la edición\",\"valor_nuevo\":\"ver si los comentarios funcionan y se pueden ver fotos y videos..\\n\\nviendo si funciona la edición...\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-06T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-06\"}]', '2025-11-09 09:46:17'),
+(17, 12, 'edicion', NULL, NULL, 6, NULL, NULL, 'Reporte editado: Título, Salón, Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"prueba de funcion reporte\",\"valor_nuevo\":\"prueba de función reporte\"},{\"campo\":\"id_salon\",\"valor_anterior\":\"48\",\"valor_nuevo\":\"47\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-10-09T15:55:00.000Z\",\"valor_nuevo\":\"2025-10-09\"}]', '2025-11-09 09:50:53'),
+(18, 12, 'edicion', NULL, NULL, 6, NULL, NULL, 'Reporte editado: Título, Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"prueba de función reporte\",\"valor_nuevo\":\"prueba de función reporte.\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-10-09T05:00:00.000Z\",\"valor_nuevo\":\"2025-10-09\"}]', '2025-11-09 09:56:16'),
+(19, 12, 'edicion', NULL, NULL, 6, NULL, NULL, 'Reporte editado: Título, Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"prueba de función reporte.\",\"valor_nuevo\":\"Prueba de función reporte\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-10-09T05:00:00.000Z\",\"valor_nuevo\":\"2025-10-09\"}]', '2025-11-09 09:57:42'),
+(20, 12, 'edicion', NULL, NULL, 6, NULL, NULL, 'Reporte editado: Título, Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Prueba de función reporte\",\"valor_nuevo\":\"Prueba de función reporte.\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-10-09T05:00:00.000Z\",\"valor_nuevo\":\"2025-10-09\"}]', '2025-11-09 10:01:23'),
+(21, 12, 'edicion', NULL, NULL, 6, NULL, NULL, 'Reporte editado: Título, Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Prueba de función reporte.\",\"valor_nuevo\":\"Prueba de función reporte\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-10-09T05:00:00.000Z\",\"valor_nuevo\":\"2025-10-09\"}]', '2025-11-09 10:04:09'),
+(22, 6, 'edicion', NULL, NULL, 3, NULL, NULL, 'Reporte editado: Título, Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Luces dañadas.\",\"valor_nuevo\":\"Luces dañadas\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-05T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-05\"}]', '2025-11-09 10:08:46'),
+(23, 7, 'archivo', NULL, NULL, 6, NULL, NULL, '1 archivo(s) agregado(s): ANE1.jpg', NULL, NULL, NULL, NULL, '2025-11-09 10:34:04'),
+(24, 7, 'edicion', NULL, NULL, 6, NULL, NULL, 'Reporte editado: Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-01T14:04:00.000Z\",\"valor_nuevo\":\"2025-11-01\"}]', '2025-11-09 10:34:04'),
+(25, 7, 'edicion', NULL, NULL, 6, NULL, NULL, 'Reporte editado: Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-01T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-01\"}]', '2025-11-09 10:37:13'),
+(26, 7, 'archivo', NULL, NULL, 6, NULL, NULL, '1 archivo(s) agregado(s): ANE1.jpg', NULL, NULL, NULL, NULL, '2025-11-09 10:38:16'),
+(27, 7, 'edicion', NULL, NULL, 6, NULL, NULL, 'Reporte editado: Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-01T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-01\"}]', '2025-11-09 10:38:16'),
+(28, 13, 'archivo', NULL, NULL, 7, NULL, NULL, '1 archivo(s) agregado(s): ANE1.jpg', NULL, NULL, NULL, NULL, '2025-11-09 10:46:10'),
+(29, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-08T15:44:00.000Z\",\"valor_nuevo\":\"2025-11-08\"}]', '2025-11-09 10:46:10'),
+(30, 13, 'archivo', NULL, NULL, 7, NULL, NULL, '1 archivo(s) agregado(s): anubis.png', NULL, NULL, NULL, NULL, '2025-11-09 10:57:24'),
+(31, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-08T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-08\"}]', '2025-11-09 10:57:24'),
+(32, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-08T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-08\"}]', '2025-11-09 11:05:36'),
+(33, 13, 'archivo', NULL, NULL, 7, NULL, NULL, '4 archivo(s) agregado(s): balto1.png, anubis.png, anubis1.jpg, balto.jpg', NULL, NULL, NULL, NULL, '2025-11-09 11:17:02'),
+(34, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-08T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-08\"}]', '2025-11-09 11:17:02'),
+(35, 13, 'archivo', NULL, NULL, 7, NULL, NULL, '1 archivo(s) eliminado(s): 1762705022429-961-balto1.png', NULL, NULL, NULL, NULL, '2025-11-09 11:17:26'),
+(36, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Fecha reportada', NULL, NULL, NULL, '[{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-08T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-08\"}]', '2025-11-09 11:17:26'),
+(37, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Descripción', NULL, NULL, NULL, '[{\"campo\":\"descripcion\",\"valor_anterior\":\"Prueba de pantalla detalles, los archivos y historial de cambios\",\"valor_nuevo\":\"Prueba de pantalla detalles, los archivos y historial de cambios(listo)\"}]', '2025-11-09 11:21:08'),
+(38, 13, 'archivo', NULL, NULL, 7, NULL, NULL, '1 archivo(s) eliminado(s): 1762705022557-440-balto.jpg', NULL, NULL, NULL, NULL, '2025-11-09 11:22:14'),
+(39, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Descripción, Categoría', NULL, NULL, NULL, '[{\"campo\":\"descripcion\",\"valor_anterior\":\"Prueba de pantalla detalles, los archivos y historial de cambios(listo)\",\"valor_nuevo\":\"Prueba de pantalla detalles, los archivos y historial de cambios(listo)\\r\\nverificacion que ya no sale siempre que se mofico la fecha\"},{\"campo\":\"id_categoria\",\"valor_anterior\":\"1\",\"valor_nuevo\":\"4\"}]', '2025-11-09 11:22:14'),
+(40, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Descripción, Fecha y hora del incidente', NULL, NULL, NULL, '[{\"campo\":\"descripcion\",\"valor_anterior\":\"Prueba de pantalla detalles, los archivos y historial de cambios(listo)\\r\\nverificacion que ya no sale siempre que se mofico la fecha\",\"valor_nuevo\":\"Prueba de pantalla detalles, los archivos y historial de cambios(listo)\\nverificacion que ya no sale siempre que se mofico la fecha\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-08T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-07T19:00\"}]', '2025-11-09 11:37:11'),
+(41, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Título, Fecha y hora del incidente', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Prueba de pantalla detalles\",\"valor_nuevo\":\"Prueba de pantalla detalles.\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-08T00:00:00.000Z\",\"valor_nuevo\":\"2025-11-08T00:00\"}]', '2025-11-09 11:37:36'),
+(42, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Título, Fecha y hora del incidente', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Prueba de pantalla detalles.\",\"valor_nuevo\":\"Prueba de pantalla detalles\"},{\"campo\":\"fecha_reporte\",\"valor_anterior\":\"2025-11-08T05:00:00.000Z\",\"valor_nuevo\":\"2025-11-08T05:00\"}]', '2025-11-09 11:40:52'),
+(43, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Categoría', NULL, NULL, NULL, '[{\"campo\":\"id_categoria\",\"valor_anterior\":\"4\",\"valor_nuevo\":\"1\"}]', '2025-11-09 11:45:29'),
+(44, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Descripción', NULL, NULL, NULL, '[{\"campo\":\"descripcion\",\"valor_anterior\":\"Prueba de pantalla detalles, los archivos y historial de cambios(listo)\\nverificacion que ya no sale siempre que se mofico la fecha\",\"valor_nuevo\":\"Prueba de pantalla detalles, los archivos y historial de cambios(listo)\\nverificación que ya no sale siempre que se mórfico la fecha\"}]', '2025-11-09 11:45:49'),
+(45, 13, 'archivo', NULL, NULL, 7, NULL, NULL, '1 archivo(s) eliminado(s): 1762705022529-821-anubis1.jpg', NULL, NULL, NULL, NULL, '2025-11-09 11:46:18'),
+(46, 13, 'edicion', NULL, NULL, 7, NULL, NULL, 'Reporte editado: Título, Descripción, Categoría', NULL, NULL, NULL, '[{\"campo\":\"titulo\",\"valor_anterior\":\"Prueba de pantalla detalles\",\"valor_nuevo\":\"Prueba de pantalla detalles.\"},{\"campo\":\"descripcion\",\"valor_anterior\":\"Prueba de pantalla detalles, los archivos y historial de cambios(listo)\\nverificación que ya no sale siempre que se mórfico la fecha\",\"valor_nuevo\":\"Prueba de pantalla detalles, los archivos y historial de cambios(listo).\\r\\nverificación que ya no sale siempre que se mórfico la fecha\"},{\"campo\":\"id_categoria\",\"valor_anterior\":\"1\",\"valor_nuevo\":\"2\"}]', '2025-11-09 11:46:18'),
+(47, 3, 'cambio_estado', 1, 2, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"revisado\"', NULL, NULL, NULL, NULL, '2025-11-10 14:03:52'),
+(48, 6, 'cambio_estado', 1, 4, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"resuelto\"', NULL, NULL, NULL, NULL, '2025-11-10 14:04:55'),
+(49, 6, 'cambio_estado', 4, 1, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"pendiente\"', NULL, NULL, NULL, NULL, '2025-11-10 14:05:07'),
+(50, 6, 'cambio_estado', 1, 2, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"revisado\"', NULL, NULL, NULL, NULL, '2025-11-10 14:05:12'),
+(51, 6, 'cambio_estado', 2, 1, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"pendiente\"', NULL, NULL, NULL, NULL, '2025-11-10 14:05:31'),
+(52, 6, 'cambio_estado', 1, 2, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"revisado\"', NULL, NULL, NULL, NULL, '2025-11-10 14:05:36'),
+(53, 6, 'cambio_estado', 2, 3, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"en proceso\"', NULL, NULL, NULL, NULL, '2025-11-10 14:05:40'),
+(54, 6, 'cambio_estado', 3, 4, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"resuelto\"', NULL, NULL, NULL, NULL, '2025-11-10 14:05:43'),
+(55, 6, 'cambio_estado', 4, 1, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"pendiente\"', NULL, NULL, NULL, NULL, '2025-11-10 14:05:46'),
+(56, 14, 'cambio_estado', 1, 2, NULL, NULL, NULL, 'Estado cambiado de estado anterior a \"revisado\"', NULL, NULL, NULL, NULL, '2025-11-12 10:12:41');
 
 -- --------------------------------------------------------
 
@@ -273,7 +364,28 @@ INSERT INTO `objetos` (`id_objeto`, `id_categoria`, `nombre`, `especificaciones`
 (71, 5, 'Rampa', 'Rampas de accesibilidad', '2025-11-02 11:09:53'),
 (72, 5, 'Ascensor', 'Elevadores', '2025-11-02 11:09:53'),
 (73, 5, 'Otro', 'Objeto no especificado', '2025-11-02 11:09:53'),
-(74, 5, 'Desconocido', 'Objeto sin identificar', '2025-11-02 11:09:53');
+(74, 5, 'Desconocido', 'Objeto sin identificar', '2025-11-02 11:09:53'),
+(75, 6, 'Fuga de gas', 'Olor fuerte a gas, posible fuga en laboratorio/cafetería. Cerrar llaves y evacuar.', '2025-11-12 09:40:52'),
+(76, 6, 'Cortocircuito', 'Chisporroteo u olor a quemado en toma o tablero; breaker disparado.', '2025-11-12 09:40:52'),
+(77, 6, 'Conato de incendio', 'Inicio de fuego controlable con extintor cercano.', '2025-11-12 09:40:52'),
+(78, 6, 'Incendio activo', 'Fuego extendido; activar alarma y evacuar.', '2025-11-12 09:40:52'),
+(79, 6, 'Humo anormal', 'Presencia de humo sin fuente clara; posible riesgo eléctrico o químico.', '2025-11-12 09:40:52'),
+(80, 6, 'Inundación', 'Acumulación rápida de agua por rotura o lluvias; riesgo eléctrico/estructural.', '2025-11-12 09:40:52'),
+(81, 6, 'Fuga de agua', 'Pérdida constante en tubería/llave; puede dañar infraestructura o equipos.', '2025-11-12 09:40:52'),
+(82, 6, 'Ascensor averiado con personas', 'Personas atrapadas; coordinar rescate seguro.', '2025-11-12 09:40:52'),
+(83, 6, 'Colapso estructural inminente', 'Techo/pared con riesgo de caída; acordonar y evacuar zona.', '2025-11-12 09:40:52'),
+(84, 6, 'Vidrio roto peligroso', 'Fragmentos sueltos con riesgo de cortaduras; señalizar y aislar.', '2025-11-12 09:40:52'),
+(85, 6, 'Falla crítica de red', 'Caída de red/WiFi que impacta evaluaciones o eventos masivos.', '2025-11-12 09:40:52'),
+(86, 6, 'Falla crítica de servidor', 'Servicios institucionales indisponibles (correo, LMS, SIU, etc.).', '2025-11-12 09:40:52'),
+(87, 6, 'Planta eléctrica sin respuesta', 'Planta de respaldo no arranca durante apagón; afecta operación.', '2025-11-12 09:40:52'),
+(88, 6, 'Alarma contra incendios fallando', 'No activa o falsos positivos reiterados; afecta evacuaciones.', '2025-11-12 09:40:52'),
+(89, 6, 'Hidrante/extintor inoperativo', 'Sin presión/carga; imposible atender conato o incendio.', '2025-11-12 09:40:52'),
+(90, 6, 'Salida de emergencia obstruida', 'Ruta o puerta bloqueada; incumple protocolo de evacuación.', '2025-11-12 09:40:52'),
+(91, 6, 'Derrame de sustancia peligrosa', 'Químicos/biológicos fuera de contención; seguir protocolo HSE.', '2025-11-12 09:40:52'),
+(92, 6, 'Amenaza a la seguridad', 'Intrusión, alteración del orden o riesgo directo a personas.', '2025-11-12 09:40:52'),
+(93, 6, 'Electrocución potencial', 'Cables expuestos/zonas húmedas con tensión; alto riesgo.', '2025-11-12 09:40:52'),
+(94, 6, 'Pozo/tapa de registro abierta', 'Hueco sin señalización; riesgo de caída.', '2025-11-12 09:40:52'),
+(95, 6, 'Otro', 'Objeto no listado dentro de la categoría Urgencia.', '2025-11-12 09:40:52');
 
 -- --------------------------------------------------------
 
@@ -300,13 +412,18 @@ CREATE TABLE `reportes` (
 
 INSERT INTO `reportes` (`id_reporte`, `id_objeto`, `id_usuario`, `id_categoria`, `titulo`, `descripcion`, `id_salon`, `fecha_reporte`, `id_estado`, `fecha_creacion`) VALUES
 (2, 39, 2, 2, 'Mouse dañado en sala de cómputo', 'El mouse del equipo #7 no funciona; probado en otro puerto sin respuesta.', 65, '2025-11-04 16:25:10', 1, '2025-11-04 16:25:10'),
-(3, NULL, 1, 1, 'Prueba de Reporte', 'Este es un reporte de prueba', 1, '2025-11-04 18:00:25', 1, '2025-11-04 18:00:25'),
+(3, NULL, 1, 1, 'Prueba de Reporte', 'Este es un reporte de prueba', 1, '2025-11-04 18:00:25', 2, '2025-11-04 18:00:25'),
 (4, NULL, 1, 2, 'Segundo Reporte de Prueba', 'Este es otro reporte para verificar que funciona', 2, '2025-11-04 18:07:54', 1, '2025-11-04 18:07:54'),
 (5, NULL, 1, 2, 'Pantalla rota', 'pantalla 10 rota', 66, '2025-11-04 18:36:51', 1, '2025-11-04 18:36:51'),
-(6, NULL, 3, 1, 'Luces dañadas', 'Varias luces parecen quemadas porque no prenden', 48, '2025-11-04 19:52:48', 1, '2025-11-04 19:52:48'),
-(7, NULL, 6, 1, 'el ascensor no sirve', 'el ascensor dejo de servir', 36, '2025-11-01 09:04:00', 1, '2025-11-05 09:05:41'),
+(6, NULL, 3, 1, 'Luces dañadas', 'Varias luces parecen quemadas porque no prenden', 48, '2025-11-05 00:00:00', 1, '2025-11-04 19:52:48'),
+(7, NULL, 6, 1, 'el ascensor no sirve', 'el ascensor dejo de servir', 36, '2025-11-01 00:00:00', 1, '2025-11-05 09:05:41'),
 (8, NULL, 1, 4, 'limpieza', 'sssssssssssssss', 65, '2025-11-05 09:22:00', 1, '2025-11-05 09:23:07'),
-(9, NULL, 3, 1, 'Luces dañadas', 'Prueba de guardado de imagen', 66, '2025-10-25 18:21:00', 1, '2025-11-05 18:18:02');
+(9, NULL, 3, 1, 'Luces dañadas.', 'Prueba de guardado de imagen', 66, '2025-10-25 00:00:00', 1, '2025-11-05 18:18:02'),
+(10, NULL, 3, 5, 'Prueba manejo de archivos.', 'Prueba manejo de archivos', 36, '2025-11-03 00:00:00', 1, '2025-11-06 09:31:14'),
+(11, NULL, 3, 2, 'Prueba de vista archivos y comentario(edición).', 'ver si los comentarios funcionan y se pueden ver fotos y videos..\n\nviendo si funciona la edición...', 28, '2025-11-06 00:00:00', 4, '2025-11-06 16:53:07'),
+(12, NULL, 6, 1, 'Prueba de función reporte', 'ver si funciona el crear reporte despues de eliminarlo del admin', 47, '2025-10-09 00:00:00', 3, '2025-11-07 10:57:52'),
+(13, NULL, 7, 2, 'Prueba de pantalla detalles.', 'Prueba de pantalla detalles, los archivos y historial de cambios(listo).\r\nverificación que ya no sale siempre que se mórfico la fecha', 66, '2025-11-08 05:00:00', 1, '2025-11-09 10:45:23'),
+(14, NULL, 3, 6, 'Prueba opcion de urgencia', 'Reporte de prueba para que haga notificacion de urgencia', 66, '2025-11-12 09:41:00', 2, '2025-11-12 09:42:43');
 
 -- --------------------------------------------------------
 
@@ -472,6 +589,7 @@ CREATE TABLE `usuarios` (
   `contrasena` varchar(255) NOT NULL,
   `fecha_creacion` datetime DEFAULT current_timestamp(),
   `rol` varchar(50) DEFAULT 'monitor',
+  `foto_url` varchar(500) DEFAULT NULL,
   `codigo` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -479,11 +597,12 @@ CREATE TABLE `usuarios` (
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id_usuario`, `nombre`, `correo`, `contrasena`, `fecha_creacion`, `rol`, `codigo`) VALUES
-(1, 'Administrador Principal', 'admin@uni.local', '$2a$10$cgAbG4rzgNyxzaRvrViXhuxu8o22VSuV6cMfv6GIVxPuWxd91hVwO', '2025-10-10 18:53:12', 'admin', '2024000001'),
-(2, 'Rubén González', 'ruben@gmail.com', '$2y$10$IUUEy4I5pZsYvk8JegVdYOENgG97F6CTvEYcauubU2wjcJIxB4tEO', '2025-10-10 20:05:22', 'admin', '2019214026'),
-(3, 'Adriana María', 'adriana@gmail.com', '$2a$10$QKpX8RYhbLs0xLVjfR0Sg..zurdv8upVikbiUXj0bvYb27t0aJC4G', '2025-10-11 11:25:45', 'monitor', '2014214026'),
-(6, 'yineth avila', 'yine@gmail.com', '$2a$10$P8IO8U7LIlHakG8VisV.wOirU1reccvmELMWNRehp7bMwS/xJ5CBW', '2025-10-31 15:02:05', 'monitor', '2020235281');
+INSERT INTO `usuarios` (`id_usuario`, `nombre`, `correo`, `contrasena`, `fecha_creacion`, `rol`, `foto_url`, `codigo`) VALUES
+(1, 'Administrador Principal', 'admin@uni.local', '$2a$10$cgAbG4rzgNyxzaRvrViXhuxu8o22VSuV6cMfv6GIVxPuWxd91hVwO', '2025-10-10 18:53:12', 'admin', NULL, '2024000001'),
+(2, 'Rubén González', 'ruben@gmail.com', '$2y$10$IUUEy4I5pZsYvk8JegVdYOENgG97F6CTvEYcauubU2wjcJIxB4tEO', '2025-10-10 20:05:22', 'admin', NULL, '2019214026'),
+(3, 'Adriana Olivares', 'adriana@gmail.com', '$2a$10$QKpX8RYhbLs0xLVjfR0Sg..zurdv8upVikbiUXj0bvYb27t0aJC4G', '2025-10-11 11:25:45', 'monitor', 'uploads/profile-pictures/user_3_1762732420196.png', '2014214026'),
+(6, 'yineth avila', 'yine@gmail.com', '$2a$10$3dxIIhsdMI2hyIA6VhgoMueb8nNzvFO19OBkk.74PbjV/o8.nYvZa', '2025-10-31 15:02:05', 'monitor', NULL, '2020235281'),
+(7, 'usuario pruebas', 'prueba@unimagdalena.edu.co', '$2a$10$1WwEIjpr47ZCbmSwM8ZUu.ipUrX02SN8yMtmz0ZfdvW7vuK1EqiS2', '2025-11-09 10:42:54', 'monitor', NULL, '2020202020');
 
 --
 -- Disparadores `usuarios`
@@ -636,7 +755,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `archivos`
 --
 ALTER TABLE `archivos`
-  MODIFY `id_archivo` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_archivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT de la tabla `categorias`
@@ -648,7 +767,7 @@ ALTER TABLE `categorias`
 -- AUTO_INCREMENT de la tabla `comentarios`
 --
 ALTER TABLE `comentarios`
-  MODIFY `id_comentario` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_comentario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `dependencias`
@@ -660,13 +779,13 @@ ALTER TABLE `dependencias`
 -- AUTO_INCREMENT de la tabla `estados`
 --
 ALTER TABLE `estados`
-  MODIFY `id_estado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_estado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `historial_cambios`
 --
 ALTER TABLE `historial_cambios`
-  MODIFY `id_historial` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_historial` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT de la tabla `notificaciones`
@@ -684,13 +803,13 @@ ALTER TABLE `notificaciones_usuarios`
 -- AUTO_INCREMENT de la tabla `objetos`
 --
 ALTER TABLE `objetos`
-  MODIFY `id_objeto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+  MODIFY `id_objeto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 
 --
 -- AUTO_INCREMENT de la tabla `reportes`
 --
 ALTER TABLE `reportes`
-  MODIFY `id_reporte` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_reporte` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `salones`
@@ -708,7 +827,7 @@ ALTER TABLE `ubicaciones`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Restricciones para tablas volcadas

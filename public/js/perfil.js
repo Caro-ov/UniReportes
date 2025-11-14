@@ -1,144 +1,161 @@
+// Funciones globales para el perfil
+let cargarDatosPerfil, cargarEstadisticasUsuario, actualizarInterfazPerfil;
+
+// Función global para inicializar perfil
+window.inicializarPerfil = function() {
+    console.log('🚀 INICIALIZACIÓN: Inicializando perfil...');
+    
+    // Re-cargar datos del perfil
+    if (typeof cargarDatosPerfil === 'function') {
+        cargarDatosPerfil();
+    }
+    
+    // Re-cargar estadísticas del usuario  
+    if (typeof cargarEstadisticasUsuario === 'function') {
+        cargarEstadisticasUsuario();
+    }
+    
+    console.log('✅ INICIALIZACIÓN: Perfil inicializado');
+};
+
+// ===========================
+// CARGA DE DATOS DEL PERFIL
+// ===========================
+
+cargarDatosPerfil = async function() {
+    try {
+        console.log('Cargando datos del perfil...');
+        const response = await fetch('/api/users/profile', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Error al cargar el perfil');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            const usuario = result.data;
+            console.log('Datos del usuario cargados:', usuario);
+            
+            // Actualizar datos en la interfaz
+            actualizarInterfazPerfil(usuario);
+        } else {
+            console.error('Error en la respuesta:', result.message);
+            mostrarToast('Error al cargar los datos del perfil', 'error');
+        }
+    } catch (error) {
+        console.error('Error al cargar perfil:', error);
+        mostrarToast('Error de conexión al cargar el perfil', 'error');
+    }
+};
+
+actualizarInterfazPerfil = function(usuario) {
+    console.log('Actualizando interfaz con datos:', usuario);
+    
+    // Actualizar nombre del usuario
+    if (usuario.nombre) {
+        console.log('Actualizando nombre:', usuario.nombre);
+        $('.nombre-usuario').text(usuario.nombre);
+        $('.perfil-usuario .nombre-usuario').text(usuario.nombre);
+    }
+    
+    // Actualizar rol
+    if (usuario.rol) {
+        const rolTexto = usuario.rol === 'admin' ? 'Administrador' : 
+                       usuario.rol === 'monitor' ? 'Monitor' : 'Usuario';
+        console.log('Actualizando rol:', rolTexto);
+        $('.rol-usuario').text(rolTexto);
+    }
+    
+    // Actualizar código de estudiante
+    if (usuario.codigo) {
+        console.log('Actualizando código:', usuario.codigo);
+        $('.codigo-estudiante').text(usuario.codigo);
+    }
+    
+    // Actualizar correo
+    if (usuario.correo) {
+        console.log('Actualizando correo:', usuario.correo);
+        $('.correo-usuario').text(usuario.correo);
+    }
+    
+    // Actualizar fecha de registro
+    if (usuario.fecha_creacion) {
+        const fecha = new Date(usuario.fecha_creacion);
+        const fechaFormateada = fecha.toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        console.log('Actualizando fecha:', fechaFormateada);
+        $('.fecha-registro').text(fechaFormateada);
+    }
+    
+    console.log('Interfaz actualizada con datos del usuario');
+};
+
+cargarEstadisticasUsuario = async function() {
+    try {
+        console.log('Cargando estadísticas del usuario...');
+        const response = await fetch('/api/reports/my', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Error al cargar estadísticas');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            const reportes = result.data;
+            console.log('Reportes del usuario cargados:', reportes);
+            
+            // Calcular estadísticas
+            const totalReportes = reportes.length;
+            const enProceso = reportes.filter(r => r.estado === 'en_proceso' || r.estado === 'pendiente').length;
+            const resueltos = reportes.filter(r => r.estado === 'resuelto' || r.estado === 'completado').length;
+            
+            // Actualizar estadísticas en la interfaz
+            actualizarEstadisticas({
+                total: totalReportes,
+                enProceso: enProceso,
+                resueltos: resueltos
+            });
+        } else {
+            console.log('No se encontraron reportes del usuario');
+            // Mantener valores en 0
+            actualizarEstadisticas({
+                total: 0,
+                enProceso: 0,
+                resueltos: 0
+            });
+        }
+    } catch (error) {
+        console.error('Error al cargar estadísticas:', error);
+        // Mantener valores por defecto en caso de error
+    }
+};
+
+function actualizarEstadisticas(stats) {
+    // Actualizar números en las tarjetas de estadísticas
+    $('.tarjeta-estadistica').eq(0).find('.numero-estadistica').text(stats.total);
+    $('.tarjeta-estadistica').eq(1).find('.numero-estadistica').text(stats.enProceso);
+    $('.tarjeta-estadistica').eq(2).find('.numero-estadistica').text(stats.resueltos);
+    
+    console.log('Estadísticas actualizadas:', stats);
+}
+
 $(document).ready(function() {
-    
-    // ===========================
-    // CONFIGURACIÓN INICIAL
-    // ===========================
-    
     console.log('Perfil de Usuario JavaScript inicializado');
     
     // Cargar datos del perfil al inicializar
     cargarDatosPerfil();
     cargarEstadisticasUsuario();
-    
-    // El sistema de componentes ya maneja la navegación del sidebar
-    // El sistema de componentes ya maneja la navegación del sidebar
-    // Solo necesitamos la funcionalidad específica del perfil
-    
-    // ===========================
-    // CARGA DE DATOS DEL PERFIL
-    // ===========================
-    
-    async function cargarDatosPerfil() {
-        try {
-            console.log('Cargando datos del perfil...');
-            const response = await fetch('/api/users/profile');
-            
-            if (!response.ok) {
-                throw new Error('Error al cargar el perfil');
-            }
-            
-            const result = await response.json();
-            
-            if (result.success && result.data) {
-                const usuario = result.data;
-                console.log('Datos del usuario cargados:', usuario);
-                
-                // Actualizar datos en la interfaz
-                actualizarInterfazPerfil(usuario);
-            } else {
-                console.error('Error en la respuesta:', result.message);
-                mostrarToast('Error al cargar los datos del perfil', 'error');
-            }
-        } catch (error) {
-            console.error('Error al cargar perfil:', error);
-            mostrarToast('Error de conexión al cargar el perfil', 'error');
-        }
-    }
-    
-    function actualizarInterfazPerfil(usuario) {
-        console.log('Actualizando interfaz con datos:', usuario);
-        
-        // Actualizar nombre del usuario
-        if (usuario.nombre) {
-            console.log('Actualizando nombre:', usuario.nombre);
-            $('.nombre-usuario').text(usuario.nombre);
-            $('.perfil-usuario .nombre-usuario').text(usuario.nombre);
-        }
-        
-        // Actualizar rol
-        if (usuario.rol) {
-            const rolTexto = usuario.rol === 'admin' ? 'Administrador' : 
-                           usuario.rol === 'monitor' ? 'Monitor' : 'Usuario';
-            console.log('Actualizando rol:', rolTexto);
-            $('.rol-usuario').text(rolTexto);
-        }
-        
-        // Actualizar código de estudiante
-        if (usuario.codigo) {
-            console.log('Actualizando código:', usuario.codigo);
-            $('.codigo-estudiante').text(usuario.codigo);
-        }
-        
-        // Actualizar correo
-        if (usuario.correo) {
-            console.log('Actualizando correo:', usuario.correo);
-            $('.correo-usuario').text(usuario.correo);
-        }
-        
-        // Actualizar fecha de registro
-        if (usuario.fecha_creacion) {
-            const fecha = new Date(usuario.fecha_creacion);
-            const fechaFormateada = fecha.toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            console.log('Actualizando fecha:', fechaFormateada);
-            $('.fecha-registro').text(fechaFormateada);
-        }
-        
-        console.log('Interfaz actualizada con datos del usuario');
-    }
-    
-    async function cargarEstadisticasUsuario() {
-        try {
-            console.log('Cargando estadísticas del usuario...');
-            const response = await fetch('/api/reports/my');
-            
-            if (!response.ok) {
-                throw new Error('Error al cargar estadísticas');
-            }
-            
-            const result = await response.json();
-            
-            if (result.success && result.data) {
-                const reportes = result.data;
-                console.log('Reportes del usuario cargados:', reportes);
-                
-                // Calcular estadísticas
-                const totalReportes = reportes.length;
-                const enProceso = reportes.filter(r => r.estado === 'en_proceso' || r.estado === 'pendiente').length;
-                const resueltos = reportes.filter(r => r.estado === 'resuelto' || r.estado === 'completado').length;
-                
-                // Actualizar estadísticas en la interfaz
-                actualizarEstadisticas({
-                    total: totalReportes,
-                    enProceso: enProceso,
-                    resueltos: resueltos
-                });
-            } else {
-                console.log('No se encontraron reportes del usuario');
-                // Mantener valores en 0
-                actualizarEstadisticas({
-                    total: 0,
-                    enProceso: 0,
-                    resueltos: 0
-                });
-            }
-        } catch (error) {
-            console.error('Error al cargar estadísticas:', error);
-            // Mantener valores por defecto en caso de error
-        }
-    }
-    
-    function actualizarEstadisticas(stats) {
-        // Actualizar números en las tarjetas de estadísticas
-        $('.tarjeta-estadistica').eq(0).find('.numero-estadistica').text(stats.total);
-        $('.tarjeta-estadistica').eq(1).find('.numero-estadistica').text(stats.enProceso);
-        $('.tarjeta-estadistica').eq(2).find('.numero-estadistica').text(stats.resueltos);
-        
-        console.log('Estadísticas actualizadas:', stats);
-    }
     
     // ===========================
     // FUNCIONALIDADES DEL PERFIL

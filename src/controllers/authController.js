@@ -80,3 +80,25 @@ export function logout(req, res) {
     });
   });
 }
+
+export function checkSession(req, res) {
+  // Verificar si hay una sesión activa
+  if (req.session && req.session.user && req.session.user.id) {
+    res.json({
+      success: true,
+      authenticated: true,
+      user: {
+        id: req.session.user.id,
+        nombre: req.session.user.nombre,
+        correo: req.session.user.correo,
+        rol: req.session.user.rol
+      }
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      authenticated: false,
+      message: 'No hay sesión activa'
+    });
+  }
+}

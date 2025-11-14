@@ -266,18 +266,27 @@ body {
 
 /* Estados de reportes */
 .estado-badge {
-    padding: 4px 12px;
+    display: inline-block;
+    padding: 4px 10px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    vertical-align: middle;
 }
 
 .estado-abierto {
     background: rgba(239, 68, 68, 0.1);
     color: var(--error-color);
     border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.estado-revision {
+    background: rgba(59, 130, 246, 0.1);
+    color: #1d4ed8;
+    border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .estado-proceso {
@@ -400,6 +409,70 @@ body {
    CORRECCIÓN PARA ESPACIOS VERDES EN SPA
    ========================== */
 
+/* Estilos del paginador */
+.paginacion-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-color);
+    background: transparent;
+}
+
+.paginacion-info {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.paginacion-botones {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.paginacion-page-label {
+    margin: 0 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.btn-paginacion {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--transition-duration) ease;
+    box-shadow: none;
+}
+
+.btn-paginacion:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(17,115,212,0.08);
+}
+
+.btn-paginacion:disabled,
+.btn-paginacion[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 480px) {
+    .paginacion-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .paginacion-botones {
+        justify-content: flex-end;
+    }
+}
+
 /* Prevenir espacios verdes en navegación SPA */
 body[data-page="explorar-reportes"] {
     background-color: #FFFFFF !important;
@@ -430,4 +503,280 @@ html {
     padding-left: 0 !important;
     padding-right: 0 !important;
     padding-bottom: 0 !important;
+}
+
+/* ========================================
+   NOTIFICACIONES URGENTES
+======================================== */
+.seccion-notificaciones-urgentes {
+    margin-bottom: 24px;
+    animation: slideInDown 0.4s ease-out;
+}
+
+.notificacion-urgente {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 2px solid #f87171;
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.notificacion-urgente::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+}
+
+.icono-urgente {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: #ef4444;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.icono-urgente .material-symbols-outlined {
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.contenido-notificacion {
+    flex: 1;
+}
+
+.titulo-notificacion {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #7f1d1d;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lista-reportes-urgentes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.reporte-urgente-item {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+}
+
+.reporte-urgente-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #f87171;
+    cursor: pointer;
+}
+
+.info-reporte-urgente {
+    flex: 1;
+}
+
+.titulo-reporte-urgente {
+    font-size: 14px;
+    font-weight: 500;
+    color: #7f1d1d;
+    margin-bottom: 4px;
+}
+
+.detalles-reporte-urgente {
+    font-size: 12px;
+    color: #991b1b;
+    opacity: 0.8;
+}
+
+.acciones-notificacion {
+    flex-shrink: 0;
+}
+
+.btn-cerrar-notificacion {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    padding: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-cerrar-notificacion:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+}
+
+.btn-cerrar-notificacion .material-symbols-outlined {
+    font-size: 16px;
+    color: #7f1d1d;
+}
+
+/* ========================================
+   ESTILOS PARA FILAS URGENTES EN TABLA
+======================================== */
+.fila-urgente {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+    border-left: 4px solid #ef4444 !important;
+    position: relative;
+}
+
+.fila-urgente:hover {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.badge-prioridad {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-prioridad.urgente {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.badge-prioridad.normal {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+}
+
+.badge-prioridad .material-symbols-outlined {
+    font-size: 12px;
+}
+
+/* Animación para notificaciones urgentes */
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Efectos de pulsación para elementos urgentes */
+.fila-urgente::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #ef4444, #f87171, #ef4444);
+    animation: shimmer 2s infinite;
+}
+
+/* Estilos especiales para filtros activos */
+.filtro-select:focus,
+.filtro-select[data-filtered="true"] {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(17, 115, 212, 0.1);
+}
+
+.filtro-grupo.filtro-prioridad-activo .filtro-select {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.filtro-grupo.filtro-prioridad-activo .filtro-label {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* ========================================
+   RESPONSIVE DESIGN PARA NOTIFICACIONES
+======================================== */
+@media (max-width: 768px) {
+    .notificacion-urgente {
+        padding: 16px 20px;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .icono-urgente {
+        align-self: flex-start;
+    }
+    
+    .titulo-notificacion {
+        font-size: 14px;
+    }
+    
+    .reporte-urgente-item {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .titulo-reporte-urgente {
+        font-size: 13px;
+    }
+    
+    .detalles-reporte-urgente {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .badge-prioridad {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+    
+    .badge-prioridad .material-symbols-outlined {
+        font-size: 10px;
+    }
+    
+    .filtros-reportes {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .filtro-grupo {
+        width: 100%;
+    }
 }
