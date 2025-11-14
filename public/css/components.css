@@ -348,6 +348,325 @@ body {
     outline-offset: 2px !important;
 }
 
+.boton-notificaciones,
+.notification-btn {
+    position: relative !important;
+    border-radius: 50% !important;
+    padding: 8px !important;
+    color: var(--text-secondary) !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all var(--transition-duration) ease !important;
+}
+
+.boton-notificaciones:hover,
+.notification-btn:hover {
+    background-color: #f3f4f6 !important;
+    color: var(--text-primary) !important;
+}
+
+.boton-notificaciones:focus,
+.notification-btn:focus {
+    outline: 2px solid var(--primary-color) !important;
+    outline-offset: 2px !important;
+}
+
+/* Badge de contador de notificaciones */
+.badge-count {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: #dc2626;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.badge-count.urgente {
+    background-color: #dc2626;
+    animation: pulse-urgent 2s ease-in-out infinite;
+}
+
+@keyframes pulse-urgent {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+    }
+}
+
+/* Panel de notificaciones */
+.panel-notificaciones {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 380px;
+    max-height: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-notificaciones.mostrar {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.header-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: white;
+    flex-shrink: 0;
+}
+
+.header-panel h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.cerrar-panel {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all var(--transition-duration) ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cerrar-panel:hover {
+    background-color: #f3f4f6;
+    color: var(--text-primary);
+}
+
+.contenido-panel {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.notificaciones-lista {
+    min-height: 100px;
+}
+
+.notificacion-vacia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.notificacion-vacia .material-symbols-outlined {
+    font-size: 48px;
+    color: #d1d5db;
+    margin-bottom: 12px;
+}
+
+.notificacion-vacia p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.notificacion-item {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color var(--transition-duration) ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+
+.notificacion-item:hover {
+    background-color: #f9fafb;
+}
+
+.notificacion-item:last-child {
+    border-bottom: none;
+}
+
+/* Notificaciones leídas con opacidad reducida */
+.notificacion-item:not(.no-leida) {
+    opacity: 0.7;
+}
+
+.notificacion-item:not(.no-leida):hover {
+    opacity: 0.85;
+}
+
+.notificacion-item.no-leida {
+    background-color: #eff6ff;
+}
+
+.notificacion-item.no-leida:hover {
+    background-color: #dbeafe;
+}
+
+.notificacion-item.urgente {
+    background-color: #fef2f2;
+    border-left: 4px solid #dc2626;
+}
+
+.notificacion-item.urgente:hover {
+    background-color: #fee2e2;
+}
+
+.notificacion-icono {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.notificacion-icono.azul {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.notificacion-icono.verde {
+    background-color: #d1fae5;
+    color: #047857;
+}
+
+.notificacion-icono.naranja {
+    background-color: #fed7aa;
+    color: #c2410c;
+}
+
+.notificacion-icono.rojo {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.notificacion-contenido {
+    flex: 1;
+    min-width: 0;
+}
+
+.notificacion-titulo {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.notificacion-mensaje {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 6px 0;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.notificacion-tiempo {
+    font-size: 12px;
+    color: #9ca3af;
+    margin: 0;
+}
+
+.footer-panel {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-color);
+    background: white;
+    flex-shrink: 0;
+}
+
+.btn-marcar-leidas {
+    width: 100%;
+    padding: 8px 16px;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-marcar-leidas:hover {
+    background-color: #f3f4f6;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Animación shake para nueva notificación */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px) rotate(-5deg); }
+    20%, 40%, 60%, 80% { transform: translateX(5px) rotate(5deg); }
+}
+
+.notification-btn.nueva-notificacion {
+    animation: shake 0.6s ease-in-out;
+}
+
+.notification-btn.nueva-notificacion .material-symbols-outlined {
+    color: var(--primary-color);
+}
+
+/* Efecto de brillo para notificaciones urgentes */
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(220, 38, 38, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(220, 38, 38, 0.8), 0 0 30px rgba(220, 38, 38, 0.6);
+    }
+}
+
+.notification-btn.tiene-urgentes {
+    animation: glow 2s ease-in-out infinite;
+}
+
 .perfil-completo {
     display: flex !important;
     align-items: center !important;

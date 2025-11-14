@@ -2,6 +2,8 @@ import * as reportModel from '../models/reportModel.js';
 import * as categoryModel from '../models/categoryModel.js';
 import * as fileModel from '../models/fileModel.js';
 import * as historialModel from '../models/historialModel.js';
+import notificationModel from '../models/notificationModel.js';
+import * as userModel from '../models/userModel.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -535,6 +537,47 @@ export async function updateReport(req, res) {
                         cambios_json: JSON.stringify(cambios)
                     });
                     console.log(`📝 Registrados ${cambios.length} cambios en el historial del reporte ${reportId}`);
+                    
+                    // Crear notificaciones para el creador y administradores
+                    try {
+                        const actorNombre = req.session.user?.nombre || 'Un usuario';
+                        const tituloNotif = `Reporte editado: ${existingReport.titulo}`;
+                        const mensajeNotif = `Reporte modificado por ${actorNombre}`;
+                        
+                        // Notificar al creador del reporte si no fue él quien lo editó
+                        if (existingReport.id_usuario !== userId) {
+                            await notificationModel.create({
+                                id_usuario_destino: existingReport.id_usuario,
+                                id_reporte: reportId,
+                                tipo: 'edicion',
+                                titulo: tituloNotif,
+                                mensaje: `Tu reporte ha sido modificado por ${actorNombre}`,
+                                prioridad: 2,
+                                color: 'naranja'
+                            });
+                            console.log(`🔔 Notificación enviada al creador del reporte (ID: ${existingReport.id_usuario})`);
+                        }
+                        
+                        // Notificar a todos los administradores excepto al que hizo la edición
+                        const admins = await userModel.getUsersByRole('admin');
+                        for (const admin of admins) {
+                            if (admin.id_usuario !== userId) {
+                                await notificationModel.create({
+                                    id_usuario_destino: admin.id_usuario,
+                                    id_reporte: reportId,
+                                    tipo: 'edicion',
+                                    titulo: tituloNotif,
+                                    mensaje: mensajeNotif,
+                                    prioridad: 2,
+                                    color: 'naranja'
+                                });
+                            }
+                        }
+                        console.log(`🔔 Notificaciones enviadas a ${admins.filter(a => a.id_usuario !== userId).length} administrador(es)`);
+                    } catch (notifError) {
+                        console.error('❌ Error creando notificaciones de edición:', notifError);
+                        // No fallar la actualización por error en notificaciones
+                    }
                 } catch (historialError) {
                     console.error('❌ Error registrando en historial:', historialError);
                     // No fallar la actualización por error en historial

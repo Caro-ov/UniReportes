@@ -176,6 +176,17 @@ export async function studentCodeExists(codigo, excludeUserId = null) {
   return rows[0].count > 0;
 }
 
+/**
+ * Obtener usuarios por rol
+ */
+export async function getUsersByRole(rol) {
+  const [rows] = await pool.execute(
+    'SELECT id_usuario, nombre, correo, rol FROM usuarios WHERE rol = ?',
+    [rol]
+  );
+  return rows;
+}
+
 export default {
   findUserByEmail,
   findUserById,
@@ -187,5 +198,6 @@ export default {
   getUsersStats,
   getUsersFiltered,
   emailExists,
-  studentCodeExists
+  studentCodeExists,
+  getUsersByRole
 };

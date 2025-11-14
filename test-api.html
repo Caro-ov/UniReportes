@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Notificaciones</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Test de API de Notificaciones</h1>
+    <button id="testBtn">Probar API</button>
+    <div id="result"></div>
+
+    <script>
+        $('#testBtn').on('click', async function() {
+            console.log('🧪 Probando API de notificaciones...');
+            $('#result').html('<p>Cargando...</p>');
+            
+            try {
+                // Test 1: Verificar sesión
+                const profileRes = await $.get('/api/users/profile');
+                console.log('👤 Usuario actual:', profileRes);
+                $('#result').append(`<p>✅ Usuario: ${profileRes.data.nombre} (ID: ${profileRes.data.id_usuario})</p>`);
+                
+                // Test 2: Obtener notificaciones no leídas
+                const notifRes = await $.get('/api/notifications/unread');
+                console.log('📬 Notificaciones:', notifRes);
+                
+                if (notifRes.success) {
+                    $('#result').append(`<p>✅ ${notifRes.data.count} notificaciones no leídas</p>`);
+                    $('#result').append('<h3>Notificaciones:</h3>');
+                    $('#result').append('<pre>' + JSON.stringify(notifRes.data.notifications, null, 2) + '</pre>');
+                } else {
+                    $('#result').append(`<p>❌ Error: ${notifRes.message}</p>`);
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                $('#result').append(`<p>❌ Error: ${error.statusText || error.message}</p>`);
+                $('#result').append(`<pre>${JSON.stringify(error, null, 2)}</pre>`);
+            }
+        });
+    </script>
+</body>
+</html>

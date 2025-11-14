@@ -6,7 +6,31 @@
     <div class="controles-usuario">
         <button class="boton-notificaciones notification-btn">
             <span class="material-symbols-outlined">notifications</span>
+            <span class="badge-count" style="display: none;">0</span>
         </button>
+        
+        <!-- Panel de notificaciones -->
+        <div class="panel-notificaciones">
+            <div class="header-panel">
+                <h3>Notificaciones</h3>
+                <button class="cerrar-panel">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="contenido-panel">
+                <div class="notificaciones-lista">
+                    <!-- Las notificaciones se cargarán dinámicamente aquí -->
+                    <div class="notificacion-vacia">
+                        <span class="material-symbols-outlined">notifications_off</span>
+                        <p>No tienes notificaciones</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-panel">
+                <button class="btn-marcar-leidas">Marcar todas como leídas</button>
+            </div>
+        </div>
+        
         <div class="perfil-completo">
             <div class="usuario-info-header">
                 <p class="usuario-nombre-header">Name Lastname</p>

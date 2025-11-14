@@ -74,8 +74,14 @@ $(document).ready(function() {
     // Cargar header
     if ($('#header-container').length) {
         loadComponent('#header-container', 'components/header.html', function() {
+            console.log('✅ Header cargado');
             initializeHeaderFunctionality();
             loadUserDataInHeader();
+            
+            // Esperar un poco para asegurar que el DOM esté completamente listo
+            setTimeout(() => {
+                loadNotificationSystem();
+            }, 500);
         });
     }
 
@@ -129,9 +135,10 @@ $(document).ready(function() {
         // Manejar notificaciones con event delegation
         $(document).off('click.notifications').on('click.notifications', '.notification-btn, .boton-notificaciones', function(e) {
             e.stopPropagation();
-            console.log('Notificaciones clicked');
-            // Aquí se puede agregar funcionalidad de notificaciones
-            mostrarToast('Notificaciones', 'info');
+            // Cerrar dropdown de perfil si está abierto
+            $('.user-dropdown, .dropdown-perfil').removeClass('open');
+            $('.menu-desplegable').removeClass('mostrar');
+            // El sistema de notificaciones maneja el toggle del panel
         });
 
         // Manejar logout con event delegation
@@ -169,6 +176,40 @@ $(document).ready(function() {
     function toggleSidebar() {
         $('.sidebar').toggleClass('abierto');
         $('.overlay').toggleClass('mostrar');
+    }
+
+    // Cargar y inicializar sistema de notificaciones
+    function loadNotificationSystem() {
+        console.log('🔔 Iniciando sistema de notificaciones...');
+        
+        // Verificar si el script de notificaciones ya está cargado
+        if (typeof NotificationManager === 'undefined') {
+            console.log('📦 Cargando script de notificaciones...');
+            // Cargar script de notificaciones
+            const script = document.createElement('script');
+            script.src = 'js/notificaciones.js';
+            script.onload = function() {
+                // Inicializar después de cargar
+                console.log('✅ Script de notificaciones cargado');
+                window.notificationManager = new NotificationManager();
+                window.notificationManager.init();
+                console.log('🚀 Sistema de notificaciones iniciado');
+            };
+            script.onerror = function() {
+                console.error('❌ Error al cargar el script de notificaciones');
+            };
+            document.head.appendChild(script);
+        } else {
+            // Ya está cargado, solo inicializar
+            console.log('✅ Script de notificaciones ya estaba cargado');
+            if (!window.notificationManager) {
+                window.notificationManager = new NotificationManager();
+                window.notificationManager.init();
+                console.log('🚀 Sistema de notificaciones iniciado');
+            } else {
+                console.log('ℹ️ Sistema de notificaciones ya estaba iniciado');
+            }
+        }
     }
 
     // Función para mostrar toast notifications
