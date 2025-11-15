@@ -396,12 +396,12 @@ export async function getReportsFiltered(filters = {}) {
     // Agregar limit/offset si vienen
     const selectValues = [...values];
     if (filters.limit) {
-        selectQuery += ' LIMIT ?';
-        selectValues.push(parseInt(filters.limit));
+        const safeLimit = parseInt(filters.limit) || 50;
+        selectQuery += ` LIMIT ${safeLimit}`;
     }
     if (filters.offset) {
-        selectQuery += ' OFFSET ?';
-        selectValues.push(parseInt(filters.offset));
+        const safeOffset = parseInt(filters.offset) || 0;
+        selectQuery += ` OFFSET ${safeOffset}`;
     }
 
     const [rows] = await pool.execute(selectQuery, selectValues);

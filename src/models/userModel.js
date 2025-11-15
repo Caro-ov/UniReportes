@@ -137,8 +137,8 @@ export async function getUsersFiltered(filters = {}) {
   query += ' ORDER BY fecha_creacion DESC';
 
   if (filters.limit) {
-    query += ' LIMIT ?';
-    values.push(parseInt(filters.limit));
+    const safeLimit = parseInt(filters.limit) || 50;
+    query += ` LIMIT ${safeLimit}`;
   }
 
   const [rows] = await pool.execute(query, values);
