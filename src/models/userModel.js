@@ -39,14 +39,15 @@ export async function createUser({ nombre, correo, codigo_estudiante, contrasena
  * Obtener todos los usuarios con paginación
  */
 export async function getAllUsers(limit = 50, offset = 0) {
+  const safeLimit = parseInt(limit) || 50;
+  const safeOffset = parseInt(offset) || 0;
   const [rows] = await pool.execute(
     `SELECT 
        id_usuario, nombre, correo, codigo, rol, 
        fecha_creacion
      FROM usuarios 
      ORDER BY fecha_creacion DESC 
-     LIMIT ? OFFSET ?`,
-    [parseInt(limit), parseInt(offset)]
+     LIMIT ${safeLimit} OFFSET ${safeOffset}`
   );
   return rows;
 }

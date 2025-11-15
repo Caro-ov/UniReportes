@@ -3,6 +3,8 @@ import pool from '../config/db.js';
 const notificationModel = {
   // Obtener notificaciones de un usuario
   async getByUserId(userId, limit = 20, offset = 0) {
+    const safeLimit = parseInt(limit) || 20;
+    const safeOffset = parseInt(offset) || 0;
     const [rows] = await pool.execute(
       `SELECT 
         n.*,
@@ -14,8 +16,8 @@ const notificationModel = {
       LEFT JOIN estados e ON r.id_estado = e.id_estado
       WHERE n.id_usuario_destino = ?
       ORDER BY n.fecha_creacion DESC
-      LIMIT ? OFFSET ?`,
-      [userId, parseInt(limit), parseInt(offset)]
+      LIMIT ${safeLimit} OFFSET ${safeOffset}`,
+      [userId]
     );
     return rows;
   },

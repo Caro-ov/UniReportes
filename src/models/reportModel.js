@@ -52,6 +52,8 @@ export async function createReport(reportData) {
  */
 export async function getAllReports(limit = 50, offset = 0) {
     console.log('🔍 getAllReports MODEL: Ejecutando consulta SQL...');
+    const safeLimit = parseInt(limit) || 50;
+    const safeOffset = parseInt(offset) || 0;
     
     const [rows] = await pool.execute(
         `SELECT 
@@ -76,8 +78,7 @@ export async function getAllReports(limit = 50, offset = 0) {
          LEFT JOIN archivos a ON r.id_reporte = a.id_reporte
          GROUP BY r.id_reporte
          ORDER BY r.fecha_creacion DESC
-         LIMIT ? OFFSET ?`,
-        [parseInt(limit), parseInt(offset)]
+         LIMIT ${safeLimit} OFFSET ${safeOffset}`
     );
     
     console.log(`🔍 CONSULTA SQL devolvió ${rows.length} filas`);
@@ -119,6 +120,8 @@ export async function getAllReports(limit = 50, offset = 0) {
  * Obtener reportes por usuario
  */
 export async function getReportsByUser(userId, limit = 50, offset = 0) {
+    const safeLimit = parseInt(limit) || 50;
+    const safeOffset = parseInt(offset) || 0;
     const [rows] = await pool.execute(
         `SELECT 
             r.*,
@@ -140,8 +143,8 @@ export async function getReportsByUser(userId, limit = 50, offset = 0) {
          WHERE r.id_usuario = ?
          GROUP BY r.id_reporte
          ORDER BY r.fecha_creacion DESC
-         LIMIT ? OFFSET ?`,
-        [userId, parseInt(limit), parseInt(offset)]
+         LIMIT ${safeLimit} OFFSET ${safeOffset}`,
+        [userId]
     );
     
     return rows.map(row => ({
