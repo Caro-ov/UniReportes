@@ -15,7 +15,7 @@ const notificationModel = {
       WHERE n.id_usuario_destino = ?
       ORDER BY n.fecha_creacion DESC
       LIMIT ? OFFSET ?`,
-      [userId, limit, offset]
+      [userId, parseInt(limit), parseInt(offset)]
     );
     return rows;
   },

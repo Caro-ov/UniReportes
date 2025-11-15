@@ -77,7 +77,7 @@ export async function getAllReports(limit = 50, offset = 0) {
          GROUP BY r.id_reporte
          ORDER BY r.fecha_creacion DESC
          LIMIT ? OFFSET ?`,
-        [limit, offset]
+        [parseInt(limit), parseInt(offset)]
     );
     
     console.log(`🔍 CONSULTA SQL devolvió ${rows.length} filas`);
@@ -141,7 +141,7 @@ export async function getReportsByUser(userId, limit = 50, offset = 0) {
          GROUP BY r.id_reporte
          ORDER BY r.fecha_creacion DESC
          LIMIT ? OFFSET ?`,
-        [userId, limit, offset]
+        [userId, parseInt(limit), parseInt(offset)]
     );
     
     return rows.map(row => ({

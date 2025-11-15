@@ -46,7 +46,7 @@ export async function getAllUsers(limit = 50, offset = 0) {
      FROM usuarios 
      ORDER BY fecha_creacion DESC 
      LIMIT ? OFFSET ?`,
-    [limit, offset]
+    [parseInt(limit), parseInt(offset)]
   );
   return rows;
 }
