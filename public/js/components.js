@@ -106,14 +106,17 @@ $(document).ready(function() {
 
     // Función para inicializar la funcionalidad del sidebar
     function initializeSidebarFunctionality() {
-        // Funcionalidad para cerrar sidebar en móvil con event delegation
-        $(document).off('click.overlay').on('click.overlay', '.overlay', function() {
-            toggleSidebar();
-        });
-
-        // Manejar botón de menú móvil con event delegation
+        // Manejar botón de menú móvil
         $(document).off('click.menuMovil').on('click.menuMovil', '.boton-menu-movil', function() {
             toggleSidebar();
+        });
+        
+        // Cerrar sidebar al hacer clic en el overlay (::before pseudo-element)
+        $(document).off('click.closeSidebar').on('click.closeSidebar', 'body.sidebar-open', function(e) {
+            // Solo cerrar si se hace clic fuera del sidebar
+            if (!$(e.target).closest('.sidebar').length && !$(e.target).hasClass('boton-menu-movil')) {
+                toggleSidebar();
+            }
         });
     }
 
@@ -196,8 +199,13 @@ $(document).ready(function() {
 
     // Función para mostrar/ocultar sidebar en móvil
     function toggleSidebar() {
-        $('.sidebar').toggleClass('abierto');
-        $('.overlay').toggleClass('mostrar');
+        const sidebar = $('.sidebar');
+        const body = $('body');
+        
+        sidebar.toggleClass('active');
+        body.toggleClass('sidebar-open');
+        
+        console.log('Sidebar toggled:', sidebar.hasClass('active'));
     }
 
     // Cargar y inicializar sistema de notificaciones
