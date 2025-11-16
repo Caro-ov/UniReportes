@@ -307,15 +307,15 @@ renderizarTabla = function(reportes) {
 
         tbody.append(`
             <tr data-reporte-id="${reporte.id_reporte}"${filaClass}>
-                <td class="id-reporte">#${reporte.id_reporte}</td>
-                <td class="titulo">${reporte.titulo || 'Sin título'}</td>
-                <td class="categoria">${reporte.categoria_nombre || 'Sin categoría'}</td>
-                <td class="prioridad">${prioridadBadge}</td>
-                <td><span class="estado-badge ${estadoClass}">${estadoTexto}</span></td>
-                <td class="ubicacion">${ubicacion}</td>
-                <td class="usuario">${reporte.usuario_nombre || 'Sin usuario'}</td>
-                <td class="fecha">${fechaFormateada}</td>
-                <td class="acciones">
+                <td class="id-reporte" data-label="ID">#${reporte.id_reporte}</td>
+                <td class="titulo" data-label="Título">${reporte.titulo || 'Sin título'}</td>
+                <td class="categoria" data-label="Categoría">${reporte.categoria_nombre || 'Sin categoría'}</td>
+                <td class="prioridad" data-label="Prioridad">${prioridadBadge}</td>
+                <td data-label="Estado"><span class="estado-badge ${estadoClass}">${estadoTexto}</span></td>
+                <td class="ubicacion" data-label="Ubicación">${ubicacion}</td>
+                <td class="usuario" data-label="Usuario">${reporte.usuario_nombre || 'Sin usuario'}</td>
+                <td class="fecha" data-label="Fecha">${fechaFormateada}</td>
+                <td class="acciones" data-label="Acciones">
                     <div class="contenedor-acciones">
                         <button class="btn-accion btn-ver" title="Ver detalles" data-action="ver" data-id="${reporte.id_reporte}">
                             <span class="material-symbols-outlined">visibility</span>
