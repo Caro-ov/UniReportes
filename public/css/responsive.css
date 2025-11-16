@@ -526,4 +526,120 @@
     .desktop-only {
         display: none;
     }
+    
+    /* ===========================
+       EXPLORAR REPORTES - MÓVIL
+       =========================== */
+    
+    /* Sección de reportes */
+    .seccion-reportes-recientes {
+        padding: 0 !important;
+    }
+    
+    .header-seccion {
+        padding: 16px 12px !important;
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+    
+    .titulo-seccion {
+        font-size: 20px !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Filtros en columna */
+    .filtros-reportes {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+    
+    .filtro-grupo {
+        width: 100% !important;
+        padding: 12px !important;
+        border-radius: 8px !important;
+        background: var(--bg-secondary) !important;
+    }
+    
+    .filtro-buscar,
+    .filtro-select {
+        width: 100% !important;
+        font-size: 14px !important;
+        padding: 10px 12px !important;
+    }
+    
+    /* Tabla responsive - scroll horizontal */
+    .tabla-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .tabla-reportes {
+        min-width: 800px !important;
+        font-size: 13px !important;
+    }
+    
+    .tabla-reportes th,
+    .tabla-reportes td {
+        padding: 10px 8px !important;
+        white-space: nowrap !important;
+    }
+    
+    .tabla-reportes th:first-child,
+    .tabla-reportes td:first-child {
+        position: sticky !important;
+        left: 0 !important;
+        background: white !important;
+        z-index: 10 !important;
+        box-shadow: 2px 0 4px rgba(0,0,0,0.05) !important;
+    }
+    
+    .tabla-reportes thead th {
+        background: var(--bg-secondary) !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 11 !important;
+    }
+    
+    /* Badges más pequeños */
+    .badge-prioridad,
+    .badge-estado,
+    .badge-categoria {
+        font-size: 11px !important;
+        padding: 4px 8px !important;
+    }
+    
+    /* Botones de acción más compactos */
+    .btn-ver-reporte,
+    .btn-accion {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+    }
+    
+    /* Notificaciones urgentes */
+    .seccion-notificaciones-urgentes {
+        margin: 12px !important;
+        border-radius: 8px !important;
+    }
+    
+    .notificacion-urgente {
+        padding: 12px !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    
+    /* Paginación más compacta */
+    .paginacion-container {
+        flex-direction: column !important;
+        gap: 12px !important;
+        padding: 12px !important;
+    }
+    
+    .paginacion-botones {
+        width: 100% !important;
+        justify-content: space-between !important;
+    }
 }
