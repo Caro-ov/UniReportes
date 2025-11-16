@@ -567,9 +567,64 @@
     .desktop-only {
         display: none;
     }
-    
+}
+
+/* Móvil específico (max-width: 480px) */
+@media (max-width: 480px) {
     /* ===========================
        EXPLORAR REPORTES - MÓVIL
+       =========================== */
+    
+    /* Tabla responsive - Card style SOLO en móvil */
+    .tabla-reportes thead {
+        display: none !important;
+    }
+    
+    .tabla-reportes tbody tr {
+        display: block !important;
+        margin-bottom: 12px !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 8px !important;
+        padding: 12px !important;
+        background: white !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+    }
+    
+    .tabla-reportes tbody td {
+        display: flex !important;
+        justify-content: space-between !important;
+        padding: 8px 0 !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        text-align: left !important;
+    }
+    
+    .tabla-reportes tbody td:last-child {
+        border-bottom: none !important;
+    }
+    
+    .tabla-reportes tbody td::before {
+        content: attr(data-label) !important;
+        font-weight: 600 !important;
+        color: #6b7280 !important;
+        font-size: 12px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+    
+    /* Botones de acción adaptados */
+    .btn-ver-reporte,
+    .btn-accion {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+/* Tablet y menor (max-width: 768px) - Estilos generales */
+@media (max-width: 768px) {
+    /* ===========================
+       EXPLORAR REPORTES - TABLET/MÓVIL
        =========================== */
     
     /* Sección de reportes */
@@ -625,55 +680,13 @@
         border-radius: 6px !important;
     }
     
-    /* Tabla responsive - Card style en móvil */
+    /* Tabla con scroll horizontal en tablet */
     .tabla-container {
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
         border-radius: 0 !important;
         margin: 0 !important;
         background: white !important;
-    }
-    
-    .tabla-reportes {
-        width: 100% !important;
-        min-width: 100% !important;
-        font-size: 13px !important;
-        border-collapse: collapse !important;
-    }
-    
-    .tabla-reportes thead {
-        display: none !important;
-    }
-    
-    .tabla-reportes tbody tr {
-        display: block !important;
-        margin-bottom: 12px !important;
-        border: 1px solid #e5e7eb !important;
-        border-radius: 8px !important;
-        padding: 12px !important;
-        background: white !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-    }
-    
-    .tabla-reportes tbody td {
-        display: flex !important;
-        justify-content: space-between !important;
-        padding: 8px 0 !important;
-        border-bottom: 1px solid #f3f4f6 !important;
-        text-align: left !important;
-    }
-    
-    .tabla-reportes tbody td:last-child {
-        border-bottom: none !important;
-    }
-    
-    .tabla-reportes tbody td::before {
-        content: attr(data-label) !important;
-        font-weight: 600 !important;
-        color: #6b7280 !important;
-        font-size: 12px !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
     }
     
     /* Badges adaptados */
@@ -684,15 +697,6 @@
         padding: 4px 8px !important;
         border-radius: 4px !important;
         font-weight: 600 !important;
-    }
-    
-    /* Botones de acción adaptados */
-    .btn-ver-reporte,
-    .btn-accion {
-        padding: 8px 12px !important;
-        font-size: 13px !important;
-        width: 100% !important;
-        justify-content: center !important;
     }
     
     /* Notificaciones urgentes */
