@@ -106,8 +106,13 @@ $(document).ready(function() {
 
     // Función para inicializar la funcionalidad del sidebar
     function initializeSidebarFunctionality() {
+        console.log('🔧 Inicializando funcionalidad del sidebar');
+        
         // Manejar botón de menú móvil
-        $(document).off('click.menuMovil').on('click.menuMovil', '.boton-menu-movil', function() {
+        $(document).off('click.menuMovil').on('click.menuMovil', '.boton-menu-movil', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🍔 Click en botón menú móvil detectado');
             toggleSidebar();
         });
         
@@ -115,6 +120,7 @@ $(document).ready(function() {
         $(document).off('click.closeSidebar').on('click.closeSidebar', 'body.sidebar-open', function(e) {
             // Solo cerrar si se hace clic fuera del sidebar
             if (!$(e.target).closest('.sidebar').length && !$(e.target).hasClass('boton-menu-movil')) {
+                console.log('🚪 Click fuera del sidebar - cerrando');
                 toggleSidebar();
             }
         });
@@ -202,10 +208,15 @@ $(document).ready(function() {
         const sidebar = $('.sidebar');
         const body = $('body');
         
+        const wasOpen = sidebar.hasClass('active');
+        
         sidebar.toggleClass('active');
         body.toggleClass('sidebar-open');
         
-        console.log('Sidebar toggled:', sidebar.hasClass('active'));
+        console.log('🔄 Sidebar toggled - Nuevo estado:', !wasOpen ? 'ABIERTO' : 'CERRADO');
+        console.log('   - Sidebar tiene clase "active":', sidebar.hasClass('active'));
+        console.log('   - Body tiene clase "sidebar-open":', body.hasClass('sidebar-open'));
+        console.log('   - Sidebar left position:', sidebar.css('left'));
     }
 
     // Cargar y inicializar sistema de notificaciones
