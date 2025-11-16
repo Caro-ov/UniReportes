@@ -402,40 +402,63 @@ $(document).ready(function() {
     window.toggleSidebar = toggleSidebar;
     window.mostrarToast = mostrarToast;
     window.mostrarModalLogout = mostrarModalLogout;
-});// Función global para reinicializar header después de navegación SPA
+});
+// Función global para reinicializar header después de navegación SPA
 window.reinitializeHeader = function() {
-    console.log(' Reinicializando header después de navegación SPA');
+    console.log('🔄 Reinicializando header después de navegación SPA');
     
-    // Forzar estilos del header-contenido en móvil
-    if (window.innerWidth <= 768) {
-        setTimeout(() => {
-            const headerContenido = document.querySelector('.header-contenido');
-            if (headerContenido) {
-                headerContenido.setAttribute('style', 
-                    'display: flex !important; align-items: center !important; ' +
-                    'justify-content: space-between !important; width: 100% !important; ' +
-                    'height: 100% !important; padding: 0 12px !important; ' +
-                    'max-width: 100% !important; margin: 0 !important; gap: 12px !important;'
-                );
-            }
-            
-            const botonMenu = document.querySelector('.boton-menu-movil');
-            if (botonMenu) {
-                botonMenu.setAttribute('style', 
-                    'display: flex !important; flex-shrink: 0 !important; ' +
-                    'width: 44px !important; height: 44px !important;'
-                );
-            }
-            
-            const controlesUsuario = document.querySelector('.controles-usuario');
-            if (controlesUsuario) {
-                controlesUsuario.setAttribute('style', 
-                    'display: flex !important; flex-shrink: 0 !important; ' +
-                    'margin-left: auto !important; gap: 8px !important;'
-                );
-            }
-            
-            console.log(' Header reinicializado');
-        }, 100);
-    }
+    setTimeout(() => {
+        // Asegurar que el header principal esté visible
+        const headerPrincipal = document.querySelector('.header-principal');
+        if (headerPrincipal) {
+            headerPrincipal.style.display = 'block';
+            headerPrincipal.style.visibility = 'visible';
+            headerPrincipal.style.opacity = '1';
+            console.log('✅ Header principal visible');
+        } else {
+            console.warn('⚠️ No se encontró .header-principal');
+        }
+        
+        // Forzar estilos del header-contenido
+        const headerContenido = document.querySelector('.header-contenido');
+        if (headerContenido) {
+            headerContenido.setAttribute('style', 
+                'display: flex !important; align-items: center !important; ' +
+                'justify-content: space-between !important; width: 100% !important; ' +
+                'height: 100% !important; padding: 0 12px !important; ' +
+                'max-width: 100% !important; margin: 0 !important; gap: 12px !important;'
+            );
+            console.log('✅ Header-contenido estilizado');
+        } else {
+            console.warn('⚠️ No se encontró .header-contenido');
+        }
+        
+        // Forzar estilos del boton-menu-movil
+        const botonMenu = document.querySelector('.boton-menu-movil');
+        if (botonMenu) {
+            botonMenu.setAttribute('style', 
+                'display: flex !important; flex-shrink: 0 !important; ' +
+                'align-items: center !important; justify-content: center !important; ' +
+                'width: 44px !important; height: 44px !important;'
+            );
+            console.log('✅ Botón menú estilizado');
+        } else {
+            console.warn('⚠️ No se encontró .boton-menu-movil');
+        }
+        
+        // Forzar estilos de controles-usuario
+        const controlesUsuario = document.querySelector('.controles-usuario');
+        if (controlesUsuario) {
+            controlesUsuario.setAttribute('style', 
+                'display: flex !important; flex-shrink: 0 !important; ' +
+                'align-items: center !important; ' +
+                'margin-left: auto !important; gap: 8px !important;'
+            );
+            console.log('✅ Controles usuario estilizados');
+        } else {
+            console.warn('⚠️ No se encontró .controles-usuario');
+        }
+        
+        console.log('✅ Header completamente reinicializado');
+    }, 150);
 };
