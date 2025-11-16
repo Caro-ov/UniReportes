@@ -1,7 +1,11 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 
-dotenv.config();
+// Buscar .env.temp primero, si no existe usa .env
+dotenv.config({ path: '.env.temp' });
+if (!process.env.EMAIL_USER) {
+    dotenv.config();
+}
 
 // Configurar el transporter de Gmail
 const transporter = nodemailer.createTransport({
