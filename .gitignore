@@ -7,6 +7,12 @@ node_modules/
 .env.*.local
 .env.temp
 
+# Configuration files with API keys
+*_CONFIG.md
+EMAIL_CONFIG.md
+RESEND_CONFIG.md
+RAILWAY_EMAIL_CONFIG.md
+
 # Encrypted environment files (incluir en producción)
 # .env.encrypted
 

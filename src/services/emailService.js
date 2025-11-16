@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import dotenv from 'dotenv';
 
 // Solo cargar dotenv en desarrollo (Railway inyecta variables automáticamente)
@@ -11,54 +12,47 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Log de verificación de variables
 console.log('🔍 Verificando configuración de email...');
-console.log('EMAIL_USER:', process.env.EMAIL_USER ? '✓ Configurado' : '✗ Falta');
-console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Configurado' : '✗ Falta');
+const isProduction = process.env.NODE_ENV === 'production';
+const useResend = isProduction && process.env.RESEND_API_KEY;
 
-// Configurar el transporter de Gmail solo si hay credenciales
+if (useResend) {
+    console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY ? '✓ Configurado' : '✗ Falta');
+} else {
+    console.log('EMAIL_USER:', process.env.EMAIL_USER ? '✓ Configurado' : '✗ Falta');
+    console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Configurado' : '✗ Falta');
+}
+
+// Configurar servicio de email según el entorno
 let transporter = null;
+let resendClient = null;
 
-if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-    // Configuración para producción (Railway) - usar SMTP con host específico
-    const isProduction = process.env.NODE_ENV === 'production';
+if (useResend) {
+    // PRODUCCIÓN: Usar Resend
+    console.log('📧 Modo: Producción - Usando Resend API');
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+    console.log('✅ Servicio de email Resend configurado');
     
-    const transportConfig = isProduction ? {
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, // true para 465, false para otros puertos
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        },
-        tls: {
-            rejectUnauthorized: false
-        }
-    } : {
+} else if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    // DESARROLLO: Usar Gmail SMTP
+    console.log('📧 Modo: Desarrollo - Usando Gmail SMTP');
+    transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
         }
-    };
-    
-    transporter = nodemailer.createTransport(transportConfig);
-    
-    console.log(`📧 Configuración SMTP: ${isProduction ? 'Producción (smtp.gmail.com:587)' : 'Desarrollo (gmail service)'}`);
+    });
 
-    // Verificar conexión (asíncrono pero lanzar inmediatamente)
+    // Verificar conexión Gmail
     transporter.verify()
         .then(() => {
-            console.log('✅ Servicio de email listo para enviar correos');
+            console.log('✅ Servicio de email Gmail listo');
         })
         .catch((error) => {
             console.error('❌ Error al conectar con Gmail:', error.message);
-            console.error('📋 Verifica:');
-            console.error('   1. Que la contraseña de aplicación sea correcta');
-            console.error('   2. Que Gmail permita apps menos seguras');
-            console.error('   3. La conexión a internet desde Railway');
-            console.error('⚠️  NOTA: Railway puede bloquear SMTP. Considera usar SendGrid o Resend');
         });
 } else {
-    console.warn('⚠️  Variables EMAIL_USER o EMAIL_PASS no configuradas. Emails deshabilitados.');
+    console.warn('⚠️  No hay configuración de email disponible. Emails deshabilitados.');
 }
 
 /**
@@ -184,31 +178,57 @@ export const enviarNotificacionNuevoComentario = async (reporte, comentario, usu
  * Enviar notificación genérica
  */
 export const enviarNotificacionGenerica = async (destinatario, asunto, mensaje) => {
-    if (!transporter) {
-        console.warn('⚠️  Email deshabilitado: no hay transporter configurado');
+    // Verificar que haya un servicio de email configurado
+    if (!resendClient && !transporter) {
+        console.warn('⚠️  Email deshabilitado: no hay servicio configurado');
         return { success: false, error: 'Email no configurado' };
     }
     
-    const mailOptions = {
-        from: `"UniReportes" <${process.env.EMAIL_USER}>`,
-        to: destinatario,
-        subject: asunto,
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #1173d4;">UniReportes</h2>
-                <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    ${mensaje}
-                </div>
-            </div>
-        `
-    };
-
     try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log('✅ Email enviado:', info.messageId);
-        return { success: true, messageId: info.messageId };
+        console.log(`📤 Enviando email a: ${destinatario}`);
+        
+        if (resendClient) {
+            // USAR RESEND (Producción)
+            const data = await resendClient.emails.send({
+                from: 'UniReportes <onboarding@resend.dev>',
+                to: destinatario,
+                subject: asunto,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #1173d4;">UniReportes</h2>
+                        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            ${mensaje}
+                        </div>
+                    </div>
+                `
+            });
+            
+            console.log('✅ Email enviado via Resend:', data.id);
+            return { success: true, messageId: data.id };
+            
+        } else {
+            // USAR NODEMAILER/GMAIL (Desarrollo)
+            const mailOptions = {
+                from: `"UniReportes" <${process.env.EMAIL_USER}>`,
+                to: destinatario,
+                subject: asunto,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #1173d4;">UniReportes</h2>
+                        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            ${mensaje}
+                        </div>
+                    </div>
+                `
+            };
+            
+            const info = await transporter.sendMail(mailOptions);
+            console.log('✅ Email enviado via Gmail:', info.messageId);
+            return { success: true, messageId: info.messageId };
+        }
+        
     } catch (error) {
-        console.error('❌ Error al enviar email:', error);
+        console.error('❌ Error al enviar email:', error.message);
         return { success: false, error: error.message };
     }
 };
