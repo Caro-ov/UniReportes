@@ -360,3 +360,180 @@ body {
         transform: translateY(0);
     }
 }
+
+/* ========================================
+   RESPONSIVE - MOBILE STYLES
+   ======================================== */
+
+/* Tablet y menor */
+@media (max-width: 1024px) {
+    .contenedor-login {
+        flex-direction: column;
+    }
+
+    .seccion-formulario,
+    .seccion-imagen {
+        width: 100% !important;
+        min-height: auto;
+    }
+
+    .seccion-imagen {
+        display: none;
+    }
+
+    .seccion-formulario {
+        justify-content: flex-start;
+        padding: 24px 20px;
+    }
+
+    .formulario-login {
+        max-width: 100%;
+        width: 100%;
+        padding: 0;
+    }
+}
+
+/* Móvil */
+@media (max-width: 768px) {
+    body {
+        overflow-y: auto;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .contenedor-login {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+
+    .seccion-formulario {
+        padding: 20px 16px;
+        min-height: 100vh;
+        justify-content: center;
+    }
+
+    .logo-unireportes {
+        width: 36px;
+        height: 36px;
+    }
+
+    .logo-unireportes svg {
+        width: 36px;
+        height: 36px;
+    }
+
+    .nombre-app {
+        font-size: 20px;
+    }
+
+    h1 {
+        font-size: 22px !important;
+        margin-bottom: 8px;
+    }
+
+    .subtitulo-formulario {
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+
+    .formulario-login {
+        padding: 0;
+    }
+
+    .grupo-input {
+        margin-bottom: 16px;
+    }
+
+    label {
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    input {
+        font-size: 16px !important; /* Evita zoom en iOS */
+        padding: 12px 40px 12px 12px;
+        height: 48px;
+    }
+
+    .icono-input {
+        font-size: 20px;
+    }
+
+    .boton-toggle-password {
+        padding: 8px;
+    }
+
+    .recordar-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .checkbox-container {
+        margin: 0;
+    }
+
+    .link-secundario {
+        align-self: flex-start;
+    }
+
+    .boton-primario {
+        height: 48px;
+        font-size: 16px;
+        margin-top: 24px;
+    }
+
+    .separador {
+        margin: 24px 0;
+    }
+
+    .texto-registro {
+        font-size: 14px;
+        margin-top: 24px;
+    }
+}
+
+/* Móvil pequeño */
+@media (max-width: 480px) {
+    .seccion-formulario {
+        padding: 16px 12px;
+    }
+
+    .logo-unireportes {
+        width: 32px;
+        height: 32px;
+    }
+
+    .logo-unireportes svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .nombre-app {
+        font-size: 18px;
+    }
+
+    h1 {
+        font-size: 20px !important;
+    }
+
+    .subtitulo-formulario {
+        font-size: 13px;
+    }
+
+    input {
+        padding: 10px 36px 10px 10px;
+        height: 44px;
+    }
+
+    .icono-input {
+        width: 36px;
+        font-size: 18px;
+    }
+
+    .boton-primario {
+        height: 44px;
+        font-size: 15px;
+    }
+}

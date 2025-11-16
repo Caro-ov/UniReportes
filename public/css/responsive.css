@@ -1,0 +1,299 @@
+/* ========================================
+   ESTILOS RESPONSIVE GLOBALES
+   Mejoras de adaptabilidad móvil
+   ======================================== */
+
+/* Tablet y menor (max-width: 768px) */
+@media (max-width: 768px) {
+    /* Ajustes generales */
+    body {
+        font-size: 14px;
+    }
+
+    /* Header y navegación */
+    header {
+        padding: 12px 16px !important;
+    }
+
+    .header-content {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 100% !important;
+        max-width: 280px !important;
+        position: fixed !important;
+        left: -100% !important;
+        top: 0 !important;
+        height: 100vh !important;
+        z-index: 1000 !important;
+        transition: left 0.3s ease !important;
+    }
+
+    .sidebar.active {
+        left: 0 !important;
+    }
+
+    /* Overlay para cerrar sidebar en móvil */
+    body::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    body.sidebar-open::after {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    /* Main content sin sidebar en móvil */
+    .main-content,
+    main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 16px !important;
+    }
+
+    /* Contenedores */
+    .container {
+        padding: 0 16px !important;
+        max-width: 100% !important;
+    }
+
+    /* Cards y tarjetas */
+    .card,
+    .tarjeta-reporte,
+    .tarjeta-beneficio,
+    .stats-card,
+    .action-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 0 16px 0 !important;
+    }
+
+    /* Grids a columna única */
+    .grid,
+    .stats-grid,
+    .cards-grid,
+    .contenedor-tarjetas {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
+    /* Tablas responsivas */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 600px;
+        font-size: 13px;
+    }
+
+    th, td {
+        padding: 8px 6px !important;
+    }
+
+    /* Formularios */
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    input, select, textarea {
+        font-size: 16px !important; /* Evita zoom en iOS */
+    }
+
+    .form-row {
+        flex-direction: column !important;
+    }
+
+    /* Botones */
+    .btn,
+    button {
+        width: 100%;
+        padding: 12px 16px !important;
+        font-size: 15px !important;
+    }
+
+    .btn-group {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .btn-group .btn {
+        width: 100% !important;
+    }
+
+    /* Modal */
+    .modal-content {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 16px auto !important;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    /* Títulos */
+    h1 {
+        font-size: 24px !important;
+    }
+
+    h2 {
+        font-size: 20px !important;
+    }
+
+    h3 {
+        font-size: 18px !important;
+    }
+
+    /* Notificaciones urgentes */
+    #notificaciones-urgentes {
+        margin: 0 -16px 16px -16px !important;
+        border-radius: 0 !important;
+    }
+
+    .reporte-urgente-item {
+        padding: 12px !important;
+    }
+
+    /* Filtros */
+    .filtros-container,
+    .filters-container {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+
+    .filtro-item,
+    .filter-item {
+        width: 100% !important;
+    }
+
+    /* Paginación */
+    .pagination {
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+    }
+
+    .pagination button {
+        min-width: 40px !important;
+        width: auto !important;
+        padding: 8px 12px !important;
+    }
+
+    /* Dashboard stats */
+    .dashboard-stats {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Flex containers a columna */
+    .flex-row {
+        flex-direction: column !important;
+    }
+}
+
+/* Móvil pequeño (max-width: 480px) */
+@media (max-width: 480px) {
+    body {
+        font-size: 13px;
+    }
+
+    h1 {
+        font-size: 22px !important;
+    }
+
+    h2 {
+        font-size: 18px !important;
+    }
+
+    h3 {
+        font-size: 16px !important;
+    }
+
+    /* Reducir padding general */
+    .main-content,
+    main {
+        padding: 12px !important;
+    }
+
+    .container {
+        padding: 0 12px !important;
+    }
+
+    /* Cards más compactas */
+    .card,
+    .stats-card {
+        padding: 12px !important;
+    }
+
+    /* Botones más pequeños */
+    .btn {
+        padding: 10px 14px !important;
+        font-size: 14px !important;
+    }
+
+    /* Tabla más compacta */
+    table {
+        font-size: 12px;
+    }
+
+    th, td {
+        padding: 6px 4px !important;
+    }
+
+    /* Ocultar columnas menos importantes en móvil */
+    .hide-mobile {
+        display: none !important;
+    }
+
+    /* Modal ocupa toda la pantalla */
+    .modal-content {
+        width: 100% !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+    }
+}
+
+/* Landscape en móviles */
+@media (max-height: 500px) and (orientation: landscape) {
+    .sidebar {
+        overflow-y: auto;
+    }
+
+    .modal-content {
+        max-height: 95vh;
+        overflow-y: auto;
+    }
+}
+
+/* Utilities responsive */
+.mobile-only {
+    display: none;
+}
+
+.desktop-only {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .mobile-only {
+        display: block;
+    }
+
+    .desktop-only {
+        display: none;
+    }
+}
