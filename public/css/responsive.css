@@ -108,24 +108,26 @@
         top: calc(100% + 8px) !important;
         right: 0 !important;
         min-width: 220px !important;
+        max-width: 280px !important;
         background: white !important;
         border-radius: 12px !important;
         box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
         padding: 8px !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-        transform: translateY(-10px) !important;
-        transition: all 0.2s ease !important;
+        display: none !important;
         z-index: 250 !important;
         border: 1px solid #e5e7eb !important;
     }
 
-    .menu-desplegable.mostrar,
-    .dropdown-perfil.open .menu-desplegable,
+    .menu-desplegable.mostrar {
+        display: block !important;
+    }
+    
+    .dropdown-perfil.open .menu-desplegable {
+        display: block !important;
+    }
+    
     .user-dropdown.open .menu-desplegable {
-        opacity: 1 !important;
-        visibility: visible !important;
-        transform: translateY(0) !important;
+        display: block !important;
     }
 
     .opcion-menu {
