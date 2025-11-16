@@ -408,28 +408,31 @@ body {
     }
 
     .seccion-formulario {
-        padding: 20px 16px;
+        padding: 16px;
         min-height: 100vh;
-        justify-content: center;
+        justify-content: flex-start;
+        padding-top: 40px;
     }
 
     .logo-unireportes {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
+        margin-bottom: 24px;
     }
 
     .logo-unireportes svg {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
     }
 
     .nombre-app {
-        font-size: 20px;
+        font-size: 22px;
     }
 
     h1 {
-        font-size: 22px !important;
+        font-size: 26px !important;
         margin-bottom: 8px;
+        margin-top: 0;
     }
 
     .subtitulo-formulario {
@@ -439,10 +442,11 @@ body {
 
     .formulario-login {
         padding: 0;
+        max-width: 100%;
     }
 
     .grupo-input {
-        margin-bottom: 16px;
+        margin-bottom: 18px;
     }
 
     label {
@@ -451,23 +455,27 @@ body {
     }
 
     input {
-        font-size: 16px !important; /* Evita zoom en iOS */
-        padding: 12px 40px 12px 12px;
-        height: 48px;
+        font-size: 16px !important;
+        padding: 13px 40px 13px 13px;
+        height: 50px;
     }
 
     .icono-input {
-        font-size: 20px;
+        font-size: 22px;
+        width: 40px;
     }
 
     .boton-toggle-password {
-        padding: 8px;
+        padding: 10px;
+        width: 40px;
     }
 
     .recordar-container {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
     }
 
     .checkbox-container {
@@ -475,11 +483,11 @@ body {
     }
 
     .link-secundario {
-        align-self: flex-start;
+        font-size: 13px;
     }
 
     .boton-primario {
-        height: 48px;
+        height: 50px;
         font-size: 16px;
         margin-top: 24px;
     }
@@ -497,43 +505,62 @@ body {
 /* Móvil pequeño */
 @media (max-width: 480px) {
     .seccion-formulario {
-        padding: 16px 12px;
+        padding: 12px;
+        padding-top: 30px;
     }
 
     .logo-unireportes {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
+        margin-bottom: 20px;
     }
 
     .logo-unireportes svg {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
     }
 
     .nombre-app {
-        font-size: 18px;
+        font-size: 20px;
     }
 
     h1 {
-        font-size: 20px !important;
+        font-size: 24px !important;
     }
 
     .subtitulo-formulario {
         font-size: 13px;
     }
 
+    .grupo-input {
+        margin-bottom: 16px;
+    }
+
     input {
-        padding: 10px 36px 10px 10px;
-        height: 44px;
+        padding: 12px 38px 12px 12px;
+        height: 48px;
     }
 
     .icono-input {
-        width: 36px;
-        font-size: 18px;
+        width: 38px;
+        font-size: 20px;
+    }
+
+    .boton-toggle-password {
+        width: 38px;
+        padding: 9px;
     }
 
     .boton-primario {
-        height: 44px;
+        height: 48px;
         font-size: 15px;
+    }
+
+    .checkbox-container label {
+        font-size: 13px;
+    }
+
+    .link-secundario {
+        font-size: 12px;
     }
 }
