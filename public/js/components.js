@@ -119,17 +119,39 @@ $(document).ready(function() {
 
     // Función para inicializar la funcionalidad del header
     function initializeHeaderFunctionality() {
-        // Manejar dropdown del usuario con event delegation
-        $(document).off('click.header').on('click.header', '.user-dropdown, .dropdown-perfil', function(e) {
+        // Manejar dropdown del usuario con event delegation - MEJORADO PARA MÓVIL
+        $(document).off('click.header touchend.header').on('click.header touchend.header', '.perfil-usuario, #dropdownPerfil, .avatar-usuario', function(e) {
+            e.preventDefault();
             e.stopPropagation();
-            $(this).toggleClass('open');
-            $('.menu-desplegable', this).toggleClass('mostrar');
+            console.log('Click en perfil detectado');
+            
+            const dropdown = $(this).closest('.dropdown-perfil, .user-dropdown');
+            const menu = dropdown.find('.menu-desplegable, #menuPerfil');
+            
+            // Toggle
+            dropdown.toggleClass('open');
+            menu.toggleClass('mostrar');
+            
+            console.log('Dropdown abierto:', dropdown.hasClass('open'));
+            console.log('Menu visible:', menu.hasClass('mostrar'));
+        });
+        
+        // También capturar click en el contenedor
+        $(document).off('click.headerContainer touchend.headerContainer').on('click.headerContainer touchend.headerContainer', '.user-dropdown, .dropdown-perfil', function(e) {
+            if (!$(e.target).closest('.menu-desplegable, #menuPerfil').length) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).toggleClass('open');
+                $(this).find('.menu-desplegable, #menuPerfil').toggleClass('mostrar');
+            }
         });
 
         // Cerrar dropdown al hacer clic fuera
-        $(document).off('click.headerClose').on('click.headerClose', function() {
-            $('.user-dropdown, .dropdown-perfil').removeClass('open');
-            $('.menu-desplegable').removeClass('mostrar');
+        $(document).off('click.headerClose touchend.headerClose').on('click.headerClose touchend.headerClose', function(e) {
+            if (!$(e.target).closest('.dropdown-perfil, .user-dropdown, .perfil-usuario, #dropdownPerfil').length) {
+                $('.user-dropdown, .dropdown-perfil').removeClass('open');
+                $('.menu-desplegable, #menuPerfil').removeClass('mostrar');
+            }
         });
 
         // Manejar notificaciones con event delegation
