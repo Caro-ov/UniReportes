@@ -70,24 +70,27 @@
     /* Perfil usuario - Dropdown funcional */
     .perfil-completo {
         position: relative;
-        z-index: 200;
+        z-index: 300;
     }
 
     .dropdown-perfil,
     .user-dropdown {
         position: relative;
-        z-index: 200;
+        z-index: 300;
     }
 
     .perfil-usuario,
-    .perfil-usuario button {
+    #dropdownPerfil {
         width: 44px !important;
         height: 44px !important;
         padding: 0 !important;
         border: none !important;
         background: none !important;
         cursor: pointer !important;
-        z-index: 200;
+        z-index: 300;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .avatar-usuario {
@@ -95,38 +98,46 @@
         height: 40px !important;
         border-radius: 50%;
         background-color: #1173d4;
+        background-size: cover;
+        background-position: center;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-weight: 600;
+        pointer-events: none;
     }
 
     /* Menú desplegable del perfil */
+    #menuPerfil,
     .menu-desplegable {
-        position: absolute !important;
-        top: calc(100% + 8px) !important;
-        right: 0 !important;
-        min-width: 220px !important;
+        position: fixed !important;
+        top: 60px !important;
+        right: 8px !important;
+        left: auto !important;
+        min-width: 240px !important;
         max-width: 280px !important;
         background: white !important;
         border-radius: 12px !important;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25) !important;
         padding: 8px !important;
         display: none !important;
-        z-index: 250 !important;
+        z-index: 350 !important;
         border: 1px solid #e5e7eb !important;
     }
 
-    .menu-desplegable.mostrar {
+    .menu-desplegable.mostrar,
+    #menuPerfil.mostrar {
         display: block !important;
     }
     
-    .dropdown-perfil.open .menu-desplegable {
+    .dropdown-perfil.open .menu-desplegable,
+    .dropdown-perfil.open #menuPerfil {
         display: block !important;
     }
     
-    .user-dropdown.open .menu-desplegable {
+    .user-dropdown.open .menu-desplegable,
+    .user-dropdown.open #menuPerfil {
         display: block !important;
     }
 
