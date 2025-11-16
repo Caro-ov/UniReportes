@@ -433,18 +433,8 @@ window.reinitializeHeader = function() {
             console.warn('⚠️ No se encontró .header-contenido');
         }
         
-        // Forzar estilos del boton-menu-movil
-        const botonMenu = document.querySelector('.boton-menu-movil');
-        if (botonMenu) {
-            botonMenu.setAttribute('style', 
-                'display: flex !important; flex-shrink: 0 !important; ' +
-                'align-items: center !important; justify-content: center !important; ' +
-                'width: 44px !important; height: 44px !important;'
-            );
-            console.log('✅ Botón menú estilizado');
-        } else {
-            console.warn('⚠️ No se encontró .boton-menu-movil');
-        }
+        // NO forzar estilos del boton-menu-movil - debe respetar media queries
+        // El botón se oculta/muestra automáticamente según responsive.css
         
         // Forzar estilos de controles-usuario
         const controlesUsuario = document.querySelector('.controles-usuario');
