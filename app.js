@@ -22,6 +22,15 @@ import notificationRoutes from './src/routes/notificationRoutes.js';
 setupEnv();
 dotenv.config();
 
+// Verificar configuración de email al inicio
+console.log('\n🔧 === CONFIGURACIÓN DE VARIABLES DE ENTORNO ===');
+console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
+console.log('EMAIL_USER:', process.env.EMAIL_USER ? '✓ Configurado' : '❌ NO CONFIGURADO');
+console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Configurado' : '❌ NO CONFIGURADO');
+console.log('EMAIL_ADMIN:', process.env.EMAIL_ADMIN ? '✓ Configurado' : '❌ NO CONFIGURADO');
+console.log('APP_URL:', process.env.APP_URL || '⚠️ Usando default');
+console.log('==============================================\n');
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -109,6 +118,15 @@ const server = app.listen(PORT, async () => {
     console.error('❌ Error conectando a MySQL:', err.message);
     console.log('💡 Verifica que MySQL esté corriendo y las credenciales en .env sean correctas');
     console.log('⚠️ El servidor continuará funcionando sin base de datos');
+  }
+  
+  // Inicializar servicio de email después de que el servidor esté listo
+  console.log('\n📧 Inicializando servicio de email...');
+  try {
+    await import('./src/services/emailService.js');
+    console.log('✅ Servicio de email cargado\n');
+  } catch (emailError) {
+    console.error('❌ Error cargando servicio de email:', emailError.message);
   }
   
   console.log('🌐 Servidor listo para recibir peticiones...');

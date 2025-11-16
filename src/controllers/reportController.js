@@ -5,6 +5,7 @@ import * as historialModel from '../models/historialModel.js';
 import notificationModel from '../models/notificationModel.js';
 import notificationService from '../services/notificationService.js';
 import * as userModel from '../models/userModel.js';
+import pool from '../config/db.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -565,11 +566,11 @@ export async function updateReport(req, res) {
                     try {
                         const actorNombre = req.session.user?.nombre || 'Un usuario';
                         const tituloNotif = `Reporte editado: ${existingReport.titulo}`;
-                        const mensajeNotif = `Reporte modificado por ${actorNombre}`;
+                        const mensajeNotif = `Reporte modificado por ${actorNombre}. Cambios: ${cambios.map(c => nombresAmigables[c.campo] || c.campo).join(', ')}`;
                         
                         // Notificar al creador del reporte si no fue él quien lo editó
                         if (existingReport.id_usuario !== userId) {
-                            await notificationModel.create({
+                            await notificationService.crearYNotificar({
                                 id_usuario_destino: existingReport.id_usuario,
                                 id_reporte: reportId,
                                 tipo: 'edicion',
@@ -578,14 +579,14 @@ export async function updateReport(req, res) {
                                 prioridad: 2,
                                 color: 'naranja'
                             });
-                            console.log(`🔔 Notificación enviada al creador del reporte (ID: ${existingReport.id_usuario})`);
+                            console.log(`🔔 Notificación y email enviados al creador del reporte (ID: ${existingReport.id_usuario})`);
                         }
                         
                         // Notificar a todos los administradores excepto al que hizo la edición
                         const admins = await userModel.getUsersByRole('admin');
                         for (const admin of admins) {
                             if (admin.id_usuario !== userId) {
-                                await notificationModel.create({
+                                await notificationService.crearYNotificar({
                                     id_usuario_destino: admin.id_usuario,
                                     id_reporte: reportId,
                                     tipo: 'edicion',
@@ -596,7 +597,7 @@ export async function updateReport(req, res) {
                                 });
                             }
                         }
-                        console.log(`🔔 Notificaciones enviadas a ${admins.filter(a => a.id_usuario !== userId).length} administrador(es)`);
+                        console.log(`🔔 Notificaciones y emails enviados a ${admins.filter(a => a.id_usuario !== userId).length} administrador(es)`);
                     } catch (notifError) {
                         console.error('❌ Error creando notificaciones de edición:', notifError);
                         // No fallar la actualización por error en notificaciones
@@ -679,6 +680,35 @@ export async function updateReportStatus(req, res) {
 
         if (success) {
             console.log('✅ Estado actualizado exitosamente');
+            
+            // Enviar notificación al creador del reporte
+            try {
+                const [reportes] = await pool.execute(
+                    'SELECT id_usuario, titulo FROM reportes WHERE id_reporte = ?',
+                    [reportId]
+                );
+
+                if (reportes.length > 0) {
+                    const reporte = reportes[0];
+                    
+                    // Notificar al creador del reporte
+                    await notificationService.crearYNotificar({
+                        id_usuario_destino: reporte.id_usuario,
+                        id_reporte: reportId,
+                        tipo: 'cambio_estado',
+                        titulo: 'Estado de tu reporte actualizado',
+                        mensaje: `El estado de tu reporte "${reporte.titulo}" ha sido actualizado a: ${estado}`,
+                        prioridad: 2,
+                        color: 'azul'
+                    });
+
+                    console.log('✅ Notificación y email enviado por cambio de estado');
+                }
+            } catch (notifError) {
+                console.warn('⚠️ Error al enviar notificación de cambio de estado:', notifError);
+                // No fallar la respuesta si la notificación falla
+            }
+            
             res.json({
                 success: true,
                 message: 'Estado actualizado exitosamente'
