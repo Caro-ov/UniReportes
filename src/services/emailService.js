@@ -189,6 +189,7 @@ export const enviarNotificacionGenerica = async (destinatario, asunto, mensaje) 
         
         if (resendClient) {
             // USAR RESEND (Producción)
+            console.log('🔧 Enviando via Resend API...');
             const data = await resendClient.emails.send({
                 from: 'UniReportes <onboarding@resend.dev>',
                 to: destinatario,
@@ -203,8 +204,9 @@ export const enviarNotificacionGenerica = async (destinatario, asunto, mensaje) 
                 `
             });
             
-            console.log('✅ Email enviado via Resend:', data.id);
-            return { success: true, messageId: data.id };
+            console.log('📊 Respuesta de Resend:', JSON.stringify(data));
+            console.log('✅ Email enviado via Resend. ID:', data?.id || 'No disponible');
+            return { success: true, messageId: data?.id, data };
             
         } else {
             // USAR NODEMAILER/GMAIL (Desarrollo)
@@ -229,6 +231,13 @@ export const enviarNotificacionGenerica = async (destinatario, asunto, mensaje) 
         
     } catch (error) {
         console.error('❌ Error al enviar email:', error.message);
+        console.error('📋 Detalles del error:', error);
+        if (error.statusCode) {
+            console.error('🔴 Status Code:', error.statusCode);
+        }
+        if (error.name) {
+            console.error('🔴 Error Name:', error.name);
+        }
         return { success: false, error: error.message };
     }
 };

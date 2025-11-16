@@ -65,7 +65,7 @@ Este es un dominio de prueba. Los emails llegarán pero pueden ir a spam.
 3. Verifica el dominio con DNS
 4. Cambia en el código `src/services/emailService.js`:
    ```javascript
-   from: 'UniReportes <notificaciones@tudominio.com>'
+   from: "UniReportes <notificaciones@tudominio.com>";
    ```
 
 Por ahora, `onboarding@resend.dev` funcionará perfectamente para pruebas.
@@ -103,6 +103,7 @@ Esto significa que no necesitas Resend en local, solo en Railway.
 **NUNCA subas tu API key de Resend a Git.**
 
 Las API keys deben ir solo en:
+
 - Variables de entorno de Railway (producción)
 - Archivo `.env.temp` en local (ya está en .gitignore)
 
