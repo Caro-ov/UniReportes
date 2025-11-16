@@ -24,29 +24,42 @@
     }
 
     .header-contenido {
-        padding: 8px 12px !important;
-        height: 100%;
+        padding: 0 12px !important;
+        height: 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
     }
 
     /* Botón menú móvil visible y funcional */
     .boton-menu-movil {
         display: flex !important;
-        align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        padding: 10px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: #374151;
-        border-radius: 8px;
-        transition: background-color 0.2s;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        width: 44px !important;
+        height: 44px !important;
+        padding: 10px !important;
+        margin: 0 !important;
+        background: none !important;
+        border: none !important;
+        cursor: pointer !important;
+        color: #374151 !important;
+        border-radius: 8px !important;
+        transition: background-color 0.2s !important;
     }
 
     .boton-menu-movil:hover,
     .boton-menu-movil:active {
-        background-color: #f3f4f6;
+        background-color: #f3f4f6 !important;
+    }
+    
+    .boton-menu-movil .material-symbols-outlined {
+        font-size: 24px !important;
     }
 
     /* Controles usuario */
@@ -54,6 +67,8 @@
         display: flex !important;
         gap: 8px !important;
         align-items: center !important;
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
     }
 
     /* Botón notificaciones */
@@ -65,18 +80,25 @@
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .boton-notificaciones .material-symbols-outlined,
+    .notification-btn .material-symbols-outlined {
+        font-size: 24px !important;
     }
 
     /* Perfil usuario - Dropdown funcional */
     .perfil-completo {
-        position: relative;
-        z-index: 300;
+        position: relative !important;
+        z-index: 300 !important;
+        flex-shrink: 0 !important;
     }
 
     .dropdown-perfil,
     .user-dropdown {
-        position: relative;
-        z-index: 300;
+        position: relative !important;
+        z-index: 300 !important;
     }
 
     .perfil-usuario,
@@ -87,18 +109,22 @@
         border: none !important;
         background: none !important;
         cursor: pointer !important;
-        z-index: 300;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        z-index: 300 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
     }
 
     .avatar-usuario {
         width: 40px !important;
         height: 40px !important;
-        border-radius: 50%;
-        background-color: #1173d4;
-        background-size: cover;
+        border-radius: 50% !important;
+        background-color: #1173d4 !important;
+        background-size: cover !important;
+        background-position: center !important;
+        flex-shrink: 0 !important;
+    }
         background-position: center;
         display: flex;
         align-items: center;
@@ -241,12 +267,20 @@
     .contenido-principal {
         margin-left: 0 !important;
         width: 100% !important;
-        padding: 70px 12px 16px 12px !important;
+        padding: 70px 12px 20px 12px !important;
+        min-height: calc(100vh - 60px) !important;
         position: relative !important;
         z-index: 1 !important;
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
+    }
+    
+    /* Contenedor wrapper */
+    .contenido-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding-top: 60px !important;
     }
 
     /* Asegurar que el contenido sea visible */
