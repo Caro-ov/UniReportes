@@ -313,6 +313,11 @@ class SPANavigation {
                     // Ocultar indicador de carga después de la animación
                     self.hideLoadingIndicator();
                     
+                    // Reinicializar header para móvil después de navegación SPA
+                    if (typeof window.reinitializeHeader === 'function') {
+                        window.reinitializeHeader();
+                    }
+                    
                     // Disparar evento de cambio de página DESPUÉS de que todo esté listo
                     console.log('🎯 SPA: Disparando evento para:', page);
                     self.triggerPageChangeEvent(page);

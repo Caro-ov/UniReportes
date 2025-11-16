@@ -402,4 +402,40 @@ $(document).ready(function() {
     window.toggleSidebar = toggleSidebar;
     window.mostrarToast = mostrarToast;
     window.mostrarModalLogout = mostrarModalLogout;
-});
+});// Función global para reinicializar header después de navegación SPA
+window.reinitializeHeader = function() {
+    console.log(' Reinicializando header después de navegación SPA');
+    
+    // Forzar estilos del header-contenido en móvil
+    if (window.innerWidth <= 768) {
+        setTimeout(() => {
+            const headerContenido = document.querySelector('.header-contenido');
+            if (headerContenido) {
+                headerContenido.setAttribute('style', 
+                    'display: flex !important; align-items: center !important; ' +
+                    'justify-content: space-between !important; width: 100% !important; ' +
+                    'height: 100% !important; padding: 0 12px !important; ' +
+                    'max-width: 100% !important; margin: 0 !important; gap: 12px !important;'
+                );
+            }
+            
+            const botonMenu = document.querySelector('.boton-menu-movil');
+            if (botonMenu) {
+                botonMenu.setAttribute('style', 
+                    'display: flex !important; flex-shrink: 0 !important; ' +
+                    'width: 44px !important; height: 44px !important;'
+                );
+            }
+            
+            const controlesUsuario = document.querySelector('.controles-usuario');
+            if (controlesUsuario) {
+                controlesUsuario.setAttribute('style', 
+                    'display: flex !important; flex-shrink: 0 !important; ' +
+                    'margin-left: auto !important; gap: 8px !important;'
+                );
+            }
+            
+            console.log(' Header reinicializado');
+        }, 100);
+    }
+};
