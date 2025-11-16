@@ -1,4 +1,6 @@
 import CommentModel from '../models/commentModel.js';
+import notificationService from '../services/notificationService.js';
+import pool from '../config/db.js';
 
 // Controlador para manejar comentarios de reportes
 const commentController = {
@@ -88,6 +90,42 @@ const commentController = {
             };
             
             const newComment = await CommentModel.create(commentData);
+            
+            // Enviar notificación con email al dueño del reporte
+            try {
+                // Obtener datos del reporte y su dueño
+                const [reportes] = await pool.execute(
+                    `SELECT r.id_usuario, r.titulo, u.nombre, u.correo 
+                     FROM reportes r 
+                     JOIN usuarios u ON r.id_usuario = u.id_usuario 
+                     WHERE r.id_reporte = ?`,
+                    [reportId]
+                );
+                
+                if (reportes.length > 0) {
+                    const dueno_reporte = reportes[0].id_usuario;
+                    
+                    // Si el que comenta NO es el dueño del reporte, notificar al dueño
+                    if (dueno_reporte !== userId) {
+                        const autorComentario = req.session.user?.nombre || 'Un usuario';
+                        
+                        await notificationService.crearYNotificar({
+                            id_usuario_destino: dueno_reporte,
+                            id_reporte: reportId,
+                            tipo: 'comentario',
+                            titulo: 'Nuevo comentario en tu reporte',
+                            mensaje: `${autorComentario} comentó: "${comentario.trim().substring(0, 100)}${comentario.length > 100 ? '...' : ''}"`,
+                            prioridad: 1,
+                            color: 'azul'
+                        });
+                        
+                        console.log(`✅ Notificación y email enviado al usuario ${dueno_reporte}`);
+                    }
+                }
+            } catch (notifError) {
+                console.error('⚠️ Error enviando notificación (comentario creado exitosamente):', notifError);
+                // No fallar la creación del comentario por error en notificaciones
+            }
             
             // Formatear respuesta
             const formattedComment = {

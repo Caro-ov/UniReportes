@@ -3,6 +3,7 @@ import * as categoryModel from '../models/categoryModel.js';
 import * as fileModel from '../models/fileModel.js';
 import * as historialModel from '../models/historialModel.js';
 import notificationModel from '../models/notificationModel.js';
+import notificationService from '../services/notificationService.js';
 import * as userModel from '../models/userModel.js';
 import path from 'path';
 import fs from 'fs';
@@ -200,6 +201,28 @@ export async function createReport(req, res) {
         };
 
         const reportId = await reportModel.createReport(reportData);
+
+        // Notificar a todos los administradores (BD + Email)
+        try {
+            const usuarioNombre = req.session.user?.nombre || 'Un usuario';
+            const categoria = id_categoria ? 
+                (await categoryModel.getCategoryById(id_categoria))?.nombre || 'Sin categoría' : 
+                'Sin categoría';
+            
+            await notificationService.notificarAdmins({
+                id_reporte: reportId,
+                tipo: 'nuevo_reporte',
+                titulo: `Nuevo reporte: ${titulo.trim()}`,
+                mensaje: `${usuarioNombre} creó un nuevo reporte en la categoría: ${categoria}`,
+                prioridad: 2,
+                color: 'azul'
+            });
+            
+            console.log('✅ Notificaciones y emails enviados a administradores');
+        } catch (notifError) {
+            console.error('⚠️ Error enviando notificaciones (reporte creado exitosamente):', notifError);
+            // No fallar la creación del reporte por error en notificaciones
+        }
 
         // Manejar archivos si se subieron
         let archivosGuardados = [];
