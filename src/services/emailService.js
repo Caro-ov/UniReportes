@@ -190,13 +190,24 @@ export const enviarNotificacionGenerica = async (destinatario, asunto, mensaje) 
         if (resendClient) {
             // USAR RESEND (Producción)
             console.log('🔧 Enviando via Resend API...');
+            
+            // En modo prueba, Resend solo permite enviar al email verificado
+            const emailDestino = process.env.RESEND_TEST_MODE === 'true' 
+                ? process.env.EMAIL_ADMIN || 'carlos15.ci15@gmail.com'
+                : destinatario;
+            
+            if (emailDestino !== destinatario) {
+                console.log(`⚠️  Modo prueba: redirigiendo email de ${destinatario} a ${emailDestino}`);
+            }
+            
             const data = await resendClient.emails.send({
                 from: 'UniReportes <onboarding@resend.dev>',
-                to: destinatario,
+                to: emailDestino,
                 subject: asunto,
                 html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                         <h2 style="color: #1173d4;">UniReportes</h2>
+                        ${emailDestino !== destinatario ? `<p style="background: #fef3c7; padding: 10px; border-radius: 4px;"><strong>📧 Email original destinado a:</strong> ${destinatario}</p>` : ''}
                         <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
                             ${mensaje}
                         </div>
