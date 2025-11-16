@@ -18,13 +18,31 @@ console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Configurado' : '✗ Fal
 let transporter = null;
 
 if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-    transporter = nodemailer.createTransport({
+    // Configuración para producción (Railway) - usar SMTP con host específico
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    const transportConfig = isProduction ? {
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false, // true para 465, false para otros puertos
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        },
+        tls: {
+            rejectUnauthorized: false
+        }
+    } : {
         service: 'gmail',
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
         }
-    });
+    };
+    
+    transporter = nodemailer.createTransport(transportConfig);
+    
+    console.log(`📧 Configuración SMTP: ${isProduction ? 'Producción (smtp.gmail.com:587)' : 'Desarrollo (gmail service)'}`);
 
     // Verificar conexión (asíncrono pero lanzar inmediatamente)
     transporter.verify()
@@ -37,6 +55,7 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
             console.error('   1. Que la contraseña de aplicación sea correcta');
             console.error('   2. Que Gmail permita apps menos seguras');
             console.error('   3. La conexión a internet desde Railway');
+            console.error('⚠️  NOTA: Railway puede bloquear SMTP. Considera usar SendGrid o Resend');
         });
 } else {
     console.warn('⚠️  Variables EMAIL_USER o EMAIL_PASS no configuradas. Emails deshabilitados.');
