@@ -219,9 +219,9 @@ const notificationService = {
      */
     async notificarAdmins(data) {
         try {
-            // Obtener todos los usuarios con rol 1 (admin)
+            // Obtener todos los usuarios con rol 'admin'
             const [admins] = await pool.execute(
-                'SELECT id_usuario, nombre, correo FROM usuarios WHERE id_rol = 1'
+                "SELECT id_usuario, nombre, correo FROM usuarios WHERE rol = 'admin'"
             );
 
             if (admins.length === 0) {
