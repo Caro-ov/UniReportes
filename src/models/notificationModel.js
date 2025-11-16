@@ -14,7 +14,7 @@ const notificationModel = {
       FROM notificaciones n
       INNER JOIN reportes r ON n.id_reporte = r.id_reporte
       LEFT JOIN estados e ON r.id_estado = e.id_estado
-      WHERE n.id_usuario_destino = ?
+      WHERE n.id_usuario_destino = ? AND r.id_estado != 4
       ORDER BY n.fecha_creacion DESC
       LIMIT ${safeLimit} OFFSET ${safeOffset}`,
       [userId]
@@ -33,7 +33,7 @@ const notificationModel = {
       FROM notificaciones n
       INNER JOIN reportes r ON n.id_reporte = r.id_reporte
       LEFT JOIN estados e ON r.id_estado = e.id_estado
-      WHERE n.id_usuario_destino = ? AND n.leida = 0
+      WHERE n.id_usuario_destino = ? AND n.leida = 0 AND r.id_estado != 4
       ORDER BY n.prioridad DESC, n.fecha_creacion DESC`,
       [userId]
     );
@@ -44,8 +44,9 @@ const notificationModel = {
   async countUnread(userId) {
     const [rows] = await pool.execute(
       `SELECT COUNT(*) as count 
-       FROM notificaciones 
-       WHERE id_usuario_destino = ? AND leida = 0`,
+       FROM notificaciones n
+       INNER JOIN reportes r ON n.id_reporte = r.id_reporte
+       WHERE n.id_usuario_destino = ? AND n.leida = 0 AND r.id_estado != 4`,
       [userId]
     );
     return rows[0].count;
