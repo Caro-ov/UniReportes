@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { Resend } from 'resend';
+import sgMail from '@sendgrid/mail';
 import dotenv from 'dotenv';
 
 // Solo cargar dotenv en desarrollo (Railway inyecta variables automáticamente)
@@ -13,10 +13,11 @@ if (process.env.NODE_ENV !== 'production') {
 // Log de verificación de variables
 console.log('🔍 Verificando configuración de email...');
 const isProduction = process.env.NODE_ENV === 'production';
-const useResend = isProduction && process.env.RESEND_API_KEY;
+const useSendGrid = isProduction && process.env.SENDGRID_API_KEY;
 
-if (useResend) {
-    console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY ? '✓ Configurado' : '✗ Falta');
+if (useSendGrid) {
+    console.log('SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? '✓ Configurado' : '✗ Falta');
+    console.log('SENDGRID_FROM_EMAIL:', process.env.SENDGRID_FROM_EMAIL ? '✓ Configurado' : '✗ Falta');
 } else {
     console.log('EMAIL_USER:', process.env.EMAIL_USER ? '✓ Configurado' : '✗ Falta');
     console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Configurado' : '✗ Falta');
@@ -24,13 +25,14 @@ if (useResend) {
 
 // Configurar servicio de email según el entorno
 let transporter = null;
-let resendClient = null;
+let sendGridConfigured = false;
 
-if (useResend) {
-    // PRODUCCIÓN: Usar Resend
-    console.log('📧 Modo: Producción - Usando Resend API');
-    resendClient = new Resend(process.env.RESEND_API_KEY);
-    console.log('✅ Servicio de email Resend configurado');
+if (useSendGrid) {
+    // PRODUCCIÓN: Usar SendGrid
+    console.log('📧 Modo: Producción - Usando SendGrid API');
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    sendGridConfigured = true;
+    console.log('✅ Servicio de email SendGrid configurado');
     
 } else if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     // DESARROLLO: Usar Gmail SMTP
@@ -179,7 +181,7 @@ export const enviarNotificacionNuevoComentario = async (reporte, comentario, usu
  */
 export const enviarNotificacionGenerica = async (destinatario, asunto, mensaje) => {
     // Verificar que haya un servicio de email configurado
-    if (!resendClient && !transporter) {
+    if (!sendGridConfigured && !transporter) {
         console.warn('⚠️  Email deshabilitado: no hay servicio configurado');
         return { success: false, error: 'Email no configurado' };
     }
@@ -187,37 +189,28 @@ export const enviarNotificacionGenerica = async (destinatario, asunto, mensaje) 
     try {
         console.log(`📤 Enviando email a: ${destinatario}`);
         
-        if (resendClient) {
-            // USAR RESEND (Producción)
-            console.log('🔧 Enviando via Resend API...');
+        if (sendGridConfigured) {
+            // USAR SENDGRID (Producción)
+            console.log('🔧 Enviando via SendGrid API...');
             
-            // En modo prueba, Resend solo permite enviar al email verificado
-            const emailDestino = process.env.RESEND_TEST_MODE === 'true' 
-                ? process.env.EMAIL_ADMIN || 'carlos15.ci15@gmail.com'
-                : destinatario;
-            
-            if (emailDestino !== destinatario) {
-                console.log(`⚠️  Modo prueba: redirigiendo email de ${destinatario} a ${emailDestino}`);
-            }
-            
-            const data = await resendClient.emails.send({
-                from: 'UniReportes <onboarding@resend.dev>',
-                to: emailDestino,
+            const msg = {
+                to: destinatario,
+                from: process.env.SENDGRID_FROM_EMAIL || 'carlos15.ci15@gmail.com',
                 subject: asunto,
                 html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                         <h2 style="color: #1173d4;">UniReportes</h2>
-                        ${emailDestino !== destinatario ? `<p style="background: #fef3c7; padding: 10px; border-radius: 4px;"><strong>📧 Email original destinado a:</strong> ${destinatario}</p>` : ''}
                         <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
                             ${mensaje}
                         </div>
                     </div>
                 `
-            });
+            };
             
-            console.log('📊 Respuesta de Resend:', JSON.stringify(data));
-            console.log('✅ Email enviado via Resend. ID:', data?.id || 'No disponible');
-            return { success: true, messageId: data?.id, data };
+            const response = await sgMail.send(msg);
+            console.log('📊 Respuesta de SendGrid:', response[0].statusCode);
+            console.log('✅ Email enviado via SendGrid a:', destinatario);
+            return { success: true, messageId: response[0].headers['x-message-id'] };
             
         } else {
             // USAR NODEMAILER/GMAIL (Desarrollo)
@@ -243,11 +236,8 @@ export const enviarNotificacionGenerica = async (destinatario, asunto, mensaje) 
     } catch (error) {
         console.error('❌ Error al enviar email:', error.message);
         console.error('📋 Detalles del error:', error);
-        if (error.statusCode) {
-            console.error('🔴 Status Code:', error.statusCode);
-        }
-        if (error.name) {
-            console.error('🔴 Error Name:', error.name);
+        if (error.response) {
+            console.error('🔴 Response:', error.response.body);
         }
         return { success: false, error: error.message };
     }
