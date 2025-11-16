@@ -155,6 +155,7 @@ const notificationService = {
                 }
 
                 // Enviar email
+                console.log(`📧 Intentando enviar email a ${usuario.correo} (tipo: ${tipo})`);
                 const resultadoEmail = await emailService.enviarNotificacionGenerica(
                     usuario.correo,
                     emailSubject,
@@ -162,7 +163,7 @@ const notificationService = {
                 );
 
                 if (resultadoEmail.success) {
-                    console.log(`✅ Email enviado a ${usuario.correo}`);
+                    console.log(`✅ Email enviado exitosamente a ${usuario.correo}`);
                 } else {
                     console.warn(`⚠️ No se pudo enviar email a ${usuario.correo}:`, resultadoEmail.error);
                 }

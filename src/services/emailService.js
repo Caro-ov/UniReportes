@@ -26,14 +26,18 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
         }
     });
 
-    // Verificar conexión
-    transporter.verify((error, success) => {
-        if (error) {
-            console.error('❌ Error al conectar con Gmail:', error);
-        } else {
+    // Verificar conexión (asíncrono pero lanzar inmediatamente)
+    transporter.verify()
+        .then(() => {
             console.log('✅ Servicio de email listo para enviar correos');
-        }
-    });
+        })
+        .catch((error) => {
+            console.error('❌ Error al conectar con Gmail:', error.message);
+            console.error('📋 Verifica:');
+            console.error('   1. Que la contraseña de aplicación sea correcta');
+            console.error('   2. Que Gmail permita apps menos seguras');
+            console.error('   3. La conexión a internet desde Railway');
+        });
 } else {
     console.warn('⚠️  Variables EMAIL_USER o EMAIL_PASS no configuradas. Emails deshabilitados.');
 }
