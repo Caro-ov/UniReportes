@@ -1,34 +1,52 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 
-// Buscar .env.temp primero, si no existe usa .env
-dotenv.config({ path: '.env.temp' });
-if (!process.env.EMAIL_USER) {
-    dotenv.config();
+// Solo cargar dotenv en desarrollo (Railway inyecta variables automáticamente)
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config({ path: '.env.temp' });
+    if (!process.env.EMAIL_USER) {
+        dotenv.config();
+    }
 }
 
-// Configurar el transporter de Gmail
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,  // Tu correo de Gmail
-        pass: process.env.EMAIL_PASS   // Tu contraseña de aplicación
-    }
-});
+// Log de verificación de variables
+console.log('🔍 Verificando configuración de email...');
+console.log('EMAIL_USER:', process.env.EMAIL_USER ? '✓ Configurado' : '✗ Falta');
+console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Configurado' : '✗ Falta');
 
-// Verificar conexión
-transporter.verify((error, success) => {
-    if (error) {
-        console.error('❌ Error al conectar con Gmail:', error);
-    } else {
-        console.log('✅ Servicio de email listo para enviar correos');
-    }
-});
+// Configurar el transporter de Gmail solo si hay credenciales
+let transporter = null;
+
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    // Verificar conexión
+    transporter.verify((error, success) => {
+        if (error) {
+            console.error('❌ Error al conectar con Gmail:', error);
+        } else {
+            console.log('✅ Servicio de email listo para enviar correos');
+        }
+    });
+} else {
+    console.warn('⚠️  Variables EMAIL_USER o EMAIL_PASS no configuradas. Emails deshabilitados.');
+}
 
 /**
  * Enviar notificación de nuevo reporte
  */
 export const enviarNotificacionNuevoReporte = async (reporte, usuarioReporta) => {
+    if (!transporter) {
+        console.warn('⚠️  Email deshabilitado: no hay transporter configurado');
+        return { success: false, error: 'Email no configurado' };
+    }
+    
     const mailOptions = {
         from: `"UniReportes" <${process.env.EMAIL_USER}>`,
         to: process.env.EMAIL_ADMIN || process.env.EMAIL_USER, // Email del admin
@@ -65,6 +83,11 @@ export const enviarNotificacionNuevoReporte = async (reporte, usuarioReporta) =>
  * Enviar notificación de cambio de estado
  */
 export const enviarNotificacionCambioEstado = async (reporte, usuario, nuevoEstado) => {
+    if (!transporter) {
+        console.warn('⚠️  Email deshabilitado: no hay transporter configurado');
+        return { success: false, error: 'Email no configurado' };
+    }
+    
     const mailOptions = {
         from: `"UniReportes" <${process.env.EMAIL_USER}>`,
         to: usuario.correo,
@@ -97,7 +120,12 @@ export const enviarNotificacionCambioEstado = async (reporte, usuario, nuevoEsta
 /**
  * Enviar notificación de nuevo comentario
  */
-export const enviarNotificacionNuevoComentario = async (reporte, comentario, autor, destinatario) => {
+export const enviarNotificacionNuevoComentario = async (reporte, comentario, usuario) => {
+    if (!transporter) {
+        console.warn('⚠️  Email deshabilitado: no hay transporter configurado');
+        return { success: false, error: 'Email no configurado' };
+    }
+    
     const mailOptions = {
         from: `"UniReportes" <${process.env.EMAIL_USER}>`,
         to: destinatario.correo,
@@ -133,6 +161,11 @@ export const enviarNotificacionNuevoComentario = async (reporte, comentario, aut
  * Enviar notificación genérica
  */
 export const enviarNotificacionGenerica = async (destinatario, asunto, mensaje) => {
+    if (!transporter) {
+        console.warn('⚠️  Email deshabilitado: no hay transporter configurado');
+        return { success: false, error: 'Email no configurado' };
+    }
+    
     const mailOptions = {
         from: `"UniReportes" <${process.env.EMAIL_USER}>`,
         to: destinatario,
