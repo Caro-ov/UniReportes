@@ -607,34 +607,44 @@ body {
 
     .hero-card {
         margin: 0 !important;
-        padding: 24px 20px !important;
+        padding: 20px 16px !important;
         width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .hero-titulo {
-        font-size: 24px !important;
+        font-size: 23px !important;
         line-height: 1.2 !important;
         margin-bottom: 12px !important;
         text-align: center !important;
+        width: 100%;
     }
 
     .hero-texto {
-        font-size: 15px !important;
+        font-size: 14px !important;
         line-height: 1.5 !important;
         margin-bottom: 16px !important;
         text-align: center !important;
+        width: 100%;
     }
 
     .hero-boton {
         width: 100%;
         margin-top: 12px !important;
+        display: flex;
+        justify-content: center;
     }
 
     .hero-boton .boton-principal,
     .boton-principal {
         width: 100% !important;
-        padding: 12px 20px !important;
+        max-width: 100%;
+        padding: 14px 20px !important;
         font-size: 16px !important;
+        box-sizing: border-box;
+        text-align: center;
+        display: block;
     }
 
     /* Secciones - MÁS COMPACTAS */
@@ -719,15 +729,21 @@ body {
     }
 
     .hero-card {
-        padding: 20px 16px !important;
+        padding: 18px 12px !important;
+        max-width: 100%;
     }
 
     .hero-titulo {
-        font-size: 22px !important;
+        font-size: 21px !important;
     }
 
     .hero-texto {
-        font-size: 14px !important;
+        font-size: 13px !important;
+    }
+
+    .hero-boton .boton-principal {
+        padding: 13px 16px !important;
+        font-size: 15px !important;
     }
 
     .seccion-beneficios,
