@@ -13,6 +13,9 @@ router.get('/', notificationController.getNotifications);
 // Obtener notificaciones no leídas
 router.get('/unread', notificationController.getUnreadNotifications);
 
+// Obtener notificaciones urgentes (prioridad >= 2 o categoría urgente)
+router.get('/urgent', notificationController.getUrgentNotifications);
+
 // Contar notificaciones no leídas
 router.get('/unread/count', notificationController.getUnreadCount);
 

@@ -346,63 +346,71 @@ actualizarContadores = function() {
 };
 
 // Función para actualizar notificaciones urgentes
-function actualizarNotificacionesUrgentes(reportes) {
+async function actualizarNotificacionesUrgentes() {
     console.log('🚨 Actualizando notificaciones urgentes...');
     
-    // Filtrar reportes urgentes (categoría "Urgencia" o id_categoria = 6)
-    const reportesUrgentes = reportes.filter(reporte => 
-        reporte.id_categoria === 6 || 
-        (reporte.categoria_nombre && reporte.categoria_nombre.toLowerCase().includes('urgencia'))
-    );
-    
-    console.log(`🚨 Reportes urgentes encontrados: ${reportesUrgentes.length}`, reportesUrgentes);
-    
-    const seccionNotificaciones = $('#notificaciones-urgentes');
-    const listaReportesUrgentes = $('#lista-reportes-urgentes');
-    
-    if (reportesUrgentes.length > 0) {
-        // Mostrar sección de notificaciones
-        seccionNotificaciones.show();
+    try {
+        // Llamar a la API de notificaciones urgentes
+        const response = await fetch('/api/notifications/urgent');
+        const result = await response.json();
         
-        // Limpiar lista anterior
-        listaReportesUrgentes.empty();
+        if (!result.success) {
+            console.error('❌ Error al obtener notificaciones urgentes:', result.message);
+            return;
+        }
         
-        // Agregar cada reporte urgente
-        reportesUrgentes.forEach(reporte => {
-            const fecha = new Date(reporte.fecha_creacion || reporte.fecha_reporte);
-            const fechaFormateada = fecha.toLocaleDateString('es-ES');
+        const notificaciones = result.data.notifications;
+        console.log(`🚨 Notificaciones urgentes encontradas: ${notificaciones.length}`, notificaciones);
+        
+        const seccionNotificaciones = $('#notificaciones-urgentes');
+        const listaReportesUrgentes = $('#lista-reportes-urgentes');
+        
+        if (notificaciones.length > 0) {
+            // Mostrar sección de notificaciones
+            seccionNotificaciones.show();
             
-            const ubicacion = reporte.ubicacion_nombre && reporte.salon_nombre 
-                ? `${reporte.ubicacion_nombre} - ${reporte.salon_nombre}`
-                : 'Sin ubicación';
+            // Limpiar lista anterior
+            listaReportesUrgentes.empty();
+            
+            // Agregar cada notificación urgente
+            notificaciones.forEach(notif => {
+                const fecha = new Date(notif.fecha_creacion);
+                const fechaFormateada = fecha.toLocaleDateString('es-ES');
                 
-            const estadoTexto = (reporte.estado || 'Pendiente').toUpperCase();
-            
-            const itemHtml = `
-                <div class="reporte-urgente-item" data-reporte-id="${reporte.id_reporte}">
-                    <div class="info-reporte-urgente">
-                        <div class="titulo-reporte-urgente">
-                            Reporte #${reporte.id_reporte}: ${reporte.titulo || 'Sin título'}
-                        </div>
-                        <div class="detalles-reporte-urgente">
-                            ${ubicacion} • ${estadoTexto} • ${fechaFormateada}
+                const ubicacion = notif.ubicacion_nombre && notif.salon_nombre 
+                    ? `${notif.ubicacion_nombre} - ${notif.salon_nombre}`
+                    : 'Sin ubicación';
+                    
+                const estadoTexto = (notif.estado_nombre || 'Pendiente').toUpperCase();
+                
+                const itemHtml = `
+                    <div class="reporte-urgente-item" data-reporte-id="${notif.id_reporte}">
+                        <div class="info-reporte-urgente">
+                            <div class="titulo-reporte-urgente">
+                                Reporte #${notif.id_reporte}: ${notif.reporte_titulo || notif.titulo || 'Sin título'}
+                            </div>
+                            <div class="detalles-reporte-urgente">
+                                ${ubicacion} • ${estadoTexto} • ${fechaFormateada}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
+                
+                listaReportesUrgentes.append(itemHtml);
+            });
             
-            listaReportesUrgentes.append(itemHtml);
-        });
-        
-        // Actualizar el título con el contador
-        $('.titulo-notificacion').html(`
-            <span class="material-symbols-outlined" style="font-size: 18px;">emergency</span>
-            Notificaciones Urgentes (${reportesUrgentes.length})
-        `);
-        
-    } else {
-        // Ocultar sección si no hay reportes urgentes
-        seccionNotificaciones.hide();
+            // Actualizar el título con el contador
+            $('.titulo-notificacion').html(`
+                <span class="material-symbols-outlined" style="font-size: 18px;">emergency</span>
+                Notificaciones Urgentes (${notificaciones.length})
+            `);
+            
+        } else {
+            // Ocultar sección si no hay notificaciones urgentes
+            seccionNotificaciones.hide();
+        }
+    } catch (error) {
+        console.error('❌ Error al actualizar notificaciones urgentes:', error);
     }
 }
 
@@ -618,8 +626,8 @@ $(document).ready(function() {
                 renderizarTabla(reportesFiltrados);
                 renderPageControls(currentPage, paginationInfo.totalPages, paginationInfo.totalItems, (paginationInfo.totalItems>0? ( (currentPage-1)*PAGE_SIZE +1) : 0), Math.min(currentPage*PAGE_SIZE, paginationInfo.totalItems));
                 
-                // Actualizar notificaciones urgentes
-                actualizarNotificacionesUrgentes(reportesFiltrados);
+                // Actualizar notificaciones urgentes desde la API
+                actualizarNotificacionesUrgentes();
                 
                 // Actualizar contadores (usar totalItems como total si está disponible)
                 actualizarContadores();

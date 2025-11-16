@@ -40,6 +40,34 @@ const notificationModel = {
     return rows;
   },
 
+  // Obtener notificaciones urgentes (prioridad >= 2) no leídas y no resueltas
+  async getUrgentByUserId(userId) {
+    const [rows] = await pool.execute(
+      `SELECT 
+        n.*,
+        r.titulo as reporte_titulo,
+        r.id_estado,
+        r.id_categoria,
+        e.nombre as estado_nombre,
+        c.nombre as categoria_nombre,
+        s.nombre as salon_nombre,
+        ub.nombre as ubicacion_nombre
+      FROM notificaciones n
+      INNER JOIN reportes r ON n.id_reporte = r.id_reporte
+      LEFT JOIN estados e ON r.id_estado = e.id_estado
+      LEFT JOIN categorias c ON r.id_categoria = c.id_categoria
+      LEFT JOIN salones s ON r.id_salon = s.id_salon
+      LEFT JOIN ubicaciones ub ON s.ubicacion = ub.id_ubicacion
+      WHERE n.id_usuario_destino = ? 
+        AND n.leida = 0 
+        AND r.id_estado != 4
+        AND (n.prioridad >= 2 OR r.id_categoria = 6)
+      ORDER BY n.prioridad DESC, n.fecha_creacion DESC`,
+      [userId]
+    );
+    return rows;
+  },
+
   // Contar notificaciones no leídas
   async countUnread(userId) {
     const [rows] = await pool.execute(

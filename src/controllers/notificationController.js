@@ -66,6 +66,35 @@ const notificationController = {
     }
   },
 
+  // Obtener notificaciones urgentes
+  async getUrgentNotifications(req, res) {
+    try {
+      if (!req.session.user || (!req.session.user.id_usuario && !req.session.user.id)) {
+        return res.status(401).json({
+          success: false,
+          message: 'No hay sesión activa'
+        });
+      }
+      
+      const userId = req.session.user.id_usuario || req.session.user.id;
+      const notifications = await notificationModel.getUrgentByUserId(userId);
+
+      res.json({
+        success: true,
+        data: {
+          notifications,
+          count: notifications.length
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error al obtener notificaciones urgentes:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error al obtener notificaciones urgentes'
+      });
+    }
+  },
+
   // Contar notificaciones no leídas
   async getUnreadCount(req, res) {
     try {
