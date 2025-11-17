@@ -91,7 +91,7 @@ const commentController = {
             
             const newComment = await CommentModel.create(commentData);
             
-            // Enviar notificación con email al dueño del reporte
+            // Enviar notificación con email al dueño del reporte o admins
             try {
                 // Obtener datos del reporte y su dueño
                 const [reportes] = await pool.execute(
@@ -104,11 +104,10 @@ const commentController = {
                 
                 if (reportes.length > 0) {
                     const dueno_reporte = reportes[0].id_usuario;
+                    const autorComentario = req.session.user?.nombre || 'Un usuario';
                     
                     // Si el que comenta NO es el dueño del reporte, notificar al dueño
                     if (dueno_reporte !== userId) {
-                        const autorComentario = req.session.user?.nombre || 'Un usuario';
-                        
                         await notificationService.crearYNotificar({
                             id_usuario_destino: dueno_reporte,
                             id_reporte: reportId,
@@ -119,7 +118,19 @@ const commentController = {
                             color: 'azul'
                         });
                         
-                        console.log(`✅ Notificación y email enviado al usuario ${dueno_reporte}`);
+                        console.log(`✅ Notificación y email enviado al dueño del reporte (usuario ${dueno_reporte})`);
+                    } else {
+                        // Si el dueño comenta en su propio reporte, notificar a los admins
+                        await notificationService.notificarAdmins({
+                            id_reporte: reportId,
+                            tipo: 'comentario',
+                            titulo: `Nuevo comentario en reporte: ${reportes[0].titulo}`,
+                            mensaje: `${autorComentario} (creador del reporte) comentó: "${comentario.trim().substring(0, 100)}${comentario.length > 100 ? '...' : ''}"`,
+                            prioridad: 1,
+                            color: 'azul'
+                        });
+                        
+                        console.log(`✅ Notificación y email enviado a los administradores`);
                     }
                 }
             } catch (notifError) {
